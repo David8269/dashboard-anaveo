@@ -1,6 +1,7 @@
 {
-  "name": "dashboard-perso",
+  "name": "anaveo-project",
   "version": "1.0.0",
+  "homepage": "https://David8269.github.io/dashboard-anaveo",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
