@@ -21,31 +21,24 @@ import {
 } from 'recharts';
 import { keyframes } from '@emotion/react';
 
-// ✅ Animation définie avec keyframes
 const highlightAnimation = keyframes`
   0% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.02); opacity: 0.9; }
   100% { transform: scale(1); opacity: 1; }
 `;
 
-// 🎨 Fonction de couleur
-const getBarColor = (value, type) => {
-  if (type === 'inbound') {
-    if (value > 50) return '#f44336';
-    if (value > 20) return '#ff9800';
-    return '#42A5F5';
-  } else if (type === 'outbound') {
-    if (value > 50) return '#d32f2f';
-    if (value > 20) return '#ffa726';
-    return '#66BB6A';
-  }
-  return '#8884d8';
-};
+// Couleurs fixes pour la légende et les barres
+const INBOUND_COLOR = '#42A5F5'; // bleu
+const OUTBOUND_COLOR = '#66BB6A'; // vert
 
-// 📊 Formatteur de nombres (optionnel)
 const formatNumber = (num) => {
   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
   return num.toString();
+};
+
+// Masque les labels "0"
+const hideZeroLabels = (value) => {
+  return value === 0 ? '' : formatNumber(value);
 };
 
 function SLABarchart({ slaData = [], wsConnected = false }) {
@@ -55,21 +48,15 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
 
   useEffect(() => {
     const prev = prevSlaDataRef.current;
-
     if (JSON.stringify(slaData) !== JSON.stringify(prev)) {
       setData(slaData);
       setAnimate(true);
       const timer = setTimeout(() => setAnimate(false), 600);
       return () => clearTimeout(timer);
     }
-
     prevSlaDataRef.current = slaData;
   }, [slaData]);
 
-  const inboundColors = useMemo(() => data.map(entry => getBarColor(entry.inbound, 'inbound')), [data]);
-  const outboundColors = useMemo(() => data.map(entry => getBarColor(entry.outbound, 'outbound')), [data]);
-
-  // 🟡 Affichage placeholder
   if (data.length === 0) {
     return (
       <Card sx={{ backgroundColor: 'background.paper', maxWidth: 1150, width: '100%', borderRadius: 3 }}>
@@ -99,7 +86,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
         width: '100%',
         borderRadius: 3,
         ...(animate && {
-          animation: `0.6s ease-in-out ${highlightAnimation}`,
+          animation: `${highlightAnimation} 0.6s ease-in-out`,
         }),
       }}
     >
@@ -114,7 +101,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2f3a49" />
-              <XAxis dataKey="date" stroke="#8884d8" tick={{ fill: '#fff' }} />
+              <XAxis dataKey="dayLabel" stroke="#8884d8" tick={{ fill: '#fff' }} />
               <YAxis stroke="#8884d8" tick={{ fill: '#fff' }} />
               <Tooltip
                 contentStyle={{
@@ -124,10 +111,30 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   color: '#fff',
                 }}
               />
-              <Legend wrapperStyle={{ color: '#fff', paddingTop: 10 }} />
-              <Bar dataKey="inbound" name="Inbound" maxBarSize={80}>
+              {/* 🔥 Légende personnalisée : carrés colorés + texte BLANC */}
+              <Legend
+                content={() => (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, pt: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 12, height: 12, bgcolor: INBOUND_COLOR, borderRadius: '2px' }} />
+                      <Typography variant="body2" sx={{ color: '#fff', fontWeight: 500 }}>
+                        Inbound
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 12, height: 12, bgcolor: OUTBOUND_COLOR, borderRadius: '2px' }} />
+                      <Typography variant="body2" sx={{ color: '#fff', fontWeight: 500 }}>
+                        Outbound
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+              />
+
+              {/* Inbound */}
+              <Bar dataKey="inbound" name="Inbound" fill={INBOUND_COLOR} maxBarSize={80}>
                 {data.map((entry, index) => (
-                  <Cell key={`inbound-${index}`} fill={inboundColors[index]} />
+                  <Cell key={`inbound-${index}`} fill={INBOUND_COLOR} />
                 ))}
                 <LabelList
                   dataKey="inbound"
@@ -135,12 +142,14 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   fill="#fff"
                   fontWeight="bold"
                   fontSize={14}
-                  formatter={formatNumber} // ← Format court
+                  formatter={hideZeroLabels}
                 />
               </Bar>
-              <Bar dataKey="outbound" name="Outbound" maxBarSize={80}>
+
+              {/* Outbound */}
+              <Bar dataKey="outbound" name="Outbound" fill={OUTBOUND_COLOR} maxBarSize={80}>
                 {data.map((entry, index) => (
-                  <Cell key={`outbound-${index}`} fill={outboundColors[index]} />
+                  <Cell key={`outbound-${index}`} fill={OUTBOUND_COLOR} />
                 ))}
                 <LabelList
                   dataKey="outbound"
@@ -148,7 +157,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   fill="#fff"
                   fontWeight="bold"
                   fontSize={14}
-                  formatter={formatNumber} // ← Format court
+                  formatter={hideZeroLabels}
                 />
               </Bar>
             </BarChart>

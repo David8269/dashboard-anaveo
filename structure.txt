@@ -1,0 +1,32 @@
+/home/ubuntu/
+├── anaveo-project/              # Répertoire principal du projet
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public/
+│   │   └── index.html
+│   ├── src/
+│   │   ├── index.js
+│   │   ├── App.js
+│   │   └── components/
+│   │       ├── KPICard.js
+│   │       ├── SLABarchart.js
+│   │       ├── AgentTable.js
+│   │       └── CallVolumeChart.js
+│   ├── anaveo-server.js          # Node.js WebSocket server
+│   ├── deploy_anaveo.sh          # Script de déploiement
+│   └── logs/                     # Logs PM2 (créé automatiquement)
+│       ├── out.log
+│       └── err.log
+├── build_backup_YYYYMMDD_HHMMSS  # Anciennes builds (créées automatiquement lors du déploiement)
+└── .git/                          # Repository Git du projet
+/var/www/
+└── anaveo/                        # Build React déployée par Nginx
+    ├── index.html
+    ├── static/
+    └── ...
+
+/etc/nginx/sites-available/
+└── anaveo.conf                     # Configuration Nginx pour le projet
+
+/etc/nginx/sites-enabled/
+└── anaveo.conf -> ../sites-available/anaveo.conf

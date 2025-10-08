@@ -16,7 +16,7 @@ function formatSecondsToMMSS(totalSeconds) {
   if (!totalSeconds || isNaN(totalSeconds) || totalSeconds <= 0) return '00:00';
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 // Récupération des CDR depuis 3CX
@@ -82,7 +82,7 @@ wss.on('connection', (ws, req) => {
   console.log(`Nouvelle connexion WebSocket depuis ${clientIP}`);
 
   // Vérification IP autorisée
-  if (clientIP !== ALLOWED_IP && !clientIP.endsWith(ALLOWED_IP)) {
+  if (clientIP !== `::ffff:${ALLOWED_IP}` && clientIP !== ALLOWED_IP) {
     console.log(`IP non autorisée: ${clientIP}, fermeture de la connexion`);
     ws.close();
     return;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Card, CardContent, Typography, useTheme } from '@mui/material';
+import { Card, CardContent, Typography } from '@mui/material';
 import { keyframes } from '@emotion/react';
 
 // Animation d'highlight subtile quand la valeur change
@@ -8,31 +8,19 @@ const highlightAnimation = keyframes`
   100% { background-color: transparent; }
 `;
 
-function KPICard({ title, subtitle, value: initialValue, valueColor, height, unit, tooltip }) {
-  const [value, setValue] = useState(initialValue);
+function KPICard({ title, subtitle, value, valueColor, height, unit, tooltip }) {
   const [animate, setAnimate] = useState(false);
-  const theme = useTheme();
-  const isFirstRender = useRef(true);
+  const prevValueRef = useRef(value);
 
-  // Met à jour la valeur + déclenche l'animation
+  // Déclenche l'animation quand la valeur change (sauf au premier rendu)
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    if (initialValue !== value) {
-      setValue(initialValue);
+    if (prevValueRef.current !== value) {
       setAnimate(true);
       const timer = setTimeout(() => setAnimate(false), 800);
       return () => clearTimeout(timer);
     }
-  }, [initialValue]);
-
-  // Résout la couleur
-  const color = !valueColor
-    ? theme.palette.text.primary
-    : theme.palette[valueColor]?.main || theme.palette.text.primary;
+    prevValueRef.current = value;
+  }, [value]);
 
   return (
     <Card
@@ -70,7 +58,10 @@ function KPICard({ title, subtitle, value: initialValue, valueColor, height, uni
           component="div"
           sx={{
             mt: 1,
-            color: color,
+            color: (theme) => {
+              if (!valueColor) return theme.palette.text.primary;
+              return theme.palette[valueColor]?.main || theme.palette.text.primary;
+            },
             textAlign: 'center',
             fontWeight: 'bold',
             transition: 'color 0.3s ease',
@@ -86,7 +77,7 @@ function KPICard({ title, subtitle, value: initialValue, valueColor, height, uni
           }}
           aria-live="polite"
         >
-          {initialValue != null ? initialValue : '-'}
+          {value != null ? value : '-'}
           {unit && (
             <Typography
               component="span"

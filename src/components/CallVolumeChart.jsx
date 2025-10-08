@@ -14,136 +14,201 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  LabelList,
   ResponsiveContainer,
   Tooltip,
-  Legend,
   ReferenceArea,
   ReferenceLine,
 } from 'recharts';
 
-// Définition des index pour la pause déjeuner
 const lunchStartIndex = 8;
 const lunchEndIndex = 11;
 
-// Composant Label personnalisé pour la pause
 function CustomLabel({ fill }) {
   return (
-    <text x="51%" y={40} fill={fill} fontSize={14} textAnchor="middle">
-      Pause déjeuner
+    <text x="50%" y={25} fill={fill} fontSize={12} textAnchor="middle" fontWeight="bold">
+      Lunch break
     </text>
   );
 }
 
-// Label personnalisé pour CDS (masqué pendant la pause)
-function CustomCDSLabel({ x, y, width, value, index }) {
-  if (index >= lunchStartIndex && index <= lunchEndIndex) return null;
+// ✅ Légende séparée, placée en dessous du graphique
+function LegendComponent() {
+  const itemStyle = { 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: 6, 
+    fontWeight: 'bold', 
+    fontSize: 12, // ← réduit de 14 à 12
+    color: '#fff' 
+  };
+  const squareStyle = (color) => ({ 
+    width: 14,  // ← réduit de 16 à 14
+    height: 14, 
+    backgroundColor: color, 
+    borderRadius: 2 
+  });
   return (
-    <text x={x + width / 2} y={y - 6} fill="#fff" fontSize={12} fontWeight="bold" textAnchor="middle">
+    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, py: 0.5 }}>
+      <div style={itemStyle}>
+        <span style={squareStyle('#42A5F5')}></span> CDS In
+      </div>
+      <div style={itemStyle}>
+        <span style={squareStyle('#66BB6A')}></span> CDS Out
+      </div>
+      <div style={itemStyle}>
+        <span style={squareStyle('#EF5350')}></span> Absys
+      </div>
+    </Box>
+  );
+}
+
+const renderCustomLabel = (props) => {
+  const { y, value } = props;
+  if (value === 0) return null;
+  return (
+    <text
+      x={props.x + props.width / 2}
+      y={y - 6}
+      fill="#fff"
+      textAnchor="middle"
+      fontSize={10} // ← réduit de 12 à 10
+      fontWeight="bold"
+    >
       {value}
     </text>
   );
-}
+};
 
-// Transformation des données : masque CDS pendant la pause
-function getModifiedData(data) {
-  return data.map((item, index) => {
-    if (index >= lunchStartIndex && index <= lunchEndIndex) {
-      return { ...item, CDS: 0, index };
-    }
-    return { ...item, index };
-  });
-}
-
-// Légende personnalisée
-function CustomLegend() {
-  const style = { display: 'flex', justifyContent: 'center', gap: 20, marginTop: 10 };
-  const itemStyle = { display: 'flex', alignItems: 'center', gap: 6, fontWeight: 'bold', fontSize: 14, color: '#fff' };
-  const squareStyle = (color) => ({ width: 16, height: 16, backgroundColor: color, borderRadius: 3 });
-  return (
-    <div style={style}>
-      <div style={itemStyle}><span style={squareStyle('#42A5F5')}></span> CDS</div>
-      <div style={itemStyle}><span style={squareStyle('#EF5350')}></span> Absys</div>
-    </div>
-  );
-}
-
-function CallVolumeChart({ callVolumes = [], wsConnected = false }) {
+function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots = [] }) {
   const theme = useTheme();
 
-  // ✅ Memoïsation pour éviter les recalculs inutiles
-  const modifiedData = useMemo(() => getModifiedData(callVolumes), [callVolumes]);
+  const data = useMemo(() => 
+    callVolumes.map((item, index) => ({ ...item, index })), 
+    [callVolumes]
+  );
 
-  // 🟡 Affichage placeholder si aucune donnée
   if (callVolumes.length === 0) {
     return (
       <Card sx={{ backgroundColor: 'background.paper', borderRadius: 3 }}>
-        <CardContent>
+        <CardContent sx={{ p: 1 }}> {/* ← réduit le padding */}
           <Typography variant="overline" color="text.secondary" gutterBottom>
-            Call Volume (Live)
+            Call Volume
           </Typography>
-          <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Box sx={{ textAlign: 'center', py: 1 }}>
             <Chip
-              label={wsConnected ? 'Aucune donnée reçue' : 'Connexion en cours...'}
+              label={wsConnected ? 'No data received' : 'Connecting...'}
               color={wsConnected ? 'warning' : 'info'}
               size="small"
-              sx={{ mb: 2 }}
+              sx={{ mb: 1 }}
             />
-            <Skeleton variant="rectangular" width="100%" height={350} />
+            <Skeleton variant="rectangular" width="100%" height={200} /> {/* ← réduit */}
           </Box>
         </CardContent>
       </Card>
     );
   }
 
+  // ✅ Sécuriser le calcul de maxY
+  const maxY = data.reduce((max, d) => {
+    const currentMax = Math.max(d.CDS_IN || 0, d.CDS_OUT || 0, d.ABSYS || 0);
+    return currentMax > max ? currentMax : max;
+  }, 0);
+
+  const yMax = Math.max(1, isNaN(maxY) ? 1 : maxY);
+  const domainMax = Math.ceil(yMax * 1.3);
+  const tickCount = Math.min(6, domainMax + 1);
+
   return (
     <Card sx={{ backgroundColor: 'background.paper', borderRadius: 3 }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="overline" color="text.secondary">
-            Call Volume (Live)
+      <CardContent sx={{ p: 1 }}> {/* ← padding réduit pour gagner de la hauteur */}
+
+        {/* Titre + état Live */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+          <Typography variant="overline" color="text.secondary" fontSize={12}>
+            Call Volume
           </Typography>
           <Chip
-            label={wsConnected ? '🟢 Connecté' : '🔴 Déconnecté'}
+            label={wsConnected ? '🟢 Live' : '🔴 Disconnected'}
             size="small"
             color={wsConnected ? 'success' : 'error'}
+            sx={{ fontSize: 12 }}
           />
         </Box>
-        <div style={{ width: '100%', height: 450 }} aria-label="Graphique des volumes d'appels">
+
+        {/* Graphique */}
+        <div style={{ width: '100%', height: 250 }} aria-label="Graphique des volumes d'appels">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={modifiedData} margin={{ top: 60, right: 30, left: 0, bottom: 100 }}>
+            <BarChart
+              data={data}
+              margin={{ top: 5, right: 15, left: 15, bottom: 5 }} // ← marges réduites
+              barSize={18} // ← légèrement réduit pour compacité
+              stackOffset="none"
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#2f3a49" />
+
               <XAxis
                 dataKey="index"
-                tick={{ fill: '#fff' }}
-                tickFormatter={(index) => modifiedData[index]?.time || `Heure ${index}`}
+                tick={{ fill: '#fff', fontSize: 11 }} // ← police réduite
+                tickFormatter={(index) => {
+                  const time = halfHourSlots[index] || '';
+                  if (time.endsWith(':30')) return time.replace(':30', 'h30');
+                  if (time.endsWith(':00')) return time.replace(':00', 'h');
+                  return time;
+                }}
                 interval={0}
+                angle={-45}
+                textAnchor="end"
+                height={30} // ← réduit de 40 à 30
+                tickMargin={3}
               />
-              <YAxis stroke="#8884d8" tick={{ fill: '#fff' }} />
-              <Tooltip labelFormatter={(value) => modifiedData[value]?.time || `Heure ${value}`} />
-              <Legend content={<CustomLegend />} />
+
+              <YAxis
+                stroke="#8884d8"
+                tick={{ fill: '#fff', fontSize: 11 }}
+                domain={[0, domainMax]}
+                tickCount={tickCount}
+                allowDecimals={false}
+              />
+
+              <Tooltip
+                formatter={(value, name) => {
+                  const labels = { CDS_IN: 'CDS In', CDS_OUT: 'CDS Out', ABSYS: 'Absys' };
+                  return [value, labels[name] || name];
+                }}
+                labelFormatter={(index) => `Time: ${halfHourSlots[index] || index}`}
+                contentStyle={{
+                  backgroundColor: '#2c3e50',
+                  border: 'none',
+                  borderRadius: 4,
+                  color: '#fff',
+                  fontSize: 12,
+                }}
+              />
+
               <ReferenceArea
                 x1={lunchStartIndex}
                 x2={lunchEndIndex}
                 y1={0}
                 y2="dataMax"
                 fill="#FF0000"
-                fillOpacity={0.2}
+                fillOpacity={0.15}
                 stroke="#b30000"
-                strokeOpacity={0.8}
+                strokeOpacity={0.6}
               />
-              <ReferenceLine x={lunchStartIndex} stroke="#b30000" strokeWidth={2} />
-              <ReferenceLine x={lunchEndIndex} stroke="#b30000" strokeWidth={2} />
+              <ReferenceLine x={lunchStartIndex} stroke="#b30000" strokeWidth={1} />
+              <ReferenceLine x={lunchEndIndex} stroke="#b30000" strokeWidth={1} />
               <CustomLabel fill={theme.palette.text.secondary} />
-              <Bar dataKey="CDS" fill="#42A5F5">
-                <LabelList dataKey="CDS" content={CustomCDSLabel} />
-              </Bar>
-              <Bar dataKey="Absys" fill="#EF5350">
-                <LabelList dataKey="Absys" position="top" fill="#fff" />
-              </Bar>
+
+              <Bar dataKey="CDS_IN" name="CDS In" fill="#42A5F5" label={renderCustomLabel} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="CDS_OUT" name="CDS Out" fill="#66BB6A" label={renderCustomLabel} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="ABSYS" name="Absys" fill="#EF5350" label={renderCustomLabel} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
+
+        {/* ✅ Légende placée EN DEHORS du graphique */}
+        <LegendComponent />
+
       </CardContent>
     </Card>
   );
