@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/dashboard-anaveo/static/js/main.a3fc255b.js",
+    "main.js": "/dashboard-anaveo/static/js/main.b66fd7b3.js",
     "index.html": "/dashboard-anaveo/index.html",
-    "main.a3fc255b.js.map": "/dashboard-anaveo/static/js/main.a3fc255b.js.map"
+    "main.b66fd7b3.js.map": "/dashboard-anaveo/static/js/main.b66fd7b3.js.map"
   },
   "entrypoints": [
-    "static/js/main.a3fc255b.js"
+    "static/js/main.b66fd7b3.js"
   ]
 }
