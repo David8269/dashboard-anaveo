@@ -11,10 +11,10 @@ import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 
-// 🔊 Fonction de lecture audio
+// 🔊 Fonction de lecture audio — utilise PUBLIC_URL
 const playSound = (filename) => {
   try {
-    const audio = new Audio(`/sounds/${filename}`);
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
     audio.play().catch(e => console.warn(`Échec lecture ${filename} :`, e));
   } catch (error) {
     console.error('Erreur lecture son :', error);
@@ -656,9 +656,8 @@ const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
   const [lastScheduledSounds, setLastScheduledSounds] = useState({});
   const prevEmployeesRef = useRef([]);
-  const [audioUnlocked, setAudioUnlocked] = useState(false); // 🔊 État pour sons
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
-  // 🔊 Callback pour appel perdu — ne joue que si audio débloqué
   const handleLostCall = () => {
     if (audioUnlocked) {
       playSound('fatality.mp3');
@@ -683,7 +682,6 @@ const App = () => {
   const dailyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, dailyStats, allCalls);
 
-  // 🔊 Sons horaires — ne jouent que si audio débloqué
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -709,7 +707,6 @@ const App = () => {
     }
   }, [lastScheduledSounds, audioUnlocked]);
 
-  // 🔊 Détection de dépassement — ne joue que si audio débloqué
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -733,9 +730,9 @@ const App = () => {
     console.table(dailyStats.map(d => ({ date: d.date, day: d.dayLabel, in: d.inbound, out: d.outbound })));
   }, [dailyStats]);
 
-  // 🔊 Fonction pour débloquer les sons avec silent.wav
+  // 🔊 Fonction pour débloquer les sons — CORRIGÉE
   const unlockAudio = () => {
-    const audio = new Audio('/sounds/silent.wav');
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
     audio.play()
       .then(() => {
         console.log('✅ Sons activés via silent.wav');
@@ -750,7 +747,7 @@ const App = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundImage: `url('./images/background-dashboard.jpg')`,
+        backgroundImage: `url('${process.env.PUBLIC_URL}/images/background-dashboard.jpg')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -841,7 +838,6 @@ const App = () => {
                   slaData={dailyStats} 
                   wsConnected={isConnected} 
                 />
-                {/* 🔊 Bouton sous "NUMBER OF CALLS" */}
                 {!audioUnlocked && (
                   <Box
                     sx={{
