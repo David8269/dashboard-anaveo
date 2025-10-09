@@ -21,7 +21,7 @@ const playSound = (filename) => {
   }
 };
 
-// 🕒 Horloge — MODIFIÉE POUR MATCHER LE TITRE EXACTEMENT
+// 🕒 Horloge — MATCH EXACT DU TITRE (police, liseré, ombres, pas de cadre)
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -708,36 +708,42 @@ const App = () => {
   const dailyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, dailyStats, allCalls);
 
+  // 🔊 Gestion fiable des sons horaires (vérification chaque seconde)
   useEffect(() => {
     if (!audioUnlocked) return;
 
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const timeKey = `${hours}:${minutes}`;
+    const interval = setInterval(() => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const timeKey = `${hours}:${minutes}`;
 
-    if (lastScheduledSounds[timeKey]) return;
+      if (lastScheduledSounds[timeKey]) return;
 
-    if (hours === 8 && minutes === 30) {
-      playSound('debut.mp3');
-      setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
-    } else if (hours === 12 && minutes === 30) {
-      playSound('pause.mp3');
-      setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
-    } else if (hours === 14 && minutes === 0) {
-      playSound('reprise.mp3');
-      setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
-    } else if (hours === 18 && minutes === 0) {
-      playSound('fin.mp3');
-      setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
-    }
-  }, [lastScheduledSounds, audioUnlocked]);
+      let soundToPlay = null;
+      if (hours === 8 && minutes === 30) {
+        soundToPlay = 'debut.mp3';
+      } else if (hours === 12 && minutes === 30) {
+        soundToPlay = 'pause.mp3';
+      } else if (hours === 14 && minutes === 0) {
+        soundToPlay = 'reprise.mp3';
+      } else if (hours === 18 && minutes === 0) {
+        soundToPlay = 'fin.mp3';
+      }
+
+      if (soundToPlay) {
+        playSound(soundToPlay);
+        setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [audioUnlocked, lastScheduledSounds]);
 
   // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 (CDS_IN + CDS_OUT) ET un agent devient 1er
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
-    // Début de la journée opérationnelle
     const now = new Date();
     const startOfDay = new Date(now);
     startOfDay.setHours(8, 30, 0, 0);
@@ -745,7 +751,6 @@ const App = () => {
       startOfDay.setDate(startOfDay.getDate() - 1);
     }
 
-    // Compter uniquement CDS_IN + CDS_OUT depuis 8h30
     const totalRelevantCalls = allCalls.filter(call =>
       call.startTime &&
       call.startTime >= startOfDay &&
