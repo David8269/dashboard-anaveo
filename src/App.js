@@ -21,7 +21,7 @@ const playSound = (filename) => {
   }
 };
 
-// 🕒 Horloge — MODIFIÉE POUR MATCHER LE TITRE
+// 🕒 Horloge — MODIFIÉE POUR MATCHER LE TITRE EXACTEMENT
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -51,7 +51,7 @@ function Clock() {
             90% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
             100% { clip-path: inset(0 0 0 0); transform: translate(0); }
           }
-          .glitch-digital {
+          .clock-glitch {
             position: relative;
             font-family: 'Orbitron', 'Roboto', sans-serif;
             font-weight: 900;
@@ -61,27 +61,31 @@ function Clock() {
             user-select: none;
             text-align: center;
             text-transform: uppercase;
-            text-shadow: 0 0 8px rgba(255,255,255,0.7);
-            border: 1px solid rgba(255,255,255,0.3);
+            text-shadow: 
+              0 0 8px rgba(255,255,255,0.7),
+              0 0 12px rgba(255,255,255,0.5),
+              0 0 16px rgba(255,255,255,0.3);
             padding: 0.5rem 1rem;
-            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.2);
             border-radius: 4px;
+            background: transparent;
+            display: inline-block;
           }
-          .glitch-digital::before,
-          .glitch-digital::after {
+          .clock-glitch::before,
+          .clock-glitch::after {
             content: attr(data-text);
             position: absolute;
             left: 0;
             width: 100%;
             opacity: 0.8;
           }
-          .glitch-digital::before {
+          .clock-glitch::before {
             animation: glitch-digital 2.5s infinite linear alternate-reverse;
             color: #ff0;
             left: -1px;
             mix-blend-mode: screen;
           }
-          .glitch-digital::after {
+          .clock-glitch::after {
             animation: glitch-digital 2s infinite linear alternate;
             color: #ffa500;
             left: 1px;
@@ -91,10 +95,17 @@ function Clock() {
         `}
       </style>
       <Box
-        className="glitch-digital"
+        className="clock-glitch"
         data-text={`${hours}:${minutes}:${seconds}`}
         role="status"
         aria-live="polite"
+        sx={{
+          display: 'inline-block',
+          margin: '0 auto',
+          '&::before, &::after': {
+            pointerEvents: 'none'
+          }
+        }}
       >
         {hours}:{minutes}:{seconds}
       </Box>
