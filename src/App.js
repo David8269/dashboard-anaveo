@@ -722,12 +722,26 @@ const App = () => {
     }
   }, [lastScheduledSounds, audioUnlocked]);
 
-  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 ET un agent devient 1er
+  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 (CDS_IN + CDS_OUT) ET un agent devient 1er
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
-    const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
-    if (totalCalls < 50) return;
+    // Début de la journée opérationnelle
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(8, 30, 0, 0);
+    if (now < startOfDay) {
+      startOfDay.setDate(startOfDay.getDate() - 1);
+    }
+
+    // Compter uniquement CDS_IN + CDS_OUT depuis 8h30
+    const totalRelevantCalls = allCalls.filter(call =>
+      call.startTime &&
+      call.startTime >= startOfDay &&
+      (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT')
+    ).length;
+
+    if (totalRelevantCalls < 50) return;
 
     const prevEmployees = prevEmployeesRef.current;
     const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
@@ -741,7 +755,7 @@ const App = () => {
     }
 
     prevEmployeesRef.current = [...employees];
-  }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
+  }, [employees, audioUnlocked, allCalls]);
 
   useEffect(() => {
     console.table(dailyStats.map(d => ({ date: d.date, day: d.dayLabel, in: d.inbound, out: d.outbound })));
