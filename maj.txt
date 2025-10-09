@@ -1,4 +1,5 @@
 npm run build
+<<<<<<< Updated upstream
 npm run deploy
 
 
@@ -11,4 +12,8 @@ git pull --rebase origin main
 # 3. Restaure tes modifications (si tu en as besoin)
 git stash pop
 
+=======
+git add .
+git commit -m "Add favicon.ico" (exemple)
+>>>>>>> Stashed changes
 git push origin main

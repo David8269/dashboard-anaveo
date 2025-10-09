@@ -21,7 +21,7 @@ const playSound = (filename) => {
   }
 };
 
-// 🕒 Horloge
+// 🕒 Horloge — MODIFIÉE POUR MATCHER LE TITRE
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -62,6 +62,10 @@ function Clock() {
             text-align: center;
             text-transform: uppercase;
             text-shadow: 0 0 8px rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
           }
           .glitch-digital::before,
           .glitch-digital::after {
@@ -196,11 +200,15 @@ const useWebSocketData = (url, onLostCall) => {
 
   const cleanupOldStorage = () => {
     const now = new Date();
-    const currentKey = getStorageKey();
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith('callData_') && key !== currentKey) {
-        localStorage.removeItem(key);
+      if (key?.startsWith('callData_')) {
+        const dateStr = key.split('_')[1];
+        const date = new Date(dateStr + 'T00:00:00');
+        const daysDiff = Math.floor((now - date) / (24 * 60 * 60 * 1000));
+        if (daysDiff > 7) {
+          localStorage.removeItem(key);
+        }
       }
     }
   };
@@ -221,23 +229,30 @@ const useWebSocketData = (url, onLostCall) => {
   };
 
   const loadCallsFromStorage = () => {
-    try {
-      const key = getStorageKey();
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return parsed.map(call => ({
-          ...call,
-          startTime: call.startTime ? new Date(call.startTime) : null,
-          endTime: call.endTime ? new Date(call.endTime) : null,
-          receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
-        })).filter(call => call.startTime);
+    const calls = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const key = `callData_${getLocalDateStr(date)}`;
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const loadedCalls = parsed.map(call => ({
+            ...call,
+            startTime: call.startTime ? new Date(call.startTime) : null,
+            endTime: call.endTime ? new Date(call.endTime) : null,
+            receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
+          })).filter(call => call.startTime);
+          calls.push(...loadedCalls);
+        }
+      } catch (e) {
+        console.warn(`[Storage] ⚠️ Chargement échoué pour ${key}`, e);
+        localStorage.removeItem(key);
       }
-    } catch (e) {
-      console.warn('[Storage] ⚠️ Chargement échoué', e);
-      localStorage.removeItem(getStorageKey());
     }
-    return [];
+    return calls;
   };
 
   const rebuildAgentsFromCalls = (calls) => {
@@ -707,30 +722,31 @@ const App = () => {
     }
   }, [lastScheduledSounds, audioUnlocked]);
 
+  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 ET un agent devient 1er
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
+
+    const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
+    if (totalCalls < 50) return;
 
     const prevEmployees = prevEmployeesRef.current;
     const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
     const prevSorted = [...prevEmployees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
 
-    for (let i = 0; i < currentEmployees.length; i++) {
-      const currentAgent = currentEmployees[i];
-      const prevIndex = prevSorted.findIndex(a => a.name === currentAgent.name);
-      if (prevIndex > i && prevIndex !== -1) {
-        playSound('passage.mp3');
-        break;
-      }
+    const currentTopAgent = currentEmployees[0];
+    const wasTopBefore = prevSorted.length > 0 && prevSorted[0]?.name === currentTopAgent.name;
+
+    if (!wasTopBefore && currentTopAgent) {
+      playSound('passage.mp3');
     }
 
     prevEmployeesRef.current = [...employees];
-  }, [employees, audioUnlocked]);
+  }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
 
   useEffect(() => {
     console.table(dailyStats.map(d => ({ date: d.date, day: d.dayLabel, in: d.inbound, out: d.outbound })));
   }, [dailyStats]);
 
-  // 🔊 Fonction pour débloquer les sons — CORRIGÉE
   const unlockAudio = () => {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
     audio.play()
