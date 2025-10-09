@@ -1,0 +1,14 @@
+npm run build
+npm run deploy
+
+
+# 1. Stocke temporairement tes modifications
+git stash
+
+# 2. Récupère les commits distants et place les tiens au-dessus
+git pull --rebase origin main
+
+# 3. Restaure tes modifications (si tu en as besoin)
+git stash pop
+
+git push origin main
