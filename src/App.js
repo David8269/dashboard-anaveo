@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -193,6 +193,57 @@ const formatDateToLocalISO = (date) => {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+// 🔁 Hook pour réinitialiser les données quotidiennes à 8h
+const useDailyResetScheduler = (resetFn) => {
+  useEffect(() => {
+    const scheduleNextReset = () => {
+      const now = new Date();
+      const nextReset = new Date();
+      nextReset.setHours(8, 0, 0, 0);
+      if (now >= nextReset) nextReset.setDate(nextReset.getDate() + 1);
+      const delay = nextReset.getTime() - now.getTime();
+      const timeoutId = setTimeout(() => {
+        resetFn();
+        scheduleNextReset();
+      }, delay);
+      return () => clearTimeout(timeoutId);
+    };
+    return scheduleNextReset();
+  }, [resetFn]);
+};
+
+// 🔁 Hook pour réinitialiser les données hebdomadaires le lundi à 8h
+const useWeeklyResetScheduler = (resetFn) => {
+  useEffect(() => {
+    const scheduleNextReset = () => {
+      const now = new Date();
+      const nextReset = new Date();
+
+      // Prochain lundi à 8h
+      const dayOfWeek = now.getDay(); // 0 = dimanche
+      let daysUntilMonday = 1 - dayOfWeek;
+      if (daysUntilMonday <= 0) daysUntilMonday += 7;
+
+      nextReset.setDate(now.getDate() + daysUntilMonday);
+      nextReset.setHours(8, 0, 0, 0);
+
+      // Si on est lundi après 8h, on prend le lundi suivant
+      if (dayOfWeek === 1 && now.getHours() >= 8) {
+        nextReset.setDate(nextReset.getDate() + 7);
+      }
+
+      const delay = nextReset.getTime() - now.getTime();
+      const timeoutId = setTimeout(() => {
+        resetFn();
+        scheduleNextReset();
+      }, delay);
+
+      return () => clearTimeout(timeoutId);
+    };
+    return scheduleNextReset();
+  }, [resetFn]);
 };
 
 const useWebSocketData = (url, onLostCall) => {
@@ -482,6 +533,18 @@ const useWebSocketData = (url, onLostCall) => {
     localStorage.removeItem(getStorageKey());
   };
 
+  // ✅ NOUVELLE FONCTION : réinitialise mais garde les appels de la journée en cours
+  const resetTodayOnly = () => {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const todayCalls = allCalls.filter(call => call.startTime && call.startTime >= startOfDay);
+    setAllCalls(todayCalls);
+    const rebuiltAgents = rebuildAgentsFromCalls(todayCalls);
+    setCumulativeAgents(rebuiltAgents);
+    saveCallsToStorage(todayCalls);
+    setLastUpdate(new Date());
+  };
+
   useEffect(() => {
     isMountedRef.current = true;
     cleanupOldStorage();
@@ -544,13 +607,40 @@ const useWebSocketData = (url, onLostCall) => {
     halfHourSlots,
     allCalls,
     resetDailyData,
+    resetTodayOnly, // 👈 exposé
   };
 };
 
+// ✅ useWeeklyCallStats avec réinitialisation hebdomadaire
 const useWeeklyCallStats = (calls = []) => {
+  const [weeklyCalls, setWeeklyCalls] = useState([]);
+
+  const resetWeeklyCalls = useCallback(() => {
+    setWeeklyCalls([]);
+  }, []);
+
+  useWeeklyResetScheduler(resetWeeklyCalls);
+
+  useEffect(() => {
+    if (calls.length === 0) return;
+    setWeeklyCalls(prev => {
+      const now = new Date();
+      const monday = new Date(now);
+      const dayOfWeek = monday.getDay();
+      const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      monday.setDate(monday.getDate() + daysToMonday);
+      monday.setHours(0, 0, 0, 0);
+
+      const thisWeekCalls = calls.filter(call => call.startTime && call.startTime >= monday);
+      const existingIds = new Set(prev.map(c => c.id));
+      const newCalls = thisWeekCalls.filter(c => !existingIds.has(c.id));
+      return [...prev, ...newCalls];
+    });
+  }, [calls]);
+
   return useMemo(() => {
-    const today = new Date();
-    const monday = new Date(today);
+    const now = new Date();
+    const monday = new Date(now);
     const dayOfWeek = monday.getDay();
     const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     monday.setDate(monday.getDate() + daysToMonday);
@@ -570,7 +660,7 @@ const useWeeklyCallStats = (calls = []) => {
       });
     }
 
-    calls.forEach(call => {
+    weeklyCalls.forEach(call => {
       if (!call.startTime || call.callType === 'ABSYS') return;
       const callDate = getLocalDateStr(call.startTime);
       const dayIndex = weekData.findIndex(d => d.date === callDate);
@@ -584,7 +674,7 @@ const useWeeklyCallStats = (calls = []) => {
     });
 
     return weekData;
-  }, [calls]);
+  }, [weeklyCalls]);
 };
 
 const useKpiCalculations = (employees = [], dailyStats = [], allCalls = []) => {
@@ -659,24 +749,6 @@ const useKpiCalculations = (employees = [], dailyStats = [], allCalls = []) => {
   }, [employees, dailyStats, allCalls]);
 };
 
-const useDailyResetScheduler = (resetFn) => {
-  useEffect(() => {
-    const scheduleNextReset = () => {
-      const now = new Date();
-      const nextReset = new Date();
-      nextReset.setHours(8, 0, 0, 0);
-      if (now >= nextReset) nextReset.setDate(nextReset.getDate() + 1);
-      const delay = nextReset.getTime() - now.getTime();
-      const timeoutId = setTimeout(() => {
-        resetFn();
-        scheduleNextReset();
-      }, delay);
-      return () => clearTimeout(timeoutId);
-    };
-    return scheduleNextReset();
-  }, [resetFn]);
-};
-
 // 🔊 Composant principal
 const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
@@ -701,6 +773,7 @@ const App = () => {
     halfHourSlots,
     allCalls,
     resetDailyData,
+    resetTodayOnly, // 👈 récupéré
   } = useWebSocketData(WS_URL, handleLostCall);
 
   useDailyResetScheduler(resetDailyData);
@@ -708,7 +781,7 @@ const App = () => {
   const dailyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, dailyStats, allCalls);
 
-  // 🔊 Gestion fiable des sons horaires (vérification chaque seconde)
+  // 🔊 Gestion fiable des sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -740,7 +813,7 @@ const App = () => {
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 (CDS_IN + CDS_OUT) ET un agent devient 1er
+  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 ET un agent devient 1er
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -772,10 +845,6 @@ const App = () => {
 
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, allCalls]);
-
-  useEffect(() => {
-    console.table(dailyStats.map(d => ({ date: d.date, day: d.dayLabel, in: d.inbound, out: d.outbound })));
-  }, [dailyStats]);
 
   const unlockAudio = () => {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
@@ -819,7 +888,7 @@ const App = () => {
             { title: "Total Agents", value: kpi.totalAgents, color: "info" },
             { 
               title: "Number of Calls",
-              value: (kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls).toString(),
+              value: (kpi.cdsInboundTotal + kpi.cdsOutboundTotal).toString(),
               color: "primary" 
             },
             { 
@@ -882,7 +951,8 @@ const App = () => {
               <Box position="relative">
                 <SLABarchart 
                   slaData={dailyStats} 
-                  wsConnected={isConnected} 
+                  wsConnected={isConnected}
+                  onResetTodayOnly={resetTodayOnly} // 👈 passé ici
                 />
                 {!audioUnlocked && (
                   <Box
