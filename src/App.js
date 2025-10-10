@@ -21,7 +21,11 @@ const playSound = (filename) => {
   }
 };
 
+<<<<<<< Updated upstream
 // 🕒 Horloge — MATCH EXACT DU TITRE (police, liseré, ombres, pas de cadre)
+=======
+// 🕒 Horloge — MODIFIÉE POUR MATCHER LE TITRE
+>>>>>>> Stashed changes
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -61,6 +65,7 @@ function Clock() {
             user-select: none;
             text-align: center;
             text-transform: uppercase;
+<<<<<<< Updated upstream
             text-shadow: 
               0 0 8px rgba(255,255,255,0.7),
               0 0 12px rgba(255,255,255,0.5),
@@ -70,6 +75,13 @@ function Clock() {
             border-radius: 4px;
             background: transparent;
             display: inline-block;
+=======
+            text-shadow: 0 0 8px rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+>>>>>>> Stashed changes
           }
           .clock-glitch::before,
           .clock-glitch::after {
@@ -809,6 +821,7 @@ const App = () => {
         soundToPlay = 'fin.mp3';
       }
 
+<<<<<<< Updated upstream
       if (soundToPlay) {
         playSound(soundToPlay);
         setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
@@ -836,6 +849,14 @@ const App = () => {
     ).length;
 
     if (totalRelevantCalls < 50) return;
+=======
+  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 ET un agent devient 1er
+  useEffect(() => {
+    if (!audioUnlocked || employees.length === 0) return;
+
+    const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
+    if (totalCalls < 50) return;
+>>>>>>> Stashed changes
 
     const prevEmployees = prevEmployeesRef.current;
     const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
@@ -845,6 +866,7 @@ const App = () => {
     const wasTopBefore = prevSorted.length > 0 && prevSorted[0]?.name === currentTopAgent.name;
 
     if (!wasTopBefore && currentTopAgent) {
+<<<<<<< Updated upstream
       const allowedFirstNames = new Set([
         'xavier', 'rana', 'mathys', 'romain',
         'nicolas', 'julien', 'benjamin', 'malik'
@@ -863,6 +885,18 @@ const App = () => {
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, allCalls]);
 
+=======
+      playSound('passage.mp3');
+    }
+
+    prevEmployeesRef.current = [...employees];
+  }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
+
+  useEffect(() => {
+    console.table(dailyStats.map(d => ({ date: d.date, day: d.dayLabel, in: d.inbound, out: d.outbound })));
+  }, [dailyStats]);
+
+>>>>>>> Stashed changes
   const unlockAudio = () => {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
     audio.play()
