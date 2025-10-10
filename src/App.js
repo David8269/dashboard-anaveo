@@ -66,7 +66,7 @@ function Clock() {
               0 0 12px rgba(255,255,255,0.5),
               0 0 16px rgba(255,255,255,0.3);
             padding: 0.5rem 1rem;
-            border: 1px solid rgba(255,255,255,0.2);
+            /* ✅ Bordure supprimée ici */
             border-radius: 4px;
             background: transparent;
             display: inline-block;
