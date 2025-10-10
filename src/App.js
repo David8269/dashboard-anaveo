@@ -21,11 +21,7 @@ const playSound = (filename) => {
   }
 };
 
-<<<<<<< Updated upstream
 // 🕒 Horloge — MATCH EXACT DU TITRE (police, liseré, ombres, pas de cadre)
-=======
-// 🕒 Horloge — MODIFIÉE POUR MATCHER LE TITRE
->>>>>>> Stashed changes
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -65,7 +61,6 @@ function Clock() {
             user-select: none;
             text-align: center;
             text-transform: uppercase;
-<<<<<<< Updated upstream
             text-shadow: 
               0 0 8px rgba(255,255,255,0.7),
               0 0 12px rgba(255,255,255,0.5),
@@ -75,13 +70,6 @@ function Clock() {
             border-radius: 4px;
             background: transparent;
             display: inline-block;
-=======
-            text-shadow: 0 0 8px rgba(255,255,255,0.7);
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 0.5rem 1rem;
-            background: rgba(0,0,0,0.2);
-            border-radius: 4px;
->>>>>>> Stashed changes
           }
           .clock-glitch::before,
           .clock-glitch::after {
@@ -233,15 +221,13 @@ const useWeeklyResetScheduler = (resetFn) => {
       const now = new Date();
       const nextReset = new Date();
 
-      // Prochain lundi à 8h
-      const dayOfWeek = now.getDay(); // 0 = dimanche
-      let daysUntilMonday = 1 - dayOfWeek; // lundi = 1
+      const dayOfWeek = now.getDay();
+      let daysUntilMonday = 1 - dayOfWeek;
       if (daysUntilMonday <= 0) daysUntilMonday += 7;
 
       nextReset.setDate(now.getDate() + daysUntilMonday);
       nextReset.setHours(8, 0, 0, 0);
 
-      // Si on est lundi après 8h, on prend le lundi suivant
       if (dayOfWeek === 1 && now.getHours() >= 8) {
         nextReset.setDate(nextReset.getDate() + 7);
       }
@@ -622,7 +608,6 @@ const useWebSocketData = (url, onLostCall) => {
   };
 };
 
-// ✅ useWeeklyCallStats avec réinitialisation hebdomadaire
 const useWeeklyCallStats = (calls = []) => {
   const [weeklyCalls, setWeeklyCalls] = useState([]);
 
@@ -642,13 +627,7 @@ const useWeeklyCallStats = (calls = []) => {
       monday.setDate(monday.getDate() + daysToMonday);
       monday.setHours(0, 0, 0, 0);
 
-      // Filtrer les appels de cette semaine
-      const thisWeekCalls = calls.filter(call => {
-        if (!call.startTime) return false;
-        return call.startTime >= monday;
-      });
-
-      // Éviter les doublons
+      const thisWeekCalls = calls.filter(call => call.startTime && call.startTime >= monday);
       const existingIds = new Set(prev.map(c => c.id));
       const newCalls = thisWeekCalls.filter(c => !existingIds.has(c.id));
 
@@ -798,7 +777,7 @@ const App = () => {
   const dailyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, dailyStats, allCalls);
 
-  // 🔊 Gestion fiable des sons horaires
+  // 🔊 Sons horaires (début, pause, etc.)
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -821,7 +800,6 @@ const App = () => {
         soundToPlay = 'fin.mp3';
       }
 
-<<<<<<< Updated upstream
       if (soundToPlay) {
         playSound(soundToPlay);
         setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
@@ -831,32 +809,12 @@ const App = () => {
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-  // ✅ CORRIGÉ : Joue le son personnalisé selon le prénom de l'agent qui devient 1er
-  useEffect(() => {
-    if (!audioUnlocked || employees.length === 0) return;
-
-    const now = new Date();
-    const startOfDay = new Date(now);
-    startOfDay.setHours(8, 30, 0, 0);
-    if (now < startOfDay) {
-      startOfDay.setDate(startOfDay.getDate() - 1);
-    }
-
-    const totalRelevantCalls = allCalls.filter(call =>
-      call.startTime &&
-      call.startTime >= startOfDay &&
-      (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT')
-    ).length;
-
-    if (totalRelevantCalls < 50) return;
-=======
-  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 ET un agent devient 1er
+  // ✅ Son personnalisé quand un agent devient 1er (après ≥50 appels)
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
     const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
     if (totalCalls < 50) return;
->>>>>>> Stashed changes
 
     const prevEmployees = prevEmployeesRef.current;
     const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
@@ -866,7 +824,6 @@ const App = () => {
     const wasTopBefore = prevSorted.length > 0 && prevSorted[0]?.name === currentTopAgent.name;
 
     if (!wasTopBefore && currentTopAgent) {
-<<<<<<< Updated upstream
       const allowedFirstNames = new Set([
         'xavier', 'rana', 'mathys', 'romain',
         'nicolas', 'julien', 'benjamin', 'malik'
@@ -883,20 +840,12 @@ const App = () => {
     }
 
     prevEmployeesRef.current = [...employees];
-  }, [employees, audioUnlocked, allCalls]);
-
-=======
-      playSound('passage.mp3');
-    }
-
-    prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
 
   useEffect(() => {
     console.table(dailyStats.map(d => ({ date: d.date, day: d.dayLabel, in: d.inbound, out: d.outbound })));
   }, [dailyStats]);
 
->>>>>>> Stashed changes
   const unlockAudio = () => {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
     audio.play()
