@@ -223,11 +223,7 @@ const useWeeklyResetScheduler = (resetFn) => {
 
       // Prochain lundi à 8h
       const dayOfWeek = now.getDay(); // 0 = dimanche
-<<<<<<< HEAD
-      let daysUntilMonday = 1 - dayOfWeek;
-=======
       let daysUntilMonday = 1 - dayOfWeek; // lundi = 1
->>>>>>> 4612692 (Mise à jour : son passage ≥50 appels + horloge glitch + historique appels)
       if (daysUntilMonday <= 0) daysUntilMonday += 7;
 
       nextReset.setDate(now.getDate() + daysUntilMonday);
@@ -537,7 +533,6 @@ const useWebSocketData = (url, onLostCall) => {
     localStorage.removeItem(getStorageKey());
   };
 
-  // ✅ NOUVELLE FONCTION : réinitialise mais garde les appels de la journée en cours
   const resetTodayOnly = () => {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -611,15 +606,11 @@ const useWebSocketData = (url, onLostCall) => {
     halfHourSlots,
     allCalls,
     resetDailyData,
-    resetTodayOnly, // 👈 exposé
+    resetTodayOnly,
   };
 };
 
-<<<<<<< HEAD
 // ✅ useWeeklyCallStats avec réinitialisation hebdomadaire
-=======
-// ✅ Nouvelle version de useWeeklyCallStats avec réinitialisation hebdomadaire
->>>>>>> 4612692 (Mise à jour : son passage ≥50 appels + horloge glitch + historique appels)
 const useWeeklyCallStats = (calls = []) => {
   const [weeklyCalls, setWeeklyCalls] = useState([]);
 
@@ -629,10 +620,6 @@ const useWeeklyCallStats = (calls = []) => {
 
   useWeeklyResetScheduler(resetWeeklyCalls);
 
-<<<<<<< HEAD
-=======
-  // Met à jour weeklyCalls avec les nouveaux appels
->>>>>>> 4612692 (Mise à jour : son passage ≥50 appels + horloge glitch + historique appels)
   useEffect(() => {
     if (calls.length === 0) return;
     setWeeklyCalls(prev => {
@@ -643,11 +630,6 @@ const useWeeklyCallStats = (calls = []) => {
       monday.setDate(monday.getDate() + daysToMonday);
       monday.setHours(0, 0, 0, 0);
 
-<<<<<<< HEAD
-      const thisWeekCalls = calls.filter(call => call.startTime && call.startTime >= monday);
-      const existingIds = new Set(prev.map(c => c.id));
-      const newCalls = thisWeekCalls.filter(c => !existingIds.has(c.id));
-=======
       // Filtrer les appels de cette semaine
       const thisWeekCalls = calls.filter(call => {
         if (!call.startTime) return false;
@@ -658,7 +640,6 @@ const useWeeklyCallStats = (calls = []) => {
       const existingIds = new Set(prev.map(c => c.id));
       const newCalls = thisWeekCalls.filter(c => !existingIds.has(c.id));
 
->>>>>>> 4612692 (Mise à jour : son passage ≥50 appels + horloge glitch + historique appels)
       return [...prev, ...newCalls];
     });
   }, [calls]);
@@ -798,13 +779,10 @@ const App = () => {
     halfHourSlots,
     allCalls,
     resetDailyData,
-    resetTodayOnly, // 👈 récupéré
+    resetTodayOnly,
   } = useWebSocketData(WS_URL, handleLostCall);
 
-  // ✅ Réinitialisation quotidienne (8h)
   useDailyResetScheduler(resetDailyData);
-
-  // ✅ dailyStats est maintenant géré avec réinitialisation hebdomadaire
   const dailyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, dailyStats, allCalls);
 
@@ -840,11 +818,7 @@ const App = () => {
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-<<<<<<< HEAD
-  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 ET un agent devient 1er
-=======
   // ✅ CORRIGÉ : Joue le son personnalisé selon le prénom de l'agent qui devient 1er
->>>>>>> 4612692 (Mise à jour : son passage ≥50 appels + horloge glitch + historique appels)
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -871,16 +845,14 @@ const App = () => {
     const wasTopBefore = prevSorted.length > 0 && prevSorted[0]?.name === currentTopAgent.name;
 
     if (!wasTopBefore && currentTopAgent) {
-      // 🔊 Mapping des prénoms autorisés vers leur fichier son
       const allowedFirstNames = new Set([
         'xavier', 'rana', 'mathys', 'romain',
         'nicolas', 'julien', 'benjamin', 'malik'
       ]);
 
-      // Extraire le prénom (premier mot du nom)
       const firstName = currentTopAgent.name.split(' ')[0]?.toLowerCase() || '';
 
-      let soundToPlay = 'passage.mp3'; // fallback
+      let soundToPlay = 'passage.mp3';
       if (allowedFirstNames.has(firstName)) {
         soundToPlay = `${firstName}.mp3`;
       }
@@ -933,12 +905,7 @@ const App = () => {
             { title: "Total Agents", value: kpi.totalAgents, color: "info" },
             { 
               title: "Number of Calls",
-<<<<<<< HEAD
-              // ✅ CORRECTION ICI : on utilise totalInboundCalls + totalOutboundCalls
               value: (kpi.totalInboundCalls + kpi.totalOutboundCalls).toString(),
-=======
-              value: (kpi.cdsInboundTotal + kpi.cdsOutboundTotal).toString(),
->>>>>>> 4612692 (Mise à jour : son passage ≥50 appels + horloge glitch + historique appels)
               color: "primary" 
             },
             { 
@@ -1002,7 +969,7 @@ const App = () => {
                 <SLABarchart 
                   slaData={dailyStats} 
                   wsConnected={isConnected}
-                  onResetTodayOnly={resetTodayOnly} // 👈 passé ici
+                  onResetTodayOnly={resetTodayOnly}
                 />
                 {!audioUnlocked && (
                   <Box
