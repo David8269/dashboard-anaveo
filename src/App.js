@@ -888,7 +888,8 @@ const App = () => {
             { title: "Total Agents", value: kpi.totalAgents, color: "info" },
             { 
               title: "Number of Calls",
-              value: (kpi.cdsInboundTotal + kpi.cdsOutboundTotal).toString(),
+              // ✅ CORRECTION ICI : on utilise totalInboundCalls + totalOutboundCalls
+              value: (kpi.totalInboundCalls + kpi.totalOutboundCalls).toString(),
               color: "primary" 
             },
             { 
