@@ -1,0 +1,21 @@
+npm run build
+npm run deploy
+
+
+# 1. Stash tes modifications locales (si tu as des fichiers non commités)
+git stash
+
+# 2. Récupère les derniers commits du serveur
+git pull --rebase origin main
+
+# 3. Restaure tes modifications
+git stash pop
+
+# 4. Ajoute tous les fichiers modifiés
+git add .
+
+# 5. Commiter avec un message clair
+git commit -m "Mise à jour : son passage ≥50 appels + horloge glitch + historique appels"
+
+# 6. Pousser sur GitHub
+git push origin main
