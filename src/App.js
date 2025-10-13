@@ -5,6 +5,8 @@ import {
   Container,
   Typography,
   Button,
+  keyframes,
+  styled,
 } from '@mui/material';
 import KPICard from './components/KPICard';
 import SLABarchart from './components/SLABarchart';
@@ -21,6 +23,60 @@ const playSound = (filename) => {
   }
 };
 
+// 🎞️ Animations CSS pour l'horloge
+const glitchDigital = keyframes`
+  0% { clip-path: inset(0 0 0 0); transform: translate(0); }
+  10% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
+  20% { clip-path: inset(15% 0 75% 0); transform: translate(2px, 2px); }
+  30% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
+  40% { clip-path: inset(35% 0 55% 0); transform: translate(2px, -2px); }
+  50% { clip-path: inset(45% 0 45% 0); transform: translate(-2px, -2px); }
+  60% { clip-path: inset(35% 0 55% 0); transform: translate(2px, 2px); }
+  70% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
+  80% { clip-path: inset(15% 0 75% 0); transform: translate(2px, -2px); }
+  90% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
+  100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+`;
+
+const ClockDisplay = styled('div')(({ theme }) => ({
+  position: 'relative',
+  fontFamily: "'Orbitron', 'Roboto', sans-serif",
+  fontWeight: 900,
+  fontSize: 'clamp(2rem, 8vw, 3.5rem)',
+  letterSpacing: '0.1em',
+  color: '#fff',
+  userSelect: 'none',
+  textAlign: 'center',
+  textTransform: 'uppercase',
+  textShadow:
+    '0 0 8px rgba(255,255,255,0.7), 0 0 12px rgba(255,255,255,0.5), 0 0 16px rgba(255,255,255,0.3)',
+  padding: '0.5rem 1rem',
+  borderRadius: '4px',
+  display: 'inline-block',
+  background: 'transparent',
+  '&::before, &::after': {
+    content: 'attr(data-text)',
+    position: 'absolute',
+    left: 0,
+    width: '100%',
+    opacity: 0.8,
+    pointerEvents: 'none',
+  },
+  '&::before': {
+    animation: `${glitchDigital} 2.5s infinite linear alternate-reverse`,
+    color: '#ff0',
+    left: '-1px',
+    mixBlendMode: 'screen',
+  },
+  '&::after': {
+    animation: `${glitchDigital} 2s infinite linear alternate`,
+    color: '#ffa500',
+    left: '1px',
+    mixBlendMode: 'screen',
+    opacity: 0.6,
+  },
+}));
+
 // 🕒 Horloge
 function Clock() {
   const [time, setTime] = useState(new Date());
@@ -33,91 +89,27 @@ function Clock() {
   const hours = time.getHours().toString().padStart(2, '0');
   const minutes = time.getMinutes().toString().padStart(2, '0');
   const seconds = time.getSeconds().toString().padStart(2, '0');
+  const timeStr = `${hours}:${minutes}:${seconds}`;
 
   return (
-    <>
-      <style>
-        {`
-          @keyframes glitch-digital {
-            0% { clip-path: inset(0 0 0 0); transform: translate(0); }
-            10% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-            20% { clip-path: inset(15% 0 75% 0); transform: translate(2px, 2px); }
-            30% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-            40% { clip-path: inset(35% 0 55% 0); transform: translate(2px, -2px); }
-            50% { clip-path: inset(45% 0 45% 0); transform: translate(-2px, -2px); }
-            60% { clip-path: inset(35% 0 55% 0); transform: translate(2px, 2px); }
-            70% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-            80% { clip-path: inset(15% 0 75% 0); transform: translate(2px, -2px); }
-            90% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-            100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-          }
-          .clock-glitch {
-            position: relative;
-            font-family: 'Orbitron', 'Roboto', sans-serif;
-            font-weight: 900;
-            font-size: clamp(2rem, 8vw, 3.5rem);
-            letter-spacing: 0.1em;
-            color: #fff;
-            user-select: none;
-            text-align: center;
-            text-transform: uppercase;
-            text-shadow: 
-              0 0 8px rgba(255,255,255,0.7),
-              0 0 12px rgba(255,255,255,0.5),
-              0 0 16px rgba(255,255,255,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            background: transparent;
-            display: inline-block;
-          }
-          .clock-glitch::before,
-          .clock-glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            left: 0;
-            width: 100%;
-            opacity: 0.8;
-          }
-          .clock-glitch::before {
-            animation: glitch-digital 2.5s infinite linear alternate-reverse;
-            color: #ff0;
-            left: -1px;
-            mix-blend-mode: screen;
-          }
-          .clock-glitch::after {
-            animation: glitch-digital 2s infinite linear alternate;
-            color: #ffa500;
-            left: 1px;
-            mix-blend-mode: screen;
-            opacity: 0.6;
-          }
-        `}
-      </style>
-      <Box
-        className="clock-glitch"
-        data-text={`${hours}:${minutes}:${seconds}`}
-        role="status"
-        aria-live="polite"
-        sx={{
-          display: 'inline-block',
-          margin: '0 auto',
-          '&::before, &::after': {
-            pointerEvents: 'none'
-          }
-        }}
-      >
-        {hours}:{minutes}:{seconds}
-      </Box>
-    </>
+    <ClockDisplay
+      data-text={timeStr}
+      role="status"
+      aria-live="polite"
+    >
+      {timeStr}
+    </ClockDisplay>
   );
 }
 
+// 🔍 Pause déjeuner (12h30–14h00 heure locale du navigateur — car c’est une règle métier locale)
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
   return totalMinutes >= 750 && totalMinutes < 840; // 12:30 à 14:00
 };
 
+// ⏱️ Formatage secondes → MM:SS
 const formatSecondsToMMSS = (totalSeconds) => {
   if (!totalSeconds || isNaN(totalSeconds) || totalSeconds <= 0) return '00:00';
   const minutes = Math.floor(totalSeconds / 60);
@@ -125,6 +117,7 @@ const formatSecondsToMMSS = (totalSeconds) => {
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
+// 🎨 Couleurs KPI
 const getInboundAHTColor = (seconds) => {
   if (!seconds || isNaN(seconds)) return 'default';
   if (seconds <= 600) return 'success';
@@ -145,15 +138,24 @@ const getAbandonColor = (rateStr) => {
   return rate <= 15 ? 'success' : 'error';
 };
 
+// 📅 Parsing robuste de la date CDR (format: YYYY/MM/DD HH:mm:ss)
 const parseCDRDate = (str) => {
   if (!str) return null;
   const [datePart, timePart] = str.split(' ');
   if (!datePart || !timePart) return null;
   const [y, m, d] = datePart.split('/');
   const [hh, mm, ss] = timePart.split(':');
-  return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), Number(ss)));
+  const year = Number(y);
+  const month = Number(m) - 1;
+  const day = Number(d);
+  const hour = Number(hh);
+  const minute = Number(mm);
+  const second = Number(ss);
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+  return new Date(Date.UTC(year, month, day, hour, minute, second));
 };
 
+// 🕐 Génération des plages horaires (8h30 à 18h30)
 const generateHalfHourSlots = () => {
   const slots = [];
   for (let h = 8; h <= 18; h++) {
@@ -165,10 +167,11 @@ const generateHalfHourSlots = () => {
 
 const halfHourSlots = generateHalfHourSlots();
 
+// 🔢 Trouve l'index de plage horaire correspondant à une date (en UTC)
 const getSlotIndex = (date) => {
   if (!date) return -1;
-  const h = date.getHours();
-  const m = date.getMinutes();
+  const h = date.getUTCHours();
+  const m = date.getUTCMinutes();
   if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) {
     return -1;
   }
@@ -181,26 +184,18 @@ const getSlotIndex = (date) => {
   return -1;
 };
 
-const getLocalDateStr = (date) => {
-  const offset = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offset * 60 * 1000);
-  return localDate.toISOString().split('T')[0];
+// 📆 Renvoie une chaîne "YYYY-MM-DD" en UTC (pour stockage)
+const getUTCDateStr = (date) => {
+  return date.toISOString().split('T')[0];
 };
 
-const formatDateToLocalISO = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-// 🔁 Réinitialisation quotidienne à minuit
+// 🔄 Réinitialisation quotidienne à minuit (UTC)
 const useMidnightResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
       const nextMidnight = new Date(now);
-      nextMidnight.setHours(24, 0, 0, 0);
+      nextMidnight.setUTCHours(24, 0, 0, 0);
       const delay = nextMidnight.getTime() - now.getTime();
       const timeoutId = setTimeout(() => {
         resetFn();
@@ -212,33 +207,31 @@ const useMidnightResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// 🔁 Réinitialisation hebdomadaire le lundi à 8h
+// 🔄 Réinitialisation hebdomadaire le lundi à 8h (UTC)
 const useWeeklyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
-      const nextReset = new Date();
-
-      const dayOfWeek = now.getDay(); // 0 = dim, 1 = lun
+      const dayOfWeek = now.getUTCDay(); // 0 = dim, 1 = lun
       let daysUntilMonday = (1 - dayOfWeek + 7) % 7;
-      if (daysUntilMonday === 0 && now.getHours() >= 8) {
+      if (daysUntilMonday === 0 && now.getUTCHours() >= 8) {
         daysUntilMonday = 7;
       }
-      nextReset.setDate(now.getDate() + daysUntilMonday);
-      nextReset.setHours(8, 0, 0, 0);
-
+      const nextReset = new Date(now);
+      nextReset.setUTCDate(now.getUTCDate() + daysUntilMonday);
+      nextReset.setUTCHours(8, 0, 0, 0);
       const delay = nextReset.getTime() - now.getTime();
       const timeoutId = setTimeout(() => {
         resetFn();
         scheduleNextReset();
       }, delay);
-
       return () => clearTimeout(timeoutId);
     };
     return scheduleNextReset();
   }, [resetFn]);
 };
 
+// 📡 Hook WebSocket + gestion locale
 const useWebSocketData = (url, onLostCall) => {
   const [cumulativeAgents, setCumulativeAgents] = useState({});
   const [allCalls, setAllCalls] = useState([]);
@@ -251,7 +244,7 @@ const useWebSocketData = (url, onLostCall) => {
   const connectionTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
 
-  const getStorageKey = (date = new Date()) => `callData_${getLocalDateStr(date)}`;
+  const getStorageKey = (date = new Date()) => `callData_${getUTCDateStr(date)}`;
 
   const cleanupOldStorage = () => {
     const now = new Date();
@@ -259,7 +252,7 @@ const useWebSocketData = (url, onLostCall) => {
       const key = localStorage.key(i);
       if (key?.startsWith('callData_')) {
         const dateStr = key.split('_')[1];
-        const date = new Date(dateStr + 'T00:00:00');
+        const date = new Date(dateStr + 'T00:00:00Z');
         const daysDiff = Math.floor((now - date) / (24 * 60 * 60 * 1000));
         if (daysDiff > 7) {
           localStorage.removeItem(key);
@@ -337,62 +330,67 @@ const useWebSocketData = (url, onLostCall) => {
   };
 
   const parseCDRLine = (line) => {
-    if (!line || !line.startsWith('Call ')) return null;
-    const fields = line.substring(5).split(',');
-    const caller = fields[7] || '';
-    const status = fields[6] || '';
-    const durationStr = fields[2] || '00:00:00';
-    const technicalKeywords = new Set([
-      'provider', 'queue', 'extension', 'external_line', 'default',
-      'ReplacedDst', 'Chain:', 'Front Office', 'Sortante', 'outbound_rule',
-      '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-    ]);
-    const isLikelyName = (str) => {
-      const clean = str.trim();
-      if (!clean) return false;
-      if (technicalKeywords.has(clean)) return false;
-      if (/^\d+$/.test(clean)) return false;
-      if (!/[a-zA-ZÀ-ÿ]/.test(clean)) return false;
-      return true;
-    };
-    let agentName = '';
-    for (let i = fields.length - 1; i >= 0; i--) {
-      const field = (fields[i] || '').trim();
-      if (isLikelyName(field)) {
-        agentName = field
-          .replace(/\(.*?\)/g, '')
-          .replace(/\.+$/, '')
-          .trim();
-        break;
+    try {
+      if (!line || !line.startsWith('Call ')) return null;
+      const fields = line.substring(5).split(',');
+      const caller = fields[7] || '';
+      const status = fields[6] || '';
+      const durationStr = fields[2] || '00:00:00';
+      const technicalKeywords = new Set([
+        'provider', 'queue', 'extension', 'external_line', 'default',
+        'ReplacedDst', 'Chain:', 'Front Office', 'Sortante', 'outbound_rule',
+        '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+      ]);
+      const isLikelyName = (str) => {
+        const clean = str.trim();
+        if (!clean) return false;
+        if (technicalKeywords.has(clean)) return false;
+        if (/^\d+$/.test(clean)) return false;
+        if (!/[a-zA-ZÀ-ÿ]/.test(clean)) return false;
+        return true;
+      };
+      let agentName = '';
+      for (let i = fields.length - 1; i >= 0; i--) {
+        const field = (fields[i] || '').trim();
+        if (isLikelyName(field)) {
+          agentName = field
+            .replace(/\(.*?\)/g, '')
+            .replace(/\.+$/, '')
+            .trim();
+          break;
+        }
       }
+      const isFrontOffice = line.includes(',Front Office,');
+      let callType = 'OTHER';
+      if (agentName && (/^\d+$/.test(agentName) || agentName.startsWith('Chain:'))) {
+        agentName = '';
+      }
+      if (isFrontOffice) {
+        callType = agentName ? 'CDS_IN' : 'ABSYS';
+      } else if (caller.startsWith('Ext.')) {
+        callType = agentName ? 'CDS_OUT' : 'OTHER';
+      }
+      return {
+        id: fields[0] || '',
+        startTime: parseCDRDate(fields[3]),
+        endTime: parseCDRDate(fields[5]),
+        status,
+        caller,
+        queue: isFrontOffice ? 'Front Office' : '',
+        agentName: agentName || '',
+        duration: durationStr,
+        callType,
+      };
+    } catch (err) {
+      console.error('[CDR Parsing] Erreur:', err, 'Ligne:', line);
+      return null;
     }
-    const isFrontOffice = line.includes(',Front Office,');
-    let callType = 'OTHER';
-    if (agentName && (/^\d+$/.test(agentName) || agentName.startsWith('Chain:'))) {
-      agentName = '';
-    }
-    if (isFrontOffice) {
-      callType = agentName ? 'CDS_IN' : 'ABSYS';
-    } else if (caller.startsWith('Ext.')) {
-      callType = agentName ? 'CDS_OUT' : 'OTHER';
-    }
-    return {
-      id: fields[0] || '',
-      startTime: parseCDRDate(fields[3]),
-      endTime: parseCDRDate(fields[5]),
-      status,
-      caller,
-      queue: isFrontOffice ? 'Front Office' : '',
-      agentName: agentName || '',
-      duration: durationStr,
-      callType,
-    };
   };
 
   const isInBusinessHours = (date) => {
     if (!date) return false;
-    const h = date.getHours();
-    const m = date.getMinutes();
+    const h = date.getUTCHours();
+    const m = date.getUTCMinutes();
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
@@ -436,29 +434,28 @@ const useWebSocketData = (url, onLostCall) => {
       if (typeof msg === 'string' && msg.startsWith('Call ')) {
         const cdr = parseCDRLine(msg);
         if (cdr && cdr.startTime) {
-          // Marquer comme ABSYS pendant la pause déjeuner
+          // Marquer comme ABSYS pendant la pause déjeuner (règle métier locale)
           if (isLunchBreak(cdr.startTime)) {
             cdr.callType = 'ABSYS';
             cdr.agentName = '';
           }
 
-          const { callType } = cdr;
           const dur = cdr.duration.split(':').map(Number);
           const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
 
           // 🔴 DÉTECTION D'UN APPEL PERDU : ABSYS, <60s, HORS PAUSE
-          if (callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
+          if (cdr.callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
             console.log('[Appel perdu détecté] 💀 Joue fatality.mp3');
-            if (onLostCall) onLostCall(); // Déclenche le son
-            return; // Ne pas enregistrer ni afficher
+            if (onLostCall) onLostCall();
+            return; // Ne pas enregistrer
           }
 
           const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
 
           if (isInBusinessHours(cdr.startTime)) {
             const today = new Date();
-            const todayStr = getLocalDateStr(today);
-            const callDateStr = getLocalDateStr(cdr.startTime);
+            const todayStr = getUTCDateStr(today);
+            const callDateStr = getUTCDateStr(cdr.startTime);
             if (callDateStr === todayStr) {
               setAllCalls(prev => {
                 const updated = [...prev, callWithSec];
@@ -467,7 +464,7 @@ const useWebSocketData = (url, onLostCall) => {
               });
 
               const { agentName } = cdr;
-              if (agentName && callType !== 'ABSYS') {
+              if (agentName && cdr.callType !== 'ABSYS') {
                 setCumulativeAgents(prev => {
                   const agent = prev[agentName] || {
                     name: agentName,
@@ -479,14 +476,14 @@ const useWebSocketData = (url, onLostCall) => {
                     outboundHandlingTimeSec: 0,
                   };
                   const updated = { ...agent };
-                  if (callType === 'CDS_IN') {
+                  if (cdr.callType === 'CDS_IN') {
                     if (['src_participant_terminated', 'dst_participant_terminated'].includes(cdr.status)) {
                       updated.inbound += 1;
                       updated.inboundHandlingTimeSec += durationSec;
                     } else if (cdr.status.includes('missed') || cdr.status.includes('abandoned')) {
                       updated.missed += 1;
                     }
-                  } else if (callType === 'CDS_OUT') {
+                  } else if (cdr.callType === 'CDS_OUT') {
                     updated.outbound += 1;
                     updated.outboundHandlingTimeSec += durationSec;
                   }
@@ -531,13 +528,13 @@ const useWebSocketData = (url, onLostCall) => {
 
   const resetWeeklyData = () => {
     const now = new Date();
-    const dayOfWeek = now.getDay();
+    const dayOfWeek = now.getUTCDay();
     const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     const monday = new Date(now);
-    monday.setDate(now.getDate() + daysToMonday);
+    monday.setUTCDate(now.getUTCDate() + daysToMonday);
     for (let i = 0; i < 5; i++) {
       const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
+      date.setUTCDate(monday.getUTCDate() + i);
       localStorage.removeItem(getStorageKey(date));
     }
     resetDailyData();
@@ -613,9 +610,9 @@ const useWebSocketData = (url, onLostCall) => {
 const useTodayCallStats = (calls = []) => {
   return useMemo(() => {
     const today = new Date();
-    const todayStr = getLocalDateStr(today);
+    const todayStr = getUTCDateStr(today);
     const todayCalls = calls.filter(call => {
-      const callDateStr = getLocalDateStr(call.startTime);
+      const callDateStr = getUTCDateStr(call.startTime);
       return callDateStr === todayStr;
     });
     let inbound = 0, outbound = 0;
@@ -630,18 +627,18 @@ const useTodayCallStats = (calls = []) => {
 const useWeeklyCallStats = (calls = []) => {
   return useMemo(() => {
     const now = new Date();
-    const dayOfWeek = now.getDay();
+    const dayOfWeek = now.getUTCDay();
     const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     const monday = new Date(now);
-    monday.setDate(now.getDate() + daysToMonday);
-    monday.setHours(0, 0, 0, 0);
+    monday.setUTCDate(now.getUTCDate() + daysToMonday);
+    monday.setUTCHours(0, 0, 0, 0);
 
     const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
     const weekData = [];
     for (let i = 0; i < 5; i++) {
       const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      const isoDate = formatDateToLocalISO(date);
+      date.setUTCDate(monday.getUTCDate() + i);
+      const isoDate = date.toISOString().split('T')[0];
       weekData.push({
         date: isoDate,
         dayLabel: dayNames[i],
@@ -652,7 +649,7 @@ const useWeeklyCallStats = (calls = []) => {
 
     calls.forEach(call => {
       if (!call.startTime || call.callType === 'ABSYS') return;
-      const callDate = getLocalDateStr(call.startTime);
+      const callDate = getUTCDateStr(call.startTime);
       const dayIndex = weekData.findIndex(d => d.date === callDate);
       if (dayIndex !== -1) {
         if (call.callType === 'CDS_IN') {
@@ -774,7 +771,7 @@ const App = () => {
   const weeklyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, todayStats, allCalls);
 
-  // 🔊 Sons horaires
+  // 🔊 Sons horaires (basés sur l'heure locale du navigateur — règles métier locales)
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -801,12 +798,12 @@ const App = () => {
         playSound(soundToPlay);
         setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
       }
-    }, 1000);
+    }, 60000); // Vérifie chaque minute
 
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-  // ✅ Son personnalisé quand un agent devient 1er
+  // ✅ Son personnalisé quand un agent devient 1er (après 50 appels)
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -814,13 +811,21 @@ const App = () => {
     if (totalCalls < 50) return;
 
     const prevEmployees = prevEmployeesRef.current;
-    const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
-    const prevSorted = [...prevEmployees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
 
-    const currentTopAgent = currentEmployees[0];
-    const wasTopBefore = prevSorted.length > 0 && prevSorted[0]?.name === currentTopAgent.name;
+    // Trouver le meilleur agent actuel
+    const currentTopAgent = employees.reduce((best, emp) => {
+      const total = (emp.inbound || 0) + (emp.outbound || 0);
+      return total > (best.total || 0) ? { ...emp, total } : best;
+    }, { total: -1, name: '' });
 
-    if (!wasTopBefore && currentTopAgent) {
+    // Trouver le meilleur agent précédent
+    const prevTopAgent = prevEmployees.reduce((best, emp) => {
+      const total = (emp.inbound || 0) + (emp.outbound || 0);
+      return total > (best.total || 0) ? { ...emp, total } : best;
+    }, { total: -1, name: '' });
+
+    // Si changement de leader
+    if (currentTopAgent.name && currentTopAgent.name !== prevTopAgent.name) {
       const allowedFirstNames = new Set([
         'xavier', 'rana', 'mathys', 'romain',
         'nicolas', 'julien', 'benjamin', 'malik'
@@ -833,6 +838,7 @@ const App = () => {
         soundToPlay = `${firstName}.mp3`;
       }
 
+      console.log(`🔊 ${currentTopAgent.name} est en tête ! Lecture de ${soundToPlay}`);
       playSound(soundToPlay);
     }
 
