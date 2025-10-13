@@ -102,7 +102,7 @@ function Clock() {
   );
 }
 
-// 🔍 Pause déjeuner (12h30–14h00 heure locale du navigateur)
+// 🔍 Pause déjeuner (12h30–14h00 heure locale)
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -138,7 +138,7 @@ const getAbandonColor = (rateStr) => {
   return rate <= 15 ? 'success' : 'error';
 };
 
-// 📅 Parsing robuste de la date CDR (format: YYYY/MM/DD HH:mm:ss)
+// 📅 Parsing robuste de la date CDR
 const parseCDRDate = (str) => {
   if (!str) return null;
   const [datePart, timePart] = str.split(' ');
@@ -167,7 +167,7 @@ const generateHalfHourSlots = () => {
 
 const halfHourSlots = generateHalfHourSlots();
 
-// 📆 Renvoie une chaîne "YYYY-MM-DD" en UTC (pour stockage)
+// 📆 Renvoie une chaîne "YYYY-MM-DD" en UTC
 const getUTCDateStr = (date) => {
   return date.toISOString().split('T')[0];
 };
@@ -195,7 +195,7 @@ const useWeeklyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
-      const dayOfWeek = now.getUTCDay(); // 0 = dim, 1 = lun
+      const dayOfWeek = now.getUTCDay();
       let daysUntilMonday = (1 - dayOfWeek + 7) % 7;
       if (daysUntilMonday === 0 && now.getUTCHours() >= 8) {
         daysUntilMonday = 7;
@@ -377,11 +377,10 @@ const useWebSocketData = (url, onLostCall) => {
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
-  // 🔧 Fonction locale pour assigner les appels aux tranches horaires DU GRAPHIQUE (en heure locale)
   const getLocalSlotIndex = (date) => {
     if (!date) return -1;
-    const h = date.getHours(); // ← Heure locale
-    const m = date.getMinutes(); // ← Minute locale
+    const h = date.getHours();
+    const m = date.getMinutes();
     if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) {
       return -1;
     }
@@ -442,7 +441,6 @@ const useWebSocketData = (url, onLostCall) => {
           const dur = cdr.duration.split(':').map(Number);
           const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
 
-          // 🔴 DÉTECTION D'UN APPEL PERDU
           if (cdr.callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
             console.log('[Appel perdu détecté] 💀 Joue fatality.mp3');
             if (onLostCall) onLostCall();
@@ -568,7 +566,6 @@ const useWebSocketData = (url, onLostCall) => {
     call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
   );
 
-  // 🔧 ICI : utilisation de getLocalSlotIndex pour le graphique
   const callVolumes = halfHourSlots.map((time, index) => ({
     index,
     time,
@@ -578,7 +575,7 @@ const useWebSocketData = (url, onLostCall) => {
   }));
 
   recentCalls.forEach(call => {
-    const slotIndex = getLocalSlotIndex(call.startTime); // ← CORRECTION CLÉ
+    const slotIndex = getLocalSlotIndex(call.startTime);
     if (slotIndex >= 0 && slotIndex < callVolumes.length) {
       if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
       else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
@@ -771,7 +768,7 @@ const App = () => {
   const weeklyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, todayStats, allCalls);
 
-  // 🔊 Sons horaires (heure locale)
+  // 🔊 🔔 Sons horaires EXACTS à la seconde 0
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -779,21 +776,32 @@ const App = () => {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-      const timeKey = `${hours}:${minutes}`;
+      const seconds = now.getSeconds();
+
+      // Ne joue le son que si on est à la SECONDE 0
+      if (seconds !== 0) return;
+
+      const timeKey = `${hours}:${minutes}:00`; // Clé unique
 
       if (lastScheduledSounds[timeKey]) return;
 
       let soundToPlay = null;
-      if (hours === 8 && minutes === 30) soundToPlay = 'debut.mp3';
-      else if (hours === 12 && minutes === 30) soundToPlay = 'pause.mp3';
-      else if (hours === 14 && minutes === 0) soundToPlay = 'reprise.mp3';
-      else if (hours === 18 && minutes === 0) soundToPlay = 'fin.mp3';
+      if (hours === 8 && minutes === 30) {
+        soundToPlay = 'debut.mp3';
+      } else if (hours === 12 && minutes === 30) {
+        soundToPlay = 'pause.mp3';
+      } else if (hours === 14 && minutes === 0) {
+        soundToPlay = 'reprise.mp3';
+      } else if (hours === 18 && minutes === 0) {
+        soundToPlay = 'fin.mp3';
+      }
 
       if (soundToPlay) {
+        console.log(`🔊 Lecture de ${soundToPlay} à ${timeKey}`);
         playSound(soundToPlay);
         setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
       }
-    }, 60000);
+    }, 1000); // Vérifie chaque seconde
 
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
