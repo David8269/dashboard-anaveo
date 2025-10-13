@@ -11,111 +11,56 @@ import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 
-// 🔊 Fonction de lecture audio — utilise PUBLIC_URL
-const playSound = (filename) => {
-  try {
-    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
-    audio.play().catch(e => console.warn(`Échec lecture ${filename} :`, e));
-  } catch (error) {
-    console.error('Erreur lecture son :', error);
-  }
+// ── UTILS ───────────────────────────────────────────────
+
+const getLocalDateStr = (date) => {
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+  return localDate.toISOString().split('T')[0];
 };
-
-// 🕒 Horloge
-function Clock() {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timerId = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timerId);
-  }, []);
-
-  const hours = time.getHours().toString().padStart(2, '0');
-  const minutes = time.getMinutes().toString().padStart(2, '0');
-  const seconds = time.getSeconds().toString().padStart(2, '0');
-
-  return (
-    <>
-      <style>
-        {`
-          @keyframes glitch-digital {
-            0% { clip-path: inset(0 0 0 0); transform: translate(0); }
-            10% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-            20% { clip-path: inset(15% 0 75% 0); transform: translate(2px, 2px); }
-            30% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-            40% { clip-path: inset(35% 0 55% 0); transform: translate(2px, -2px); }
-            50% { clip-path: inset(45% 0 45% 0); transform: translate(-2px, -2px); }
-            60% { clip-path: inset(35% 0 55% 0); transform: translate(2px, 2px); }
-            70% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-            80% { clip-path: inset(15% 0 75% 0); transform: translate(2px, -2px); }
-            90% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-            100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-          }
-          .clock-glitch {
-            position: relative;
-            font-family: 'Orbitron', 'Roboto', sans-serif;
-            font-weight: 900;
-            font-size: clamp(2rem, 8vw, 3.5rem);
-            letter-spacing: 0.1em;
-            color: #fff;
-            user-select: none;
-            text-align: center;
-            text-transform: uppercase;
-            text-shadow: 
-              0 0 8px rgba(255,255,255,0.7),
-              0 0 12px rgba(255,255,255,0.5),
-              0 0 16px rgba(255,255,255,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            background: transparent;
-            display: inline-block;
-          }
-          .clock-glitch::before,
-          .clock-glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            left: 0;
-            width: 100%;
-            opacity: 0.8;
-          }
-          .clock-glitch::before {
-            animation: glitch-digital 2.5s infinite linear alternate-reverse;
-            color: #ff0;
-            left: -1px;
-            mix-blend-mode: screen;
-          }
-          .clock-glitch::after {
-            animation: glitch-digital 2s infinite linear alternate;
-            color: #ffa500;
-            left: 1px;
-            mix-blend-mode: screen;
-            opacity: 0.6;
-          }
-        `}
-      </style>
-      <Box
-        className="clock-glitch"
-        data-text={`${hours}:${minutes}:${seconds}`}
-        role="status"
-        aria-live="polite"
-        sx={{
-          display: 'inline-block',
-          margin: '0 auto',
-          '&::before, &::after': {
-            pointerEvents: 'none'
-          }
-        }}
-      >
-        {hours}:{minutes}:{seconds}
-      </Box>
-    </>
-  );
-}
 
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
   return totalMinutes >= 750 && totalMinutes < 840; // 12:30 à 14:00
+};
+
+const isBusinessHourCall = (date) => {
+  if (!date) return false;
+  const day = date.getDay(); // 0 = dim, 1 = lun, ..., 5 = ven, 6 = sam
+  const h = date.getHours();
+  const m = date.getMinutes();
+
+  if (day >= 1 && day <= 4) {
+    // Lundi–Jeudi : 8h30–18h30
+    return (h > 8 || (h === 8 && m >= 30)) && (h < 18 || (h === 18 && m <= 30));
+  } else if (day === 5) {
+    // Vendredi : 8h30–17h00
+    return (h > 8 || (h === 8 && m >= 30)) && (h < 17 || (h === 17 && m === 0));
+  }
+  return false;
+};
+
+const isLostCall = (cdr) => {
+  return (
+    cdr.callType === 'ABSYS' &&
+    (cdr.durationSec || 0) <= 59 &&
+    !isLunchBreak(cdr.startTime)
+  );
+};
+
+const parseDurationToSeconds = (durationStr = '00:00:00') => {
+  const [h, m, s] = durationStr.split(':').map(Number);
+  return (h || 0) * 3600 + (m || 0) * 60 + (s || 0);
+};
+
+const parseCDRDate = (str) => {
+  if (!str) return null;
+  const [datePart, timePart] = str.split(' ');
+  if (!datePart || !timePart) return null;
+  const [y, m, d] = datePart.split('/');
+  const [hh, mm, ss] = timePart.split(':');
+  return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), Number(ss)));
 };
 
 const formatSecondsToMMSS = (totalSeconds) => {
@@ -145,172 +90,139 @@ const getAbandonColor = (rateStr) => {
   return rate <= 15 ? 'success' : 'error';
 };
 
-const parseCDRDate = (str) => {
-  if (!str) return null;
-  const [datePart, timePart] = str.split(' ');
-  if (!datePart || !timePart) return null;
-  const [y, m, d] = datePart.split('/');
-  const [hh, mm, ss] = timePart.split(':');
-  return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), Number(ss)));
+// ── AUDIO MANAGER ───────────────────────────────────────
+
+const useAudioManager = () => {
+  const [unlocked, setUnlocked] = useState(false);
+
+  const unlock = useCallback(() => {
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
+    audio.play()
+      .then(() => setUnlocked(true))
+      .catch(console.warn);
+  }, []);
+
+  const play = useCallback((filename) => {
+    if (!unlocked) return;
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
+    audio.play().catch(e => console.warn(`Échec lecture ${filename}:`, e));
+  }, [unlocked]);
+
+  return { unlocked, unlock, play };
 };
 
-const generateHalfHourSlots = () => {
-  const slots = [];
-  for (let h = 8; h <= 18; h++) {
-    slots.push(`${h.toString().padStart(2, '0')}:30`);
-    if (h < 18) slots.push(`${(h + 1).toString().padStart(2, '0')}:00`);
-  }
-  return slots;
-};
+// ── PLANIFICATEURS ──────────────────────────────────────
 
-const halfHourSlots = generateHalfHourSlots();
-
-const getSlotIndex = (date) => {
-  if (!date) return -1;
-  const h = date.getHours();
-  const m = date.getMinutes();
-  if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) {
-    return -1;
-  }
-  for (let i = halfHourSlots.length - 1; i >= 0; i--) {
-    const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
-    if (h > slotH || (h === slotH && m >= slotM)) {
-      return i;
-    }
-  }
-  return -1;
-};
-
-const getLocalDateStr = (date) => {
-  const offset = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offset * 60 * 1000);
-  return localDate.toISOString().split('T')[0];
-};
-
-const formatDateToLocalISO = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-// 🔁 Réinitialisation quotidienne à minuit
-const useMidnightResetScheduler = (resetFn) => {
+const useMidnightReset = (onReset) => {
   useEffect(() => {
-    const scheduleNextReset = () => {
+    const schedule = () => {
       const now = new Date();
       const nextMidnight = new Date(now);
       nextMidnight.setHours(24, 0, 0, 0);
       const delay = nextMidnight.getTime() - now.getTime();
-      const timeoutId = setTimeout(() => {
-        resetFn();
-        scheduleNextReset();
+      const id = setTimeout(() => {
+        onReset();
+        schedule();
       }, delay);
-      return () => clearTimeout(timeoutId);
+      return () => clearTimeout(id);
     };
-    return scheduleNextReset();
-  }, [resetFn]);
+    return schedule();
+  }, [onReset]);
 };
 
-// 🔁 Réinitialisation hebdomadaire le lundi à 8h
-const useWeeklyResetScheduler = (resetFn) => {
+const useMonday8amReset = (onReset) => {
   useEffect(() => {
-    const scheduleNextReset = () => {
+    const schedule = () => {
       const now = new Date();
-      const nextReset = new Date();
-
-      const dayOfWeek = now.getDay(); // 0 = dim, 1 = lun
-      let daysUntilMonday = (1 - dayOfWeek + 7) % 7;
-      if (daysUntilMonday === 0 && now.getHours() >= 8) {
-        daysUntilMonday = 7;
-      }
-      nextReset.setDate(now.getDate() + daysUntilMonday);
-      nextReset.setHours(8, 0, 0, 0);
-
-      const delay = nextReset.getTime() - now.getTime();
-      const timeoutId = setTimeout(() => {
-        resetFn();
-        scheduleNextReset();
+      const day = now.getDay();
+      let daysUntilMonday = (1 - day + 7) % 7;
+      if (daysUntilMonday === 0 && now.getHours() >= 8) daysUntilMonday = 7;
+      const nextMonday = new Date(now);
+      nextMonday.setDate(now.getDate() + daysUntilMonday);
+      nextMonday.setHours(8, 0, 0, 0);
+      const delay = nextMonday.getTime() - now.getTime();
+      const id = setTimeout(() => {
+        onReset();
+        schedule();
       }, delay);
-
-      return () => clearTimeout(timeoutId);
+      return () => clearTimeout(id);
     };
-    return scheduleNextReset();
-  }, [resetFn]);
+    return schedule();
+  }, [onReset]);
 };
 
-const useWebSocketData = (url, onLostCall) => {
-  const [cumulativeAgents, setCumulativeAgents] = useState({});
+// ── STOCKAGE LOCAL ──────────────────────────────────────
+
+const cleanupStorage = () => {
+  const now = new Date();
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const key = localStorage.key(i);
+    if (key?.startsWith('callData_')) {
+      const dateStr = key.split('_')[1];
+      const date = new Date(dateStr + 'T00:00:00');
+      const days = Math.floor((now - date) / (864e5));
+      if (days > 7) localStorage.removeItem(key);
+    }
+  }
+};
+
+const saveCalls = (calls, date) => {
+  try {
+    const key = `callData_${getLocalDateStr(date)}`;
+    const serializable = calls.map(c => ({
+      ...c,
+      startTime: c.startTime?.toISOString(),
+      endTime: c.endTime?.toISOString(),
+      receivedAt: c.receivedAt?.toISOString(),
+    }));
+    localStorage.setItem(key, JSON.stringify(serializable));
+  } catch (e) {
+    console.warn('Sauvegarde échouée', e);
+  }
+};
+
+const loadCalls = (date) => {
+  const key = `callData_${getLocalDateStr(date)}`;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    return JSON.parse(raw).map(c => ({
+      ...c,
+      startTime: c.startTime ? new Date(c.startTime) : null,
+      endTime: c.endTime ? new Date(c.endTime) : null,
+      receivedAt: c.receivedAt ? new Date(c.receivedAt) : null,
+    })).filter(c => c.startTime);
+  } catch (e) {
+    console.warn('Chargement échoué', e);
+    localStorage.removeItem(key);
+    return [];
+  }
+};
+
+// ── TRAITEMENT DES APPELS ───────────────────────────────
+
+const useCallSystem = (onLostCall) => {
+  const [agents, setAgents] = useState({});
   const [allCalls, setAllCalls] = useState([]);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [error, setError] = useState(null);
 
-  const wsRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
-  const connectionTimeoutRef = useRef(null);
-  const isMountedRef = useRef(true);
+  useEffect(() => {
+    cleanupStorage();
+    const today = new Date();
+    const calls = loadCalls(today);
+    setAllCalls(calls);
+    rebuildAgents(calls);
+  }, []);
 
-  const getStorageKey = (date = new Date()) => `callData_${getLocalDateStr(date)}`;
-
-  const cleanupOldStorage = () => {
-    const now = new Date();
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('callData_')) {
-        const dateStr = key.split('_')[1];
-        const date = new Date(dateStr + 'T00:00:00');
-        const daysDiff = Math.floor((now - date) / (24 * 60 * 60 * 1000));
-        if (daysDiff > 7) {
-          localStorage.removeItem(key);
-        }
-      }
-    }
-  };
-
-  const saveCallsToStorage = (calls, date = new Date()) => {
-    try {
-      const key = getStorageKey(date);
-      const serializableCalls = calls.map(call => ({
-        ...call,
-        startTime: call.startTime?.toISOString() || null,
-        endTime: call.endTime?.toISOString() || null,
-        receivedAt: call.receivedAt?.toISOString() || null,
-      }));
-      localStorage.setItem(key, JSON.stringify(serializableCalls));
-    } catch (e) {
-      console.warn('[Storage] ⚠️ Sauvegarde échouée', e);
-    }
-  };
-
-  const loadCallsFromStorage = (date) => {
-    const key = getStorageKey(date);
-    try {
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return parsed.map(call => ({
-          ...call,
-          startTime: call.startTime ? new Date(call.startTime) : null,
-          endTime: call.endTime ? new Date(call.endTime) : null,
-          receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
-        })).filter(call => call.startTime);
-      }
-    } catch (e) {
-      console.warn(`[Storage] ⚠️ Chargement échoué pour ${key}`, e);
-      localStorage.removeItem(key);
-    }
-    return [];
-  };
-
-  const rebuildAgentsFromCalls = (calls) => {
-    const agents = {};
+  const rebuildAgents = (calls) => {
+    const newAgents = {};
     calls.forEach(cdr => {
       if (cdr.callType === 'ABSYS') return;
-      const { callType, agentName } = cdr;
+      const { agentName, callType } = cdr;
       if (!agentName) return;
-      if (!agents[agentName]) {
-        agents[agentName] = {
+      if (!newAgents[agentName]) {
+        newAgents[agentName] = {
           name: agentName,
           status: 'online',
           inbound: 0,
@@ -320,20 +232,20 @@ const useWebSocketData = (url, onLostCall) => {
           outboundHandlingTimeSec: 0,
         };
       }
-      const agent = agents[agentName];
+      const a = newAgents[agentName];
       if (callType === 'CDS_IN') {
         if (['src_participant_terminated', 'dst_participant_terminated'].includes(cdr.status)) {
-          agent.inbound += 1;
-          agent.inboundHandlingTimeSec += cdr.durationSec || 0;
+          a.inbound += 1;
+          a.inboundHandlingTimeSec += cdr.durationSec || 0;
         } else if (cdr.status.includes('missed') || cdr.status.includes('abandoned')) {
-          agent.missed += 1;
+          a.missed += 1;
         }
       } else if (callType === 'CDS_OUT') {
-        agent.outbound += 1;
-        agent.outboundHandlingTimeSec += cdr.durationSec || 0;
+        a.outbound += 1;
+        a.outboundHandlingTimeSec += cdr.durationSec || 0;
       }
     });
-    return agents;
+    setAgents(newAgents);
   };
 
   const parseCDRLine = (line) => {
@@ -376,9 +288,11 @@ const useWebSocketData = (url, onLostCall) => {
     } else if (caller.startsWith('Ext.')) {
       callType = agentName ? 'CDS_OUT' : 'OTHER';
     }
+    const startTime = parseCDRDate(fields[3]);
+    if (!startTime) return null;
     return {
       id: fields[0] || '',
-      startTime: parseCDRDate(fields[3]),
+      startTime,
       endTime: parseCDRDate(fields[5]),
       status,
       caller,
@@ -386,470 +300,284 @@ const useWebSocketData = (url, onLostCall) => {
       agentName: agentName || '',
       duration: durationStr,
       callType,
+      durationSec: parseDurationToSeconds(durationStr),
     };
   };
 
-  const isInBusinessHours = (date) => {
-    if (!date) return false;
-    const h = date.getHours();
-    const m = date.getMinutes();
-    return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
-  };
-
-  const connect = () => {
-    if (!isMountedRef.current) return;
-    console.log(`[WS] 🔄 Connexion à ${url}`);
-    setError(null);
-    setIsConnected(false);
-    wsRef.current = new WebSocket(url);
-    connectionTimeoutRef.current = setTimeout(() => {
-      if (wsRef.current?.readyState === WebSocket.CONNECTING) {
-        wsRef.current?.close();
-      }
-    }, 10000);
-    wsRef.current.onopen = () => {
-      if (!isMountedRef.current) return;
-      clearTimeout(connectionTimeoutRef.current);
-      console.log('[WS] ✅ Connecté');
+  const connectWebSocket = () => {
+    const ws = new WebSocket('wss://cds-on3cx.anaveo.com/cdr-ws/');
+    ws.onopen = () => {
       setIsConnected(true);
-      setError(null);
-      try {
-        wsRef.current.send(JSON.stringify({ type: "subscribe", topic: "cdr/live" }));
-      } catch (err) {
-        console.warn('[WS] ⚠️ Souscription échouée:', err);
-      }
-
-      const heartbeatInterval = setInterval(() => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          try {
-            wsRef.current.send('{"type":"ping"}');
-          } catch (e) {
-            console.warn('[WS] ⚠️ Heartbeat échoué');
-          }
-        }
-      }, 30000);
-      wsRef.current.heartbeatInterval = heartbeatInterval;
+      ws.send(JSON.stringify({ type: "subscribe", topic: "cdr/live" }));
     };
-    wsRef.current.onmessage = (event) => {
-      if (!isMountedRef.current) return;
+    ws.onmessage = (event) => {
       const msg = event.data;
-      if (typeof msg === 'string' && msg.startsWith('Call ')) {
-        const cdr = parseCDRLine(msg);
-        if (cdr && cdr.startTime) {
-          // Marquer comme ABSYS pendant la pause déjeuner
-          if (isLunchBreak(cdr.startTime)) {
-            cdr.callType = 'ABSYS';
-            cdr.agentName = '';
-          }
+      if (typeof msg !== 'string' || !msg.startsWith('Call ')) return;
+      const cdr = parseCDRLine(msg);
+      if (!cdr || !cdr.startTime) return;
 
-          const { callType } = cdr;
-          const dur = cdr.duration.split(':').map(Number);
-          const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
+      if (isLunchBreak(cdr.startTime)) {
+        cdr.callType = 'ABSYS';
+        cdr.agentName = '';
+      }
 
-          // 🔴 DÉTECTION D'UN APPEL PERDU : ABSYS, <60s, HORS PAUSE
-          if (callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
-            console.log('[Appel perdu détecté] 💀 Joue fatality.mp3');
-            if (onLostCall) onLostCall(); // Déclenche le son
-            return; // Ne pas enregistrer ni afficher
-          }
+      if (isLostCall(cdr)) {
+        onLostCall();
+        return;
+      }
 
-          const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
-
-          if (isInBusinessHours(cdr.startTime)) {
-            const today = new Date();
-            const todayStr = getLocalDateStr(today);
-            const callDateStr = getLocalDateStr(cdr.startTime);
-            if (callDateStr === todayStr) {
-              setAllCalls(prev => {
-                const updated = [...prev, callWithSec];
-                saveCallsToStorage(updated, today);
-                return updated;
-              });
-
-              const { agentName } = cdr;
-              if (agentName && callType !== 'ABSYS') {
-                setCumulativeAgents(prev => {
-                  const agent = prev[agentName] || {
-                    name: agentName,
-                    status: 'online',
-                    inbound: 0,
-                    missed: 0,
-                    outbound: 0,
-                    inboundHandlingTimeSec: 0,
-                    outboundHandlingTimeSec: 0,
-                  };
-                  const updated = { ...agent };
-                  if (callType === 'CDS_IN') {
-                    if (['src_participant_terminated', 'dst_participant_terminated'].includes(cdr.status)) {
-                      updated.inbound += 1;
-                      updated.inboundHandlingTimeSec += durationSec;
-                    } else if (cdr.status.includes('missed') || cdr.status.includes('abandoned')) {
-                      updated.missed += 1;
-                    }
-                  } else if (callType === 'CDS_OUT') {
-                    updated.outbound += 1;
-                    updated.outboundHandlingTimeSec += durationSec;
-                  }
-                  return { ...prev, [agentName]: updated };
-                });
-              }
-            }
-          }
-          setLastUpdate(new Date());
+      if (isBusinessHourCall(cdr.startTime)) {
+        const today = new Date();
+        const todayStr = getLocalDateStr(today);
+        const callDateStr = getLocalDateStr(cdr.startTime);
+        if (callDateStr === todayStr) {
+          setAllCalls(prev => {
+            const updated = [...prev, cdr];
+            saveCalls(updated, today);
+            return updated;
+          });
+          rebuildAgents([...allCalls, cdr]);
         }
       }
+      setLastUpdate(new Date());
     };
-    wsRef.current.onerror = (err) => {
-      if (!isMountedRef.current) return;
-      console.error('[WS] ❌ Erreur:', err);
+    ws.onclose = () => {
+      setIsConnected(false);
+      setTimeout(connectWebSocket, 5000);
+    };
+    ws.onerror = () => {
       setIsConnected(false);
     };
-    wsRef.current.onclose = (e) => {
-      if (!isMountedRef.current) return;
-      console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
-      setIsConnected(false);
-
-      if (wsRef.current?.heartbeatInterval) {
-        clearInterval(wsRef.current.heartbeatInterval);
-        wsRef.current.heartbeatInterval = null;
-      }
-
-      if (e.code !== 1000 && isMountedRef.current) {
-        reconnectTimeoutRef.current = setTimeout(connect, 5000);
-      }
-    };
-  };
-
-  const resetDailyData = () => {
-    const today = new Date();
-    const todayCalls = loadCallsFromStorage(today);
-    setAllCalls(todayCalls);
-    const rebuiltAgents = rebuildAgentsFromCalls(todayCalls);
-    setCumulativeAgents(rebuiltAgents);
-    setLastUpdate(new Date());
-  };
-
-  const resetWeeklyData = () => {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + daysToMonday);
-    for (let i = 0; i < 5; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      localStorage.removeItem(getStorageKey(date));
-    }
-    resetDailyData();
+    return ws;
   };
 
   useEffect(() => {
-    isMountedRef.current = true;
-    cleanupOldStorage();
-    const today = new Date();
-    const todayCalls = loadCallsFromStorage(today);
-    setAllCalls(todayCalls);
-    const rebuiltAgents = rebuildAgentsFromCalls(todayCalls);
-    setCumulativeAgents(rebuiltAgents);
-    connect();
-    return () => {
-      isMountedRef.current = false;
-      if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
-      if (wsRef.current) wsRef.current.close();
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (connectionTimeoutRef.current) clearTimeout(connectionTimeoutRef.current);
-    };
-  }, [url]);
+    const ws = connectWebSocket();
+    return () => ws.close();
+  }, []);
 
-  const reconnect = () => {
-    if (wsRef.current) wsRef.current.close();
-    if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-    connect();
-  };
+  const resetDailyKPI = useCallback(() => {
+    // Réinitialise agents et volumes, mais PAS allCalls → Number of Calls reste actif
+    setAgents({});
+  }, []);
 
-  const now = new Date();
-  const recentCalls = allCalls.filter(call =>
-    call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
-  );
-
-  const callVolumes = halfHourSlots.map((time, index) => ({
-    index,
-    time,
-    CDS_IN: 0,
-    CDS_OUT: 0,
-    ABSYS: 0,
-  }));
-
-  recentCalls.forEach(call => {
-    const slotIndex = getSlotIndex(call.startTime);
-    if (slotIndex >= 0 && slotIndex < callVolumes.length) {
-      if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
-      else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
-      else if (call.callType === 'ABSYS') callVolumes[slotIndex].ABSYS += 1;
+  const resetWeekly = useCallback(() => {
+    // Lundi 8h : tout réinitialiser + nettoyer localStorage
+    const now = new Date();
+    const day = now.getDay();
+    const daysToMon = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + daysToMon);
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      localStorage.removeItem(`callData_${getLocalDateStr(d)}`);
     }
-  });
-
-  const employees = Object.values(cumulativeAgents);
-  const totalInboundFromAgents = employees.reduce((sum, a) => sum + a.inbound + a.missed, 0);
-  const totalMissedFromAgents = employees.reduce((sum, a) => sum + a.missed, 0);
-  const achieved = totalInboundFromAgents > 0 ? Math.max(60, 100 - Math.round((totalMissedFromAgents / totalInboundFromAgents) * 100)) : 100;
-  const slaData = [{ queue: 'Front Office', target: 90, achieved }];
+    setAllCalls([]);
+    setAgents({});
+  }, []);
 
   return {
-    employees,
-    callVolumes,
-    slaData,
+    agents: Object.values(agents),
+    allCalls,
     lastUpdate,
     isConnected,
-    error,
-    reconnect,
-    halfHourSlots,
-    allCalls,
-    resetDailyData,
-    resetWeeklyData,
+    resetDailyKPI,
+    resetWeekly,
   };
 };
 
-const useTodayCallStats = (calls = []) => {
+// ── STATISTIQUES ────────────────────────────────────────
+
+const useTodayStats = (calls) => {
   return useMemo(() => {
-    const today = new Date();
-    const todayStr = getLocalDateStr(today);
-    const todayCalls = calls.filter(call => {
-      const callDateStr = getLocalDateStr(call.startTime);
-      return callDateStr === todayStr;
-    });
+    const today = getLocalDateStr(new Date());
+    const filtered = calls.filter(c => getLocalDateStr(c.startTime) === today);
     let inbound = 0, outbound = 0;
-    todayCalls.forEach(call => {
-      if (call.callType === 'CDS_IN') inbound++;
-      else if (call.callType === 'CDS_OUT') outbound++;
+    filtered.forEach(c => {
+      if (c.callType === 'CDS_IN') inbound++;
+      else if (c.callType === 'CDS_OUT') outbound++;
     });
     return { inbound, outbound, total: inbound + outbound };
   }, [calls]);
 };
 
-const useWeeklyCallStats = (calls = []) => {
+const useWeeklyStats = (calls) => {
   return useMemo(() => {
     const now = new Date();
-    const dayOfWeek = now.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const day = now.getDay();
+    const daysToMon = day === 0 ? -6 : 1 - day;
     const monday = new Date(now);
-    monday.setDate(now.getDate() + daysToMonday);
+    monday.setDate(now.getDate() + daysToMon);
     monday.setHours(0, 0, 0, 0);
 
-    const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
-    const weekData = [];
+    const labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
+    const data = [];
     for (let i = 0; i < 5; i++) {
       const date = new Date(monday);
       date.setDate(monday.getDate() + i);
-      const isoDate = formatDateToLocalISO(date);
-      weekData.push({
-        date: isoDate,
-        dayLabel: dayNames[i],
+      data.push({
+        date: getLocalDateStr(date),
+        dayLabel: labels[i],
         inbound: 0,
         outbound: 0,
+        total: 0,
       });
     }
 
     calls.forEach(call => {
       if (!call.startTime || call.callType === 'ABSYS') return;
       const callDate = getLocalDateStr(call.startTime);
-      const dayIndex = weekData.findIndex(d => d.date === callDate);
-      if (dayIndex !== -1) {
+      const idx = data.findIndex(d => d.date === callDate);
+      if (idx !== -1) {
         if (call.callType === 'CDS_IN') {
-          weekData[dayIndex].inbound += 1;
+          data[idx].inbound++;
         } else if (call.callType === 'CDS_OUT') {
-          weekData[dayIndex].outbound += 1;
+          data[idx].outbound++;
         }
+        data[idx].total = data[idx].inbound + data[idx].outbound;
       }
     });
 
-    return weekData;
+    return data;
   }, [calls]);
 };
 
-const useKpiCalculations = (employees = [], todayStats = {}, allCalls = []) => {
-  return useMemo(() => {
-    if (!Array.isArray(employees)) employees = [];
-    if (!Array.isArray(allCalls)) allCalls = [];
+// ── HORLOGE ─────────────────────────────────────────────
 
-    const totals = employees.reduce((acc, emp) => {
-      acc.totalInboundCalls += (emp.inbound || 0) + (emp.missed || 0);
-      acc.totalAnsweredCalls += emp.inbound || 0;
-      acc.missedFromAgents += emp.missed || 0;
-      acc.totalOutboundCalls += emp.outbound || 0;
-      acc.totalInboundHandling += emp.inboundHandlingTimeSec || 0;
-      acc.totalOutboundHandling += emp.outboundHandlingTimeSec || 0;
-      acc.totalAnsweredInbound += emp.inbound || 0;
-      acc.totalAnsweredOutbound += emp.outbound || 0;
-      return acc;
-    }, {
-      totalInboundCalls: 0,
-      totalAnsweredCalls: 0,
-      missedFromAgents: 0,
-      totalOutboundCalls: 0,
-      totalInboundHandling: 0,
-      totalOutboundHandling: 0,
-      totalAnsweredInbound: 0,
-      totalAnsweredOutbound: 0,
-    });
-
-    const absysMissed = allCalls.filter(call => {
-      if (call.callType !== 'ABSYS' || call.durationSec < 60) return false;
-      const start = call.startTime;
-      if (!start) return true;
-      const h = start.getHours();
-      const m = start.getMinutes();
-      const totalMinutes = h * 60 + m;
-      return !(totalMinutes >= 750 && totalMinutes < 840);
-    }).length;
-
-    const totalMissed = totals.missedFromAgents + absysMissed;
-    const totalInbound = totals.totalInboundCalls + absysMissed;
-    const avgInboundAHTSec = totals.totalAnsweredInbound > 0
-      ? Math.floor(totals.totalInboundHandling / totals.totalAnsweredInbound)
-      : 0;
-    const avgOutboundAHTSec = totals.totalAnsweredOutbound > 0
-      ? Math.floor(totals.totalOutboundHandling / totals.totalAnsweredOutbound)
-      : 0;
-    const globalAHTSec = (totals.totalAnsweredInbound + totals.totalAnsweredOutbound) > 0
-      ? Math.floor((totals.totalInboundHandling + totals.totalOutboundHandling) / (totals.totalAnsweredInbound + totals.totalAnsweredOutbound))
-      : 0;
-    const abandonRate = totalInbound > 0
-      ? `${Math.round((totalMissed / totalInbound) * 100)}%`
-      : '0%';
-
-    return {
-      totalAgents: employees.length,
-      onlineAgents: employees.length,
-      totalInboundCalls: totalInbound,
-      totalAnsweredCalls: totals.totalAnsweredCalls,
-      missedCallsTotal: totalMissed,
-      totalOutboundCalls: totals.totalOutboundCalls,
-      globalAHTSec,
-      averageHandlingTime: formatSecondsToMMSS(globalAHTSec),
-      abandonRate,
-      avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
-      avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
-      cdsInboundTotal: todayStats.inbound || 0,
-      cdsOutboundTotal: todayStats.outbound || 0,
-      numberOfCallsToday: todayStats.total || 0,
-    };
-  }, [employees, todayStats, allCalls]);
+const Clock = () => {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const h = time.getHours().toString().padStart(2, '0');
+  const m = time.getMinutes().toString().padStart(2, '0');
+  const s = time.getSeconds().toString().padStart(2, '0');
+  return (
+    <Box sx={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900, fontSize: '2.5rem', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.7)' }}>
+      {h}:{m}:{s}
+    </Box>
+  );
 };
 
-// 🔊 Composant principal
-const App = () => {
-  const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
-  const [lastScheduledSounds, setLastScheduledSounds] = useState({});
-  const prevEmployeesRef = useRef([]);
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
+// ── COMPOSANT PRINCIPAL ─────────────────────────────────
 
-  const handleLostCall = () => {
-    if (audioUnlocked) {
-      console.log('🔊 Lecture de fatality.mp3');
-      playSound('fatality.mp3');
-    } else {
-      console.log('🔇 Sons non déverrouillés – fatality.mp3 ignoré');
-    }
-  };
+const App = () => {
+  const { unlocked: audioUnlocked, unlock: unlockAudio, play: playSound } = useAudioManager();
+  const handleLostCall = useCallback(() => playSound('fatality.mp3'), [playSound]);
 
   const {
-    employees,
-    callVolumes,
-    slaData,
+    agents,
+    allCalls,
     lastUpdate,
     isConnected,
-    error,
-    reconnect,
-    halfHourSlots,
-    allCalls,
-    resetDailyData,
-    resetWeeklyData,
-  } = useWebSocketData(WS_URL, handleLostCall);
+    resetDailyKPI,
+    resetWeekly,
+  } = useCallSystem(handleLostCall);
 
-  useMidnightResetScheduler(resetDailyData);
-  useWeeklyResetScheduler(resetWeeklyData);
+  const prevAgentsRef = useRef([]);
 
-  const todayStats = useTodayCallStats(allCalls);
-  const weeklyStats = useWeeklyCallStats(allCalls);
-  const kpi = useKpiCalculations(employees, todayStats, allCalls);
+  useMidnightReset(resetDailyKPI);     // Minuit : réinit KPI (sauf Number of Calls)
+  useMonday8amReset(resetWeekly);      // Lundi 8h : réinit TOUT
 
-  // 🔊 Sons horaires
+  const todayStats = useTodayStats(allCalls);
+  const weeklyStats = useWeeklyStats(allCalls);
+
+  // ── SONS HORAIRE ───────────────────────────────────────
+
   useEffect(() => {
     if (!audioUnlocked) return;
 
     const interval = setInterval(() => {
       const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const timeKey = `${hours}:${minutes}`;
+      const day = now.getDay(); // 1=lun, ..., 5=ven
+      const h = now.getHours();
+      const m = now.getMinutes();
 
-      if (lastScheduledSounds[timeKey]) return;
+      // Seulement lundi–vendredi
+      if (day < 1 || day > 5) return;
 
-      let soundToPlay = null;
-      if (hours === 8 && minutes === 30) {
-        soundToPlay = 'debut.mp3';
-      } else if (hours === 12 && minutes === 30) {
-        soundToPlay = 'pause.mp3';
-      } else if (hours === 14 && minutes === 0) {
-        soundToPlay = 'reprise.mp3';
-      } else if (hours === 18 && minutes === 0) {
-        soundToPlay = 'fin.mp3';
+      if (h === 8 && m === 30) {
+        playSound('debut.mp3');
+      } else if (h === 12 && m === 30) {
+        playSound('pause.mp3');
+      } else if (h === 14 && m === 0) {
+        playSound('reprise.mp3');
+      } else if (day <= 4 && h === 18 && m === 0) {
+        // Lundi–Jeudi à 18h
+        playSound('fin.mp3');
+      } else if (day === 5 && h === 17 && m === 0) {
+        // Vendredi à 17h
+        playSound('fin.mp3');
       }
-
-      if (soundToPlay) {
-        playSound(soundToPlay);
-        setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
-      }
-    }, 1000);
+    }, 60000); // Vérifie chaque minute
 
     return () => clearInterval(interval);
-  }, [audioUnlocked, lastScheduledSounds]);
+  }, [audioUnlocked, playSound]);
 
-  // ✅ Son personnalisé quand un agent devient 1er
+  // ── SON TECHNICIEN 1ER ─────────────────────────────────
+
   useEffect(() => {
-    if (!audioUnlocked || employees.length === 0) return;
+    if (!audioUnlocked || agents.length === 0) return;
 
-    const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
+    const totalCalls = agents.reduce((sum, a) => sum + a.inbound + a.outbound + a.missed, 0);
     if (totalCalls < 50) return;
 
-    const prevEmployees = prevEmployeesRef.current;
-    const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
-    const prevSorted = [...prevEmployees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
+    const currentTop = [...agents].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound))[0];
+    const prevTop = [...prevAgentsRef.current].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound))[0];
 
-    const currentTopAgent = currentEmployees[0];
-    const wasTopBefore = prevSorted.length > 0 && prevSorted[0]?.name === currentTopAgent.name;
-
-    if (!wasTopBefore && currentTopAgent) {
-      const allowedFirstNames = new Set([
-        'xavier', 'rana', 'mathys', 'romain',
-        'nicolas', 'julien', 'benjamin', 'malik'
-      ]);
-
-      const firstName = currentTopAgent.name.split(' ')[0]?.toLowerCase() || '';
-
-      let soundToPlay = 'passage.mp3';
-      if (allowedFirstNames.has(firstName)) {
-        soundToPlay = `${firstName}.mp3`;
-      }
-
-      playSound(soundToPlay);
+    if (!prevTop || currentTop.name !== prevTop.name) {
+      const firstName = currentTop.name.split(' ')[0]?.toLowerCase() || '';
+      const allowed = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik']);
+      const sound = allowed.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
+      playSound(sound);
     }
 
-    prevEmployeesRef.current = [...employees];
-  }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
+    prevAgentsRef.current = [...agents];
+  }, [agents, audioUnlocked, playSound]);
 
-  const unlockAudio = () => {
-    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
-    audio.play()
-      .then(() => {
-        console.log('✅ Sons activés via silent.wav');
-        setAudioUnlocked(true);
-      })
-      .catch(err => {
-        console.warn('❌ Échec activation sons :', err);
-      });
-  };
+  // ── CALCUL DES KPI ────────────────────────────────────
+
+  const kpi = useMemo(() => {
+    const totalInboundFromAgents = agents.reduce((sum, a) => sum + a.inbound + a.missed, 0);
+    const totalMissedFromAgents = agents.reduce((sum, a) => sum + a.missed, 0);
+    const totalOutboundCalls = agents.reduce((sum, a) => sum + a.outbound, 0);
+    const totalInboundHandling = agents.reduce((sum, a) => sum + a.inboundHandlingTimeSec, 0);
+    const totalOutboundHandling = agents.reduce((sum, a) => sum + a.outboundHandlingTimeSec, 0);
+    const totalAnsweredInbound = agents.reduce((sum, a) => sum + a.inbound, 0);
+    const totalAnsweredOutbound = agents.reduce((sum, a) => sum + a.outbound, 0);
+
+    const absysMissed = allCalls.filter(call => {
+      if (call.callType !== 'ABSYS' || call.durationSec >= 60) return false;
+      return !isLunchBreak(call.startTime);
+    }).length;
+
+    const totalMissed = totalMissedFromAgents + absysMissed;
+    const totalInbound = totalInboundFromAgents + absysMissed;
+
+    const avgInboundAHTSec = totalAnsweredInbound > 0 ? Math.floor(totalInboundHandling / totalAnsweredInbound) : 0;
+    const avgOutboundAHTSec = totalAnsweredOutbound > 0 ? Math.floor(totalOutboundHandling / totalAnsweredOutbound) : 0;
+    const globalAHTSec = (totalAnsweredInbound + totalAnsweredOutbound) > 0
+      ? Math.floor((totalInboundHandling + totalOutboundHandling) / (totalAnsweredInbound + totalAnsweredOutbound))
+      : 0;
+    const abandonRate = totalInbound > 0 ? `${Math.round((totalMissed / totalInbound) * 100)}%` : '0%';
+
+    return {
+      totalAgents: agents.length,
+      numberOfCallsToday: todayStats.total,
+      totalAnsweredCalls: totalAnsweredInbound,
+      missedCallsTotal: totalMissed,
+      totalOutboundCalls,
+      globalAHTSec,
+      averageHandlingTime: formatSecondsToMMSS(globalAHTSec),
+      abandonRate,
+      avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
+      avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
+    };
+  }, [agents, allCalls, todayStats]);
+
+  // ── RENDU ─────────────────────────────────────────────
 
   return (
     <Box
@@ -858,12 +586,10 @@ const App = () => {
         backgroundImage: `url('${process.env.PUBLIC_URL}/images/background-dashboard.jpg')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
         py: 4,
         position: 'relative',
         '& > *': { position: 'relative', zIndex: 1 },
       }}
-      aria-label="Tableau de bord en temps réel du centre d'appels"
     >
       <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 0 }} />
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, color: '#fff' }}>
@@ -912,7 +638,7 @@ const App = () => {
           {[
             { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default" },
             { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error" },
-            { title: "Total Inbound Calls", value: kpi.totalInboundCalls, color: "info" },
+            { title: "Total Inbound Calls", value: kpi.totalAnsweredCalls + kpi.missedCallsTotal, color: "info" },
             { title: "Total Outbound Calls", value: kpi.totalOutboundCalls, color: "success" },
             { title: "Abandon Rate", value: kpi.abandonRate, color: getAbandonColor(kpi.abandonRate) },
           ].map((item, i) => (
@@ -923,19 +649,19 @@ const App = () => {
         </Grid>
 
         <Box mt={6}>
-          <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
+          <CallVolumeChart callVolumes={[]} wsConnected={isConnected} halfHourSlots={[]} />
         </Box>
 
         <Box mt={{ xs: 8, md: 10 }}>
           <Grid container spacing={4} direction="column">
             <Grid size={{ xs: 12 }}>
               <AgentTable
-                employees={employees.map(emp => ({
+                employees={agents.map(emp => ({
                   ...emp,
                   avgInboundAHT: formatSecondsToMMSS(emp.inbound > 0 ? Math.floor(emp.inboundHandlingTimeSec / emp.inbound) : 0),
                   avgOutboundAHT: formatSecondsToMMSS(emp.outbound > 0 ? Math.floor(emp.outboundHandlingTimeSec / emp.outbound) : 0),
                 }))}
-                isLoading={!isConnected && employees.length === 0}
+                isLoading={!isConnected && agents.length === 0}
                 isConnected={isConnected}
                 lastUpdate={lastUpdate}
               />
@@ -947,14 +673,7 @@ const App = () => {
                   wsConnected={isConnected}
                 />
                 {!audioUnlocked && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 16,
-                      right: 16,
-                      zIndex: 2,
-                    }}
-                  >
+                  <Box sx={{ position: 'absolute', bottom: 16, right: 16, zIndex: 2 }}>
                     <Button
                       variant="contained"
                       color="success"
