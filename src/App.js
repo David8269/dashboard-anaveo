@@ -441,10 +441,17 @@ const useWebSocketData = (url, onLostCall) => {
           const dur = cdr.duration.split(':').map(Number);
           const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
 
+          // 🔴 DÉTECTION D'UN APPEL PERDU : ABSYS <60s HORS PAUSE
           if (cdr.callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
             console.log('[Appel perdu détecté] 💀 Joue fatality.mp3');
             if (onLostCall) onLostCall();
             return;
+          }
+
+          // 🔴 DÉTECTION D'UN APPEL MANQUÉ (CDS_IN avec statut "missed")
+          if (cdr.callType === 'CDS_IN' && (cdr.status.includes('missed') || cdr.status.includes('abandoned'))) {
+            console.log('[Appel manqué détecté] 💀 Joue fatality.mp3');
+            if (onLostCall) onLostCall();
           }
 
           const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
