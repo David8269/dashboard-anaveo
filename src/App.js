@@ -13,7 +13,7 @@ import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 
-// 🔊 Fonction de lecture audio — utilise PUBLIC_URL
+// 🔊 Lecture audio — utilise PUBLIC_URL
 const playSound = (filename) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
@@ -102,7 +102,7 @@ function Clock() {
   );
 }
 
-// 🔍 Pause déjeuner (12h30–14h00 heure locale du navigateur — car c’est une règle métier locale)
+// 🔍 Pause déjeuner (12h30–14h00 heure locale du navigateur)
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -166,23 +166,6 @@ const generateHalfHourSlots = () => {
 };
 
 const halfHourSlots = generateHalfHourSlots();
-
-// 🔢 Trouve l'index de plage horaire correspondant à une date (en UTC)
-const getSlotIndex = (date) => {
-  if (!date) return -1;
-  const h = date.getUTCHours();
-  const m = date.getUTCMinutes();
-  if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) {
-    return -1;
-  }
-  for (let i = halfHourSlots.length - 1; i >= 0; i--) {
-    const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
-    if (h > slotH || (h === slotH && m >= slotM)) {
-      return i;
-    }
-  }
-  return -1;
-};
 
 // 📆 Renvoie une chaîne "YYYY-MM-DD" en UTC (pour stockage)
 const getUTCDateStr = (date) => {
@@ -394,6 +377,23 @@ const useWebSocketData = (url, onLostCall) => {
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
+  // 🔧 Fonction locale pour assigner les appels aux tranches horaires DU GRAPHIQUE (en heure locale)
+  const getLocalSlotIndex = (date) => {
+    if (!date) return -1;
+    const h = date.getHours(); // ← Heure locale
+    const m = date.getMinutes(); // ← Minute locale
+    if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) {
+      return -1;
+    }
+    for (let i = halfHourSlots.length - 1; i >= 0; i--) {
+      const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
+      if (h > slotH || (h === slotH && m >= slotM)) {
+        return i;
+      }
+    }
+    return -1;
+  };
+
   const connect = () => {
     if (!isMountedRef.current) return;
     console.log(`[WS] 🔄 Connexion à ${url}`);
@@ -434,7 +434,6 @@ const useWebSocketData = (url, onLostCall) => {
       if (typeof msg === 'string' && msg.startsWith('Call ')) {
         const cdr = parseCDRLine(msg);
         if (cdr && cdr.startTime) {
-          // Marquer comme ABSYS pendant la pause déjeuner (règle métier locale)
           if (isLunchBreak(cdr.startTime)) {
             cdr.callType = 'ABSYS';
             cdr.agentName = '';
@@ -443,11 +442,11 @@ const useWebSocketData = (url, onLostCall) => {
           const dur = cdr.duration.split(':').map(Number);
           const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
 
-          // 🔴 DÉTECTION D'UN APPEL PERDU : ABSYS, <60s, HORS PAUSE
+          // 🔴 DÉTECTION D'UN APPEL PERDU
           if (cdr.callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
             console.log('[Appel perdu détecté] 💀 Joue fatality.mp3');
             if (onLostCall) onLostCall();
-            return; // Ne pas enregistrer
+            return;
           }
 
           const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
@@ -569,6 +568,7 @@ const useWebSocketData = (url, onLostCall) => {
     call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
   );
 
+  // 🔧 ICI : utilisation de getLocalSlotIndex pour le graphique
   const callVolumes = halfHourSlots.map((time, index) => ({
     index,
     time,
@@ -578,7 +578,7 @@ const useWebSocketData = (url, onLostCall) => {
   }));
 
   recentCalls.forEach(call => {
-    const slotIndex = getSlotIndex(call.startTime);
+    const slotIndex = getLocalSlotIndex(call.startTime); // ← CORRECTION CLÉ
     if (slotIndex >= 0 && slotIndex < callVolumes.length) {
       if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
       else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
@@ -771,7 +771,7 @@ const App = () => {
   const weeklyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, todayStats, allCalls);
 
-  // 🔊 Sons horaires (basés sur l'heure locale du navigateur — règles métier locales)
+  // 🔊 Sons horaires (heure locale)
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -784,26 +784,21 @@ const App = () => {
       if (lastScheduledSounds[timeKey]) return;
 
       let soundToPlay = null;
-      if (hours === 8 && minutes === 30) {
-        soundToPlay = 'debut.mp3';
-      } else if (hours === 12 && minutes === 30) {
-        soundToPlay = 'pause.mp3';
-      } else if (hours === 14 && minutes === 0) {
-        soundToPlay = 'reprise.mp3';
-      } else if (hours === 18 && minutes === 0) {
-        soundToPlay = 'fin.mp3';
-      }
+      if (hours === 8 && minutes === 30) soundToPlay = 'debut.mp3';
+      else if (hours === 12 && minutes === 30) soundToPlay = 'pause.mp3';
+      else if (hours === 14 && minutes === 0) soundToPlay = 'reprise.mp3';
+      else if (hours === 18 && minutes === 0) soundToPlay = 'fin.mp3';
 
       if (soundToPlay) {
         playSound(soundToPlay);
         setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
       }
-    }, 60000); // Vérifie chaque minute
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-  // ✅ Son personnalisé quand un agent devient 1er (après 50 appels)
+  // 🏆 Son quand un agent devient 1er
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -811,33 +806,23 @@ const App = () => {
     if (totalCalls < 50) return;
 
     const prevEmployees = prevEmployeesRef.current;
-
-    // Trouver le meilleur agent actuel
     const currentTopAgent = employees.reduce((best, emp) => {
       const total = (emp.inbound || 0) + (emp.outbound || 0);
       return total > (best.total || 0) ? { ...emp, total } : best;
     }, { total: -1, name: '' });
 
-    // Trouver le meilleur agent précédent
     const prevTopAgent = prevEmployees.reduce((best, emp) => {
       const total = (emp.inbound || 0) + (emp.outbound || 0);
       return total > (best.total || 0) ? { ...emp, total } : best;
     }, { total: -1, name: '' });
 
-    // Si changement de leader
     if (currentTopAgent.name && currentTopAgent.name !== prevTopAgent.name) {
       const allowedFirstNames = new Set([
         'xavier', 'rana', 'mathys', 'romain',
         'nicolas', 'julien', 'benjamin', 'malik'
       ]);
-
       const firstName = currentTopAgent.name.split(' ')[0]?.toLowerCase() || '';
-
-      let soundToPlay = 'passage.mp3';
-      if (allowedFirstNames.has(firstName)) {
-        soundToPlay = `${firstName}.mp3`;
-      }
-
+      const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
       console.log(`🔊 ${currentTopAgent.name} est en tête ! Lecture de ${soundToPlay}`);
       playSound(soundToPlay);
     }
