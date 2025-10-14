@@ -608,13 +608,21 @@ const useWebSocketData = (url, onLostCall) => {
       const h = localStartTime.getHours();
       const m = localStartTime.getMinutes();
       if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) return;
-      for (let i = halfHourSlots.length - 1; i >= 0; i--) {
+      
+      // Trouver le bon slot
+      for (let i = 0; i < halfHourSlots.length; i++) {
         const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
         if (h > slotH || (h === slotH && m >= slotM)) {
-          if (call.callType === 'CDS_IN') volumes[i].CDS_IN += 1;
-          else if (call.callType === 'CDS_OUT') volumes[i].CDS_OUT += 1;
-          else if (call.callType === 'ABSYS') volumes[i].ABSYS += 1;
-          break;
+          if (i === halfHourSlots.length - 1 || 
+              (i < halfHourSlots.length - 1 && 
+               (localStartTime.getHours() < parseInt(halfHourSlots[i+1].split(':')[0]) || 
+                (localStartTime.getHours() === parseInt(halfHourSlots[i+1].split(':')[0]) && 
+                 localStartTime.getMinutes() < parseInt(halfHourSlots[i+1].split(':')[1]))))) {
+            if (call.callType === 'CDS_IN') volumes[i].CDS_IN += 1;
+            else if (call.callType === 'CDS_OUT') volumes[i].CDS_OUT += 1;
+            else if (call.callType === 'ABSYS') volumes[i].ABSYS += 1;
+            break;
+          }
         }
       }
     });
@@ -673,6 +681,7 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       totalAnsweredOutbound: 0,
     });
 
+    // ✅ Compter les appels ABSYS perdus hors pause (déjà fait dans WS)
     const absysMissed = todayCalls.filter(call => {
       if (call.callType !== 'ABSYS' || call.durationSec < 60) return false;
       const start = call.startTime;
@@ -698,9 +707,12 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       ? `${Math.round((totalMissed / totalInbound) * 100)}%`
       : '0%';
 
-    // ✅ Compter les appels de la semaine (CDS_IN + CDS_OUT)
+    // ✅ Compter les appels de la semaine (CDS_IN + CDS_OUT) — CORRECTION : filtrer uniquement les jours ouvrés
     const numberOfCallsThisWeek = weeklyCalls.filter(call =>
-      call.callType === 'CDS_IN' || call.callType === 'CDS_OUT'
+      (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') &&
+      call.startTime && 
+      call.startTime.getDay() >= 1 && 
+      call.startTime.getDay() <= 5
     ).length;
 
     return {
