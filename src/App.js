@@ -167,18 +167,21 @@ const generateHalfHourSlots = () => {
 
 const halfHourSlots = generateHalfHourSlots();
 
-// 📆 Renvoie une chaîne "YYYY-MM-DD" en UTC
-const getUTCDateStr = (date) => {
-  return date.toISOString().split('T')[0];
+// ✅ CORRECTION : Utiliser la date LOCALE pour le stockage et le filtrage
+const getLocalDateStr = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
-// 🔄 Réinitialisation quotidienne à minuit (UTC)
+// 🔄 Réinitialisation quotidienne à minuit (heure locale)
 const useMidnightResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
       const nextMidnight = new Date(now);
-      nextMidnight.setUTCHours(24, 0, 0, 0);
+      nextMidnight.setHours(24, 0, 0, 0); // minuit local
       const delay = nextMidnight.getTime() - now.getTime();
       const timeoutId = setTimeout(() => {
         resetFn();
@@ -190,19 +193,19 @@ const useMidnightResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// 🔄 Réinitialisation hebdomadaire le lundi à 8h (UTC)
+// 🔄 Réinitialisation hebdomadaire le lundi à 8h (heure locale)
 const useWeeklyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
-      const dayOfWeek = now.getUTCDay();
+      const dayOfWeek = now.getDay(); // 0 = dimanche
       let daysUntilMonday = (1 - dayOfWeek + 7) % 7;
-      if (daysUntilMonday === 0 && now.getUTCHours() >= 8) {
+      if (daysUntilMonday === 0 && now.getHours() >= 8) {
         daysUntilMonday = 7;
       }
       const nextReset = new Date(now);
-      nextReset.setUTCDate(now.getUTCDate() + daysUntilMonday);
-      nextReset.setUTCHours(8, 0, 0, 0);
+      nextReset.setDate(now.getDate() + daysUntilMonday);
+      nextReset.setHours(8, 0, 0, 0); // lundi 8h local
       const delay = nextReset.getTime() - now.getTime();
       const timeoutId = setTimeout(() => {
         resetFn();
@@ -227,7 +230,8 @@ const useWebSocketData = (url, onLostCall) => {
   const connectionTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
 
-  const getStorageKey = (date = new Date()) => `callData_${getUTCDateStr(date)}`;
+  // ✅ CORRECTION : Utilise getLocalDateStr
+  const getStorageKey = (date = new Date()) => `callData_${getLocalDateStr(date)}`;
 
   const cleanupOldStorage = () => {
     const now = new Date();
@@ -235,7 +239,7 @@ const useWebSocketData = (url, onLostCall) => {
       const key = localStorage.key(i);
       if (key?.startsWith('callData_')) {
         const dateStr = key.split('_')[1];
-        const date = new Date(dateStr + 'T00:00:00Z');
+        const date = new Date(dateStr + 'T00:00:00'); // local assumed
         const daysDiff = Math.floor((now - date) / (24 * 60 * 60 * 1000));
         if (daysDiff > 7) {
           localStorage.removeItem(key);
@@ -458,8 +462,8 @@ const useWebSocketData = (url, onLostCall) => {
 
           if (isInBusinessHours(cdr.startTime)) {
             const today = new Date();
-            const todayStr = getUTCDateStr(today);
-            const callDateStr = getUTCDateStr(cdr.startTime);
+            const todayStr = getLocalDateStr(today);
+            const callDateStr = getLocalDateStr(cdr.startTime);
             if (callDateStr === todayStr) {
               setAllCalls(prev => {
                 const updated = [...prev, callWithSec];
@@ -532,13 +536,13 @@ const useWebSocketData = (url, onLostCall) => {
 
   const resetWeeklyData = () => {
     const now = new Date();
-    const dayOfWeek = now.getUTCDay();
+    const dayOfWeek = now.getDay();
     const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     const monday = new Date(now);
-    monday.setUTCDate(now.getUTCDate() + daysToMonday);
+    monday.setDate(now.getDate() + daysToMonday);
     for (let i = 0; i < 5; i++) {
       const date = new Date(monday);
-      date.setUTCDate(monday.getUTCDate() + i);
+      date.setDate(monday.getDate() + i);
       localStorage.removeItem(getStorageKey(date));
     }
     resetDailyData();
@@ -611,12 +615,13 @@ const useWebSocketData = (url, onLostCall) => {
   };
 };
 
+// ✅ CORRECTION : Utilise getLocalDateStr
 const useTodayCallStats = (calls = []) => {
   return useMemo(() => {
     const today = new Date();
-    const todayStr = getUTCDateStr(today);
+    const todayStr = getLocalDateStr(today);
     const todayCalls = calls.filter(call => {
-      const callDateStr = getUTCDateStr(call.startTime);
+      const callDateStr = getLocalDateStr(call.startTime);
       return callDateStr === todayStr;
     });
     let inbound = 0, outbound = 0;
@@ -628,21 +633,22 @@ const useTodayCallStats = (calls = []) => {
   }, [calls]);
 };
 
+// ✅ CORRECTION : Utilise getLocalDateStr et logique locale
 const useWeeklyCallStats = (calls = []) => {
   return useMemo(() => {
     const now = new Date();
-    const dayOfWeek = now.getUTCDay();
+    const dayOfWeek = now.getDay(); // 0 = dimanche
     const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     const monday = new Date(now);
-    monday.setUTCDate(now.getUTCDate() + daysToMonday);
-    monday.setUTCHours(0, 0, 0, 0);
+    monday.setDate(now.getDate() + daysToMonday);
+    monday.setHours(0, 0, 0, 0);
 
     const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
     const weekData = [];
     for (let i = 0; i < 5; i++) {
       const date = new Date(monday);
-      date.setUTCDate(monday.getUTCDate() + i);
-      const isoDate = date.toISOString().split('T')[0];
+      date.setDate(monday.getDate() + i);
+      const isoDate = getLocalDateStr(date);
       weekData.push({
         date: isoDate,
         dayLabel: dayNames[i],
@@ -653,7 +659,7 @@ const useWeeklyCallStats = (calls = []) => {
 
     calls.forEach(call => {
       if (!call.startTime || call.callType === 'ABSYS') return;
-      const callDate = getUTCDateStr(call.startTime);
+      const callDate = getLocalDateStr(call.startTime);
       const dayIndex = weekData.findIndex(d => d.date === callDate);
       if (dayIndex !== -1) {
         if (call.callType === 'CDS_IN') {
@@ -785,10 +791,9 @@ const App = () => {
       const minutes = now.getMinutes();
       const seconds = now.getSeconds();
 
-      // Ne joue le son que si on est à la SECONDE 0
       if (seconds !== 0) return;
 
-      const timeKey = `${hours}:${minutes}:00`; // Clé unique
+      const timeKey = `${hours}:${minutes}:00`;
 
       if (lastScheduledSounds[timeKey]) return;
 
@@ -808,7 +813,7 @@ const App = () => {
         playSound(soundToPlay);
         setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
       }
-    }, 1000); // Vérifie chaque seconde
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
