@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -6,7 +6,6 @@ import {
   Box,
   Skeleton,
   Chip,
-  Button,
 } from '@mui/material';
 import {
   BarChart,
@@ -42,7 +41,7 @@ const hideZeroLabels = (value) => {
   return value === 0 ? '' : formatNumber(value);
 };
 
-function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
+function SLABarchart({ slaData = [], wsConnected = false }) {
   const [data, setData] = useState([]);
   const [animate, setAnimate] = useState(false);
   const prevSlaDataRef = useRef();
@@ -112,7 +111,7 @@ function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
                   color: '#fff',
                 }}
               />
-              {/* 🔥 Légende personnalisée */}
+              {/* 🔥 Légende personnalisée : carrés colorés + texte BLANC */}
               <Legend
                 content={() => (
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, pt: 1 }}>
