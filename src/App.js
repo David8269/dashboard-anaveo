@@ -5,15 +5,13 @@ import {
   Container,
   Typography,
   Button,
-  keyframes,
-  styled,
 } from '@mui/material';
 import KPICard from './components/KPICard';
 import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 
-// 🔊 Lecture audio — utilise PUBLIC_URL
+// 🔊 Fonction de lecture audio — utilise PUBLIC_URL
 const playSound = (filename) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
@@ -22,60 +20,6 @@ const playSound = (filename) => {
     console.error('Erreur lecture son :', error);
   }
 };
-
-// 🎞️ Animations CSS pour l'horloge
-const glitchDigital = keyframes`
-  0% { clip-path: inset(0 0 0 0); transform: translate(0); }
-  10% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-  20% { clip-path: inset(15% 0 75% 0); transform: translate(2px, 2px); }
-  30% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-  40% { clip-path: inset(35% 0 55% 0); transform: translate(2px, -2px); }
-  50% { clip-path: inset(45% 0 45% 0); transform: translate(-2px, -2px); }
-  60% { clip-path: inset(35% 0 55% 0); transform: translate(2px, 2px); }
-  70% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-  80% { clip-path: inset(15% 0 75% 0); transform: translate(2px, -2px); }
-  90% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-  100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-`;
-
-const ClockDisplay = styled('div')(({ theme }) => ({
-  position: 'relative',
-  fontFamily: "'Orbitron', 'Roboto', sans-serif",
-  fontWeight: 900,
-  fontSize: 'clamp(2rem, 8vw, 3.5rem)',
-  letterSpacing: '0.1em',
-  color: '#fff',
-  userSelect: 'none',
-  textAlign: 'center',
-  textTransform: 'uppercase',
-  textShadow:
-    '0 0 8px rgba(255,255,255,0.7), 0 0 12px rgba(255,255,255,0.5), 0 0 16px rgba(255,255,255,0.3)',
-  padding: '0.5rem 1rem',
-  borderRadius: '4px',
-  display: 'inline-block',
-  background: 'transparent',
-  '&::before, &::after': {
-    content: 'attr(data-text)',
-    position: 'absolute',
-    left: 0,
-    width: '100%',
-    opacity: 0.8,
-    pointerEvents: 'none',
-  },
-  '&::before': {
-    animation: `${glitchDigital} 2.5s infinite linear alternate-reverse`,
-    color: '#ff0',
-    left: '-1px',
-    mixBlendMode: 'screen',
-  },
-  '&::after': {
-    animation: `${glitchDigital} 2s infinite linear alternate`,
-    color: '#ffa500',
-    left: '1px',
-    mixBlendMode: 'screen',
-    opacity: 0.6,
-  },
-}));
 
 // 🕒 Horloge
 function Clock() {
@@ -89,27 +33,91 @@ function Clock() {
   const hours = time.getHours().toString().padStart(2, '0');
   const minutes = time.getMinutes().toString().padStart(2, '0');
   const seconds = time.getSeconds().toString().padStart(2, '0');
-  const timeStr = `${hours}:${minutes}:${seconds}`;
 
   return (
-    <ClockDisplay
-      data-text={timeStr}
-      role="status"
-      aria-live="polite"
-    >
-      {timeStr}
-    </ClockDisplay>
+    <>
+      <style>
+        {`
+          @keyframes glitch-digital {
+            0% { clip-path: inset(0 0 0 0); transform: translate(0); }
+            10% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
+            20% { clip-path: inset(15% 0 75% 0); transform: translate(2px, 2px); }
+            30% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
+            40% { clip-path: inset(35% 0 55% 0); transform: translate(2px, -2px); }
+            50% { clip-path: inset(45% 0 45% 0); transform: translate(-2px, -2px); }
+            60% { clip-path: inset(35% 0 55% 0); transform: translate(2px, 2px); }
+            70% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
+            80% { clip-path: inset(15% 0 75% 0); transform: translate(2px, -2px); }
+            90% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
+            100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+          }
+          .clock-glitch {
+            position: relative;
+            font-family: 'Orbitron', 'Roboto', sans-serif;
+            font-weight: 900;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            letter-spacing: 0.1em;
+            color: #fff;
+            user-select: none;
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 
+              0 0 8px rgba(255,255,255,0.7),
+              0 0 12px rgba(255,255,255,0.5),
+              0 0 16px rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background: transparent;
+            display: inline-block;
+          }
+          .clock-glitch::before,
+          .clock-glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            width: 100%;
+            opacity: 0.8;
+          }
+          .clock-glitch::before {
+            animation: glitch-digital 2.5s infinite linear alternate-reverse;
+            color: #ff0;
+            left: -1px;
+            mix-blend-mode: screen;
+          }
+          .clock-glitch::after {
+            animation: glitch-digital 2s infinite linear alternate;
+            color: #ffa500;
+            left: 1px;
+            mix-blend-mode: screen;
+            opacity: 0.6;
+          }
+        `}
+      </style>
+      <Box
+        className="clock-glitch"
+        data-text={`${hours}:${minutes}:${seconds}`}
+        role="status"
+        aria-live="polite"
+        sx={{
+          display: 'inline-block',
+          margin: '0 auto',
+          '&::before, &::after': {
+            pointerEvents: 'none'
+          }
+        }}
+      >
+        {hours}:{minutes}:{seconds}
+      </Box>
+    </>
   );
 }
 
-// 🔍 Pause déjeuner (12h30–14h00 heure locale)
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
-  return totalMinutes >= 750 && totalMinutes < 840; // 12:30 à 14:00
+  return totalMinutes >= 750 && totalMinutes < 840; // 12:30–14:00
 };
 
-// ⏱️ Formatage secondes → MM:SS
 const formatSecondsToMMSS = (totalSeconds) => {
   if (!totalSeconds || isNaN(totalSeconds) || totalSeconds <= 0) return '00:00';
   const minutes = Math.floor(totalSeconds / 60);
@@ -117,7 +125,6 @@ const formatSecondsToMMSS = (totalSeconds) => {
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-// 🎨 Couleurs KPI
 const getInboundAHTColor = (seconds) => {
   if (!seconds || isNaN(seconds)) return 'default';
   if (seconds <= 600) return 'success';
@@ -138,24 +145,15 @@ const getAbandonColor = (rateStr) => {
   return rate <= 15 ? 'success' : 'error';
 };
 
-// 📅 Parsing robuste de la date CDR
 const parseCDRDate = (str) => {
   if (!str) return null;
   const [datePart, timePart] = str.split(' ');
   if (!datePart || !timePart) return null;
   const [y, m, d] = datePart.split('/');
   const [hh, mm, ss] = timePart.split(':');
-  const year = Number(y);
-  const month = Number(m) - 1;
-  const day = Number(d);
-  const hour = Number(hh);
-  const minute = Number(mm);
-  const second = Number(ss);
-  if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
-  return new Date(Date.UTC(year, month, day, hour, minute, second));
+  return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), Number(ss)));
 };
 
-// 🕐 Génération des plages horaires (8h30 à 18h30)
 const generateHalfHourSlots = () => {
   const slots = [];
   for (let h = 8; h <= 18; h++) {
@@ -167,52 +165,45 @@ const generateHalfHourSlots = () => {
 
 const halfHourSlots = generateHalfHourSlots();
 
-// ✅ UTILISER DATE LOCALE
+const getSlotIndex = (date) => {
+  if (!date) return -1;
+  const h = date.getHours();
+  const m = date.getMinutes();
+  if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) {
+    return -1;
+  }
+  for (let i = halfHourSlots.length - 1; i >= 0; i--) {
+    const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
+    if (h > slotH || (h === slotH && m >= slotM)) {
+      return i;
+    }
+  }
+  return -1;
+};
+
 const getLocalDateStr = (date) => {
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+  return localDate.toISOString().split('T')[0];
+};
+
+const formatDateToLocalISO = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
 
-// ✅ Obtenir clé hebdomadaire ISO (ex: 2025-W42)
-const getWeekKey = (date) => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + 4 - (d.getDay() || 7)); // jeudi de la semaine
-  const year = d.getFullYear();
-  const week = Math.ceil((((d - new Date(year, 0, 1)) / 86400000) + new Date(year, 0, 1).getDay() + 1) / 7);
-  return `${year}-W${String(week).padStart(2, '0')}`;
-};
-
-// 🔄 Réinitialisation quotidienne à minuit (locale)
-const useMidnightResetScheduler = (resetFn) => {
+// 🔁 Réinitialisation quotidienne à 8h
+const useDailyResetAt8AM = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
-      const nextMidnight = new Date(now);
-      nextMidnight.setHours(24, 0, 0, 0);
-      const delay = nextMidnight.getTime() - now.getTime();
-      const timeoutId = setTimeout(() => {
-        resetFn();
-        scheduleNextReset();
-      }, delay);
-      return () => clearTimeout(timeoutId);
-    };
-    return scheduleNextReset();
-  }, [resetFn]);
-};
-
-// 🔄 Réinitialisation hebdomadaire le lundi à 00:00 (locale)
-const useWeeklyResetScheduler = (resetFn) => {
-  useEffect(() => {
-    const scheduleNextReset = () => {
-      const now = new Date();
-      const dayOfWeek = now.getDay(); // 0 = dimanche
-      let daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
-      const nextReset = new Date(now);
-      nextReset.setDate(now.getDate() + daysUntilMonday);
-      nextReset.setHours(0, 0, 0, 0);
+      const nextReset = new Date();
+      nextReset.setHours(8, 0, 0, 0);
+      if (now >= nextReset) {
+        nextReset.setDate(nextReset.getDate() + 1);
+      }
       const delay = nextReset.getTime() - now.getTime();
       const timeoutId = setTimeout(() => {
         resetFn();
@@ -224,11 +215,37 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// 📡 Hook WebSocket + gestion locale
+// 🔁 Réinitialisation hebdomadaire le lundi à 8h
+const useWeeklyResetOnMonday8AM = (resetFn) => {
+  useEffect(() => {
+    const scheduleNextReset = () => {
+      const now = new Date();
+      const nextReset = new Date();
+
+      // Prochain lundi à 8h
+      const dayOfWeek = now.getDay(); // 0 = dim, 1 = lun
+      let daysUntilMonday = (1 - dayOfWeek + 7) % 7;
+      if (daysUntilMonday === 0 && now.getHours() >= 8) {
+        daysUntilMonday = 7;
+      }
+      nextReset.setDate(now.getDate() + daysUntilMonday);
+      nextReset.setHours(8, 0, 0, 0);
+
+      const delay = nextReset.getTime() - now.getTime();
+      const timeoutId = setTimeout(() => {
+        resetFn();
+        scheduleNextReset();
+      }, delay);
+
+      return () => clearTimeout(timeoutId);
+    };
+    return scheduleNextReset();
+  }, [resetFn]);
+};
+
 const useWebSocketData = (url, onLostCall) => {
-  const [dailyCalls, setDailyCalls] = useState([]);
-  const [weeklyCalls, setWeeklyCalls] = useState([]);
   const [cumulativeAgents, setCumulativeAgents] = useState({});
+  const [allCalls, setAllCalls] = useState([]);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
@@ -238,59 +255,67 @@ const useWebSocketData = (url, onLostCall) => {
   const connectionTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
 
-  const getDailyKey = (dateStr) => `callData_daily_${dateStr}`;
-  const getWeeklyKey = (dateStr) => `callData_weekly_${dateStr}`;
+  const getStorageKey = (date = new Date()) => `callData_${getLocalDateStr(date)}`;
 
-  const cleanupOldStorage = () => {
-    const now = new Date();
+  // Nettoyage hebdomadaire : appelé le lundi à 8h
+  const cleanupPreviousWeek = () => {
+    const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key?.startsWith('callData_')) {
-        const datePart = key.split('_').slice(-1)[0];
-        const isWeekly = key.includes('_weekly_');
-        let date;
-        if (!isWeekly) {
-          date = new Date(datePart + 'T00:00:00');
-          const daysDiff = Math.floor((now - date) / (24 * 60 * 60 * 1000));
-          if (daysDiff > 7) {
-            localStorage.removeItem(key);
-          }
-        }
+        keysToRemove.push(key);
       }
     }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
   };
 
-  const saveToStorage = (key, calls) => {
+  const saveCallsToStorage = (calls, date = new Date()) => {
     try {
-      const serializable = calls.map(call => ({
+      const key = getStorageKey(date);
+      const serializableCalls = calls.map(call => ({
         ...call,
         startTime: call.startTime?.toISOString() || null,
         endTime: call.endTime?.toISOString() || null,
         receivedAt: call.receivedAt?.toISOString() || null,
       }));
-      localStorage.setItem(key, JSON.stringify(serializable));
+      localStorage.setItem(key, JSON.stringify(serializableCalls));
     } catch (e) {
-      console.warn(`[Storage] ⚠️ Échec sauvegarde ${key}`, e);
+      console.warn('[Storage] ⚠️ Sauvegarde échouée', e);
     }
   };
 
-  const loadFromStorage = (key) => {
-    try {
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return parsed.map(call => ({
-          ...call,
-          startTime: call.startTime ? new Date(call.startTime) : null,
-          endTime: call.endTime ? new Date(call.endTime) : null,
-          receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
-        })).filter(call => call.startTime);
+  const loadCallsFromStorage = () => {
+    const calls = [];
+    const today = new Date();
+    // Charger uniquement les 5 jours ouvrés de cette semaine
+    const monday = new Date(today);
+    const dayOfWeek = monday.getDay();
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    monday.setDate(today.getDate() + daysToMonday);
+    monday.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 5; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      const key = getStorageKey(date);
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const loadedCalls = parsed.map(call => ({
+            ...call,
+            startTime: call.startTime ? new Date(call.startTime) : null,
+            endTime: call.endTime ? new Date(call.endTime) : null,
+            receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
+          })).filter(call => call.startTime);
+          calls.push(...loadedCalls);
+        }
+      } catch (e) {
+        console.warn(`[Storage] ⚠️ Chargement échoué pour ${key}`, e);
+        localStorage.removeItem(key);
       }
-    } catch (e) {
-      console.warn(`[Storage] ⚠️ Échec chargement ${key}`, e);
-      localStorage.removeItem(key);
     }
-    return [];
+    return calls;
   };
 
   const rebuildAgentsFromCalls = (calls) => {
@@ -327,68 +352,62 @@ const useWebSocketData = (url, onLostCall) => {
   };
 
   const parseCDRLine = (line) => {
-    try {
-      if (!line || !line.startsWith('Call ')) return null;
-      const fields = line.substring(5).split(',');
-      const caller = fields[7] || '';
-      const status = fields[6] || '';
-      const durationStr = fields[2] || '00:00:00';
-      const technicalKeywords = new Set([
-        'provider', 'queue', 'extension', 'external_line', 'default',
-        'ReplacedDst', 'Chain:', 'Front Office', 'Sortante', 'outbound_rule',
-        '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-      ]);
-      const isLikelyName = (str) => {
-        const clean = str.trim();
-        if (!clean) return false;
-        if (technicalKeywords.has(clean)) return false;
-        if (/^\d+$/.test(clean)) return false;
-        if (!/[a-zA-ZÀ-ÿ]/.test(clean)) return false;
-        return true;
-      };
-      let agentName = '';
-      for (let i = fields.length - 1; i >= 0; i--) {
-        const field = (fields[i] || '').trim();
-        if (isLikelyName(field)) {
-          agentName = field
-            .replace(/\(.*?\)/g, '')
-            .replace(/\.+$/, '')
-            .trim();
-          break;
-        }
+    if (!line || !line.startsWith('Call ')) return null;
+    const fields = line.substring(5).split(',');
+    const caller = fields[7] || '';
+    const status = fields[6] || '';
+    const durationStr = fields[2] || '00:00:00';
+    const technicalKeywords = new Set([
+      'provider', 'queue', 'extension', 'external_line', 'default',
+      'ReplacedDst', 'Chain:', 'Front Office', 'Sortante', 'outbound_rule',
+      '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+    ]);
+    const isLikelyName = (str) => {
+      const clean = str.trim();
+      if (!clean) return false;
+      if (technicalKeywords.has(clean)) return false;
+      if (/^\d+$/.test(clean)) return false;
+      if (!/[a-zA-ZÀ-ÿ]/.test(clean)) return false;
+      return true;
+    };
+    let agentName = '';
+    for (let i = fields.length - 1; i >= 0; i--) {
+      const field = (fields[i] || '').trim();
+      if (isLikelyName(field)) {
+        agentName = field
+          .replace(/\(.*?\)/g, '')
+          .replace(/\.+$/, '')
+          .trim();
+        break;
       }
-      const isFrontOffice = line.includes(',Front Office,');
-      let callType = 'OTHER';
-      if (agentName && (/^\d+$/.test(agentName) || agentName.startsWith('Chain:'))) {
-        agentName = '';
-      }
-      if (isFrontOffice) {
-        callType = agentName ? 'CDS_IN' : 'ABSYS';
-      } else if (caller.startsWith('Ext.')) {
-        callType = agentName ? 'CDS_OUT' : 'OTHER';
-      }
-      return {
-        id: fields[0] || '',
-        startTime: parseCDRDate(fields[3]),
-        endTime: parseCDRDate(fields[5]),
-        status,
-        caller,
-        queue: isFrontOffice ? 'Front Office' : '',
-        agentName: agentName || '',
-        duration: durationStr,
-        callType,
-      };
-    } catch (err) {
-      console.error('[CDR Parsing] Erreur:', err, 'Ligne:', line);
-      return null;
     }
+    const isFrontOffice = line.includes(',Front Office,');
+    let callType = 'OTHER';
+    if (agentName && (/^\d+$/.test(agentName) || agentName.startsWith('Chain:'))) {
+      agentName = '';
+    }
+    if (isFrontOffice) {
+      callType = agentName ? 'CDS_IN' : 'ABSYS';
+    } else if (caller.startsWith('Ext.')) {
+      callType = agentName ? 'CDS_OUT' : 'OTHER';
+    }
+    return {
+      id: fields[0] || '',
+      startTime: parseCDRDate(fields[3]),
+      endTime: parseCDRDate(fields[5]),
+      status,
+      caller,
+      queue: isFrontOffice ? 'Front Office' : '',
+      agentName: agentName || '',
+      duration: durationStr,
+      callType,
+    };
   };
 
-  // ✅ CORRECTION : utiliser heure locale
   const isInBusinessHours = (date) => {
     if (!date) return false;
-    const h = date.getHours();       // ← HEURE LOCALE
-    const m = date.getMinutes();     // ← MINUTES LOCALES
+    const h = date.getHours();
+    const m = date.getMinutes();
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
@@ -431,106 +450,60 @@ const useWebSocketData = (url, onLostCall) => {
       const msg = event.data;
       if (typeof msg === 'string' && msg.startsWith('Call ')) {
         const cdr = parseCDRLine(msg);
-        if (!cdr || !cdr.startTime) return;
+        if (cdr && cdr.startTime) {
+          if (isLunchBreak(cdr.startTime)) {
+            cdr.callType = 'ABSYS';
+            cdr.agentName = '';
+          }
 
-        const dur = cdr.duration.split(':').map(Number);
-        const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
-        const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
+          const { callType } = cdr;
+          const dur = cdr.duration.split(':').map(Number);
+          const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
 
-        // 🔍 LOG DÉTAILLÉ POUR DIAGNOSTIC
-        console.log(`[WS] 📥 Message brut :`, msg);
-        console.log(`[WS] 📞 Appel parsé :`, {
-          id: callWithSec.id,
-          startTime: callWithSec.startTime,
-          callType: callWithSec.callType,
-          status: callWithSec.status,
-          agent: callWithSec.agentName,
-          durationSec: callWithSec.durationSec,
-          isLunchBreak: isLunchBreak(callWithSec.startTime),
-        });
-
-        if (isLunchBreak(callWithSec.startTime)) {
-          callWithSec.callType = 'ABSYS';
-          callWithSec.agentName = '';
-        }
-
-        // 🔴 DÉTECTION D'UN APPEL PERDU : ABSYS <60s HORS PAUSE
-        if (callWithSec.callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(callWithSec.startTime)) {
-          console.log('[Appel perdu détecté] 💀 Joue fatality.mp3');
-          if (onLostCall) onLostCall();
-          return;
-        }
-
-        // 🔴 DÉTECTION ROBUSTE D'UN APPEL MANQUÉ
-        let isMissedStatus = false;
-        if (callWithSec.callType === 'CDS_IN') {
-          const statusLower = callWithSec.status.toLowerCase();
-          isMissedStatus = [
-            'missed', 'abandoned', 'missed_call', 'abandoned_call',
-            'call_missed', 'call_abandoned', 'no_answer', 'timeout'
-          ].some(keyword => statusLower.includes(keyword));
-
-          if (isMissedStatus) {
-            console.log(`[Appel manqué détecté] 💀 Statut: "${callWithSec.status}" → Joue fatality.mp3`);
+          if (callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
             if (onLostCall) onLostCall();
+            return;
           }
-        }
 
-        if (isInBusinessHours(callWithSec.startTime)) {
-          const now = new Date();
-          const todayStr = getLocalDateStr(now);
-          const weekKey = getWeekKey(now);
+          const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
 
-          // ✅ Ajouter localDateStr et weekKey à l'appel
-          const localStartTime = new Date(callWithSec.startTime.getTime() + callWithSec.startTime.getTimezoneOffset() * 60000);
-          const callDateStr = getLocalDateStr(localStartTime);
-          const enrichedCall = { ...callWithSec, localDateStr: callDateStr, weekKey };
-
-          if (callDateStr === todayStr) {
-            setDailyCalls(prev => {
-              const updated = [...prev, enrichedCall];
-              saveToStorage(getDailyKey(todayStr), updated);
+          if (isInBusinessHours(cdr.startTime)) {
+            setAllCalls(prev => {
+              const updated = [...prev, callWithSec];
+              saveCallsToStorage(updated.filter(c => getLocalDateStr(c.startTime) === getLocalDateStr(new Date())));
               return updated;
             });
-          }
 
-          const dayOfWeek = localStartTime.getDay(); // 1=lun ... 5=ven
-          if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-            setWeeklyCalls(prev => {
-              const updated = [...prev, enrichedCall];
-              saveToStorage(getWeeklyKey(weekKey), updated);
-              return updated;
-            });
-          }
-
-          if (callDateStr === todayStr && enrichedCall.agentName && enrichedCall.callType !== 'ABSYS') {
-            setCumulativeAgents(prev => {
-              const agent = prev[enrichedCall.agentName] || {
-                name: enrichedCall.agentName,
-                status: 'online',
-                inbound: 0,
-                missed: 0,
-                outbound: 0,
-                inboundHandlingTimeSec: 0,
-                outboundHandlingTimeSec: 0,
-              };
-              const updated = { ...agent };
-              if (enrichedCall.callType === 'CDS_IN') {
-                if (['src_participant_terminated', 'dst_participant_terminated'].includes(enrichedCall.status)) {
-                  updated.inbound += 1;
-                  updated.inboundHandlingTimeSec += durationSec;
-                } else if (isMissedStatus) {
-                  updated.missed += 1;
+            const { agentName } = cdr;
+            if (agentName && callType !== 'ABSYS') {
+              setCumulativeAgents(prev => {
+                const agent = prev[agentName] || {
+                  name: agentName,
+                  status: 'online',
+                  inbound: 0,
+                  missed: 0,
+                  outbound: 0,
+                  inboundHandlingTimeSec: 0,
+                  outboundHandlingTimeSec: 0,
+                };
+                const updated = { ...agent };
+                if (callType === 'CDS_IN') {
+                  if (['src_participant_terminated', 'dst_participant_terminated'].includes(cdr.status)) {
+                    updated.inbound += 1;
+                    updated.inboundHandlingTimeSec += durationSec;
+                  } else if (cdr.status.includes('missed') || cdr.status.includes('abandoned')) {
+                    updated.missed += 1;
+                  }
+                } else if (callType === 'CDS_OUT') {
+                  updated.outbound += 1;
+                  updated.outboundHandlingTimeSec += durationSec;
                 }
-              } else if (enrichedCall.callType === 'CDS_OUT') {
-                updated.outbound += 1;
-                updated.outboundHandlingTimeSec += durationSec;
-              }
-              return { ...prev, [enrichedCall.agentName]: updated };
-            });
+                return { ...prev, [agentName]: updated };
+              });
+            }
           }
+          setLastUpdate(new Date());
         }
-        setLastUpdate(new Date());
       }
     };
     wsRef.current.onerror = (err) => {
@@ -542,7 +515,12 @@ const useWebSocketData = (url, onLostCall) => {
       if (!isMountedRef.current) return;
       console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
       setIsConnected(false);
-      if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
+
+      if (wsRef.current?.heartbeatInterval) {
+        clearInterval(wsRef.current.heartbeatInterval);
+        wsRef.current.heartbeatInterval = null;
+      }
+
       if (e.code !== 1000 && isMountedRef.current) {
         reconnectTimeoutRef.current = setTimeout(connect, 5000);
       }
@@ -550,31 +528,29 @@ const useWebSocketData = (url, onLostCall) => {
   };
 
   const resetDailyData = () => {
-    const todayStr = getLocalDateStr(new Date());
-    const calls = loadFromStorage(getDailyKey(todayStr));
-    const callsWithLocalDate = calls.map(call => ({
-      ...call,
-      localDateStr: todayStr
-    }));
-    setDailyCalls(callsWithLocalDate);
-    const agents = rebuildAgentsFromCalls(callsWithLocalDate);
-    setCumulativeAgents(agents);
+    // Réinitialise uniquement les données du jour courant
+    const todayKey = getStorageKey();
+    localStorage.removeItem(todayKey);
+    const now = new Date();
+    const todayCalls = allCalls.filter(call => call.startTime && getLocalDateStr(call.startTime) === getLocalDateStr(now));
+    setCumulativeAgents(rebuildAgentsFromCalls(todayCalls));
+    setAllCalls(todayCalls);
     setLastUpdate(new Date());
   };
 
   const resetWeeklyData = () => {
-    const now = new Date();
-    const weekKey = getWeekKey(now);
-    const calls = loadFromStorage(getWeeklyKey(weekKey));
-    setWeeklyCalls(calls);
-    setLastUpdate(new Date());
+    cleanupPreviousWeek();
+    setAllCalls([]);
+    setCumulativeAgents({});
+    setLastUpdate(null);
   };
 
   useEffect(() => {
     isMountedRef.current = true;
-    cleanupOldStorage();
-    resetDailyData();
-    resetWeeklyData();
+    const storedCalls = loadCallsFromStorage();
+    setAllCalls(storedCalls);
+    const rebuiltAgents = rebuildAgentsFromCalls(storedCalls);
+    setCumulativeAgents(rebuiltAgents);
     connect();
     return () => {
       isMountedRef.current = false;
@@ -591,118 +567,102 @@ const useWebSocketData = (url, onLostCall) => {
     connect();
   };
 
-  const callVolumes = useMemo(() => {
-    const todayStr = getLocalDateStr(new Date());
-    const todayCalls = dailyCalls.filter(call => call.localDateStr === todayStr);
+  const now = new Date();
+  const recentCalls = allCalls.filter(call =>
+    call.startTime && (now - call.startTime) < 7 * 24 * 60 * 60 * 1000
+  );
 
-    const volumes = halfHourSlots.map((time, index) => ({
-      index,
-      time,
-      CDS_IN: 0,
-      CDS_OUT: 0,
-      ABSYS: 0,
-    }));
+  const callVolumes = halfHourSlots.map((time, index) => ({
+    index,
+    time,
+    CDS_IN: 0,
+    CDS_OUT: 0,
+    ABSYS: 0,
+  }));
 
-    todayCalls.forEach(call => {
-      const localStartTime = new Date(call.startTime.getTime() + call.startTime.getTimezoneOffset() * 60000);
-      const h = localStartTime.getHours();
-      const m = localStartTime.getMinutes();
-      if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) return;
-      
-      // Trouver le bon slot
-      for (let i = 0; i < halfHourSlots.length; i++) {
-        const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
-        if (h > slotH || (h === slotH && m >= slotM)) {
-          if (i === halfHourSlots.length - 1 || 
-              (i < halfHourSlots.length - 1 && 
-               (localStartTime.getHours() < parseInt(halfHourSlots[i+1].split(':')[0]) || 
-                (localStartTime.getHours() === parseInt(halfHourSlots[i+1].split(':')[0]) && 
-                 localStartTime.getMinutes() < parseInt(halfHourSlots[i+1].split(':')[1]))))) {
-            if (call.callType === 'CDS_IN') volumes[i].CDS_IN += 1;
-            else if (call.callType === 'CDS_OUT') volumes[i].CDS_OUT += 1;
-            else if (call.callType === 'ABSYS') volumes[i].ABSYS += 1;
-            break;
-          }
-        }
-      }
-    });
-    return volumes;
-  }, [dailyCalls]);
-
-  // ✅ Calcul du tableau slaData pour SLABarchart à partir de weeklyCalls
-  const slaData = useMemo(() => {
-    const today = new Date();
-    const weekKey = getWeekKey(today);
-    const thisWeekCalls = weeklyCalls.filter(call => call.weekKey === weekKey);
-
-    // Filtrer les appels de la semaine pour les jours ouvrés (lundi à vendredi)
-    const weekdayCalls = thisWeekCalls.filter(call => {
-      const dayOfWeek = call.startTime?.getDay() || 0;
-      return dayOfWeek >= 1 && dayOfWeek <= 5; // 1=lun, 5=ven
-    });
-
-    // Grouper par date et par type d'appel
-    const groupedByDate = weekdayCalls.reduce((acc, call) => {
-      const dateStr = getLocalDateStr(call.startTime);
-      if (!acc[dateStr]) {
-        acc[dateStr] = { date: dateStr, dayLabel: '', inbound: 0, outbound: 0 };
-      }
-      if (call.callType === 'CDS_IN') {
-        acc[dateStr].inbound += 1;
-      } else if (call.callType === 'CDS_OUT') {
-        acc[dateStr].outbound += 1;
-      }
-      return acc;
-    }, {});
-
-    // Ajouter les labels de jour (Lun, Mar, etc.)
-    const days = Object.values(groupedByDate).map(item => {
-      const date = new Date(item.date);
-      const dayIndex = date.getDay(); // 0=dim, 1=lun, ..., 6=sam
-      const dayLabels = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-      item.dayLabel = dayLabels[dayIndex];
-      return item;
-    });
-
-    // Trier par date (le plus récent en premier)
-    days.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    // Retourner les 5 derniers jours ouvrés
-    return days.slice(0, 5).reverse(); // Inverser pour avoir le plus ancien en premier
-
-  }, [weeklyCalls]);
+  recentCalls.forEach(call => {
+    const slotIndex = getSlotIndex(call.startTime);
+    if (slotIndex >= 0 && slotIndex < callVolumes.length) {
+      if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
+      else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
+      else if (call.callType === 'ABSYS') callVolumes[slotIndex].ABSYS += 1;
+    }
+  });
 
   const employees = Object.values(cumulativeAgents);
   const totalInboundFromAgents = employees.reduce((sum, a) => sum + a.inbound + a.missed, 0);
   const totalMissedFromAgents = employees.reduce((sum, a) => sum + a.missed, 0);
   const achieved = totalInboundFromAgents > 0 ? Math.max(60, 100 - Math.round((totalMissedFromAgents / totalInboundFromAgents) * 100)) : 100;
-  const slaDataForKpi = [{ queue: 'Front Office', target: 90, achieved }];
+  const slaData = [{ queue: 'Front Office', target: 90, achieved }];
 
   return {
     employees,
     callVolumes,
-    slaData, // ✅ Utilisé par SLABarchart
-    slaDataForKpi, // ✅ Utilisé pour le KPI global (si nécessaire)
+    slaData,
     lastUpdate,
     isConnected,
     error,
     reconnect,
     halfHourSlots,
-    dailyCalls,
-    weeklyCalls,
+    allCalls,
     resetDailyData,
     resetWeeklyData,
   };
 };
 
-const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) => {
+// Statistiques quotidiennes (seulement le jour courant)
+const useTodayCallStats = (calls = []) => {
+  return useMemo(() => {
+    const today = getLocalDateStr(new Date());
+    return calls.filter(call => call.startTime && getLocalDateStr(call.startTime) === today);
+  }, [calls]);
+};
+
+// Statistiques hebdomadaires (lun–ven de la semaine en cours)
+const useWeeklyCallStats = (calls = []) => {
+  return useMemo(() => {
+    const now = new Date();
+    const monday = new Date(now);
+    const dayOfWeek = monday.getDay();
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    monday.setDate(now.getDate() + daysToMonday);
+    monday.setHours(0, 0, 0, 0);
+
+    const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
+    const weekData = [];
+    for (let i = 0; i < 5; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      const isoDate = formatDateToLocalISO(date);
+      weekData.push({
+        date: isoDate,
+        dayLabel: dayNames[i],
+        inbound: 0,
+        outbound: 0,
+      });
+    }
+
+    calls.forEach(call => {
+      if (!call.startTime || call.callType === 'ABSYS') return;
+      const callDate = getLocalDateStr(call.startTime);
+      const dayIndex = weekData.findIndex(d => d.date === callDate);
+      if (dayIndex !== -1) {
+        if (call.callType === 'CDS_IN') {
+          weekData[dayIndex].inbound += 1;
+        } else if (call.callType === 'CDS_OUT') {
+          weekData[dayIndex].outbound += 1;
+        }
+      }
+    });
+
+    return weekData;
+  }, [calls]);
+};
+
+const useKpiCalculations = (employees = [], todayCalls = []) => {
   return useMemo(() => {
     if (!Array.isArray(employees)) employees = [];
-    if (!Array.isArray(dailyCalls)) dailyCalls = [];
-    if (!Array.isArray(weeklyCalls)) weeklyCalls = [];
-
-    const todayStr = getLocalDateStr(new Date());
-    const todayCalls = dailyCalls.filter(call => call.localDateStr === todayStr);
+    if (!Array.isArray(todayCalls)) todayCalls = [];
 
     const totals = employees.reduce((acc, emp) => {
       acc.totalInboundCalls += (emp.inbound || 0) + (emp.missed || 0);
@@ -725,7 +685,6 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       totalAnsweredOutbound: 0,
     });
 
-    // ✅ Compter les appels ABSYS perdus hors pause (déjà fait dans WS)
     const absysMissed = todayCalls.filter(call => {
       if (call.callType !== 'ABSYS' || call.durationSec < 60) return false;
       const start = call.startTime;
@@ -751,14 +710,6 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       ? `${Math.round((totalMissed / totalInbound) * 100)}%`
       : '0%';
 
-    // ✅ Compter les appels de la semaine (CDS_IN + CDS_OUT) — CORRECTION : filtrer uniquement les jours ouvrés
-    const numberOfCallsThisWeek = weeklyCalls.filter(call =>
-      (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') &&
-      call.startTime && 
-      call.startTime.getDay() >= 1 && 
-      call.startTime.getDay() <= 5
-    ).length;
-
     return {
       totalAgents: employees.length,
       onlineAgents: employees.length,
@@ -771,9 +722,8 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       abandonRate,
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
-      numberOfCallsThisWeek,
     };
-  }, [employees, dailyCalls, weeklyCalls]);
+  }, [employees, todayCalls]);
 };
 
 // 🔊 Composant principal
@@ -785,34 +735,32 @@ const App = () => {
 
   const handleLostCall = () => {
     if (audioUnlocked) {
-      console.log('🔊 Lecture de fatality.mp3');
       playSound('fatality.mp3');
-    } else {
-      console.log('🔇 Sons non déverrouillés – fatality.mp3 ignoré');
     }
   };
 
   const {
     employees,
     callVolumes,
-    slaData, // ✅ Données pour SLABarchart
+    slaData,
     lastUpdate,
     isConnected,
     error,
     reconnect,
     halfHourSlots,
-    dailyCalls,
-    weeklyCalls,
+    allCalls,
     resetDailyData,
     resetWeeklyData,
   } = useWebSocketData(WS_URL, handleLostCall);
 
-  useMidnightResetScheduler(resetDailyData);
-  useWeeklyResetScheduler(resetWeeklyData);
+  useDailyResetAt8AM(resetDailyData);
+  useWeeklyResetOnMonday8AM(resetWeeklyData);
 
-  const kpi = useKpiCalculations(employees, dailyCalls, weeklyCalls);
+  const todayCalls = useTodayCallStats(allCalls);
+  const weeklyStats = useWeeklyCallStats(allCalls);
+  const kpi = useKpiCalculations(employees, todayCalls);
 
-  // 🔊 🔔 Sons horaires EXACTS à la seconde 0
+  // 🔊 Sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -820,11 +768,7 @@ const App = () => {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
-
-      if (seconds !== 0) return;
-
-      const timeKey = `${hours}:${minutes}:00`;
+      const timeKey = `${hours}:${minutes}`;
 
       if (lastScheduledSounds[timeKey]) return;
 
@@ -840,7 +784,6 @@ const App = () => {
       }
 
       if (soundToPlay) {
-        console.log(`🔊 Lecture de ${soundToPlay} à ${timeKey}`);
         playSound(soundToPlay);
         setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
       }
@@ -849,7 +792,7 @@ const App = () => {
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-  // 🏆 Son quand un agent devient 1er — ✅ RÉINTÉGRÉ ET FONCTIONNEL
+  // ✅ Son personnalisé quand un agent devient 1er
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -857,24 +800,25 @@ const App = () => {
     if (totalCalls < 50) return;
 
     const prevEmployees = prevEmployeesRef.current;
-    const currentTopAgent = employees.reduce((best, emp) => {
-      const total = (emp.inbound || 0) + (emp.outbound || 0);
-      return total > (best.total || 0) ? { ...emp, total } : best;
-    }, { total: -1, name: '' });
+    const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
+    const prevSorted = [...prevEmployees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
 
-    const prevTopAgent = prevEmployees.reduce((best, emp) => {
-      const total = (emp.inbound || 0) + (emp.outbound || 0);
-      return total > (best.total || 0) ? { ...emp, total } : best;
-    }, { total: -1, name: '' });
+    const currentTopAgent = currentEmployees[0];
+    const wasTopBefore = prevSorted.length > 0 && prevSorted[0]?.name === currentTopAgent.name;
 
-    if (currentTopAgent.name && currentTopAgent.name !== prevTopAgent.name) {
+    if (!wasTopBefore && currentTopAgent) {
       const allowedFirstNames = new Set([
         'xavier', 'rana', 'mathys', 'romain',
         'nicolas', 'julien', 'benjamin', 'malik'
       ]);
+
       const firstName = currentTopAgent.name.split(' ')[0]?.toLowerCase() || '';
-      const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
-      console.log(`🔊 ${currentTopAgent.name} est en tête ! Lecture de ${soundToPlay}`);
+
+      let soundToPlay = 'passage.mp3';
+      if (allowedFirstNames.has(firstName)) {
+        soundToPlay = `${firstName}.mp3`;
+      }
+
       playSound(soundToPlay);
     }
 
@@ -922,8 +866,8 @@ const App = () => {
           {[
             { title: "Total Agents", value: kpi.totalAgents, color: "info" },
             { 
-              title: "Number of calls",
-              value: kpi.numberOfCallsThisWeek != null ? kpi.numberOfCallsThisWeek.toString() : "0",
+              title: "Number of Calls",
+              value: (kpi.totalInboundCalls + kpi.totalOutboundCalls).toString(),
               color: "primary" 
             },
             { 
@@ -985,8 +929,9 @@ const App = () => {
             <Grid size={{ xs: 12 }}>
               <Box position="relative">
                 <SLABarchart 
-                  slaData={slaData} // ✅ Passer les données hebdomadaires filtrées
+                  slaData={weeklyStats} 
                   wsConnected={isConnected}
+                  onResetTodayOnly={resetDailyData}
                 />
                 {!audioUnlocked && (
                   <Box

@@ -6,6 +6,7 @@ import {
   Box,
   Skeleton,
   Chip,
+  Button,
 } from '@mui/material';
 import {
   BarChart,
@@ -41,7 +42,7 @@ const hideZeroLabels = (value) => {
   return value === 0 ? '' : formatNumber(value);
 };
 
-function SLABarchart({ slaData = [], wsConnected = false }) {
+function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
   const [data, setData] = useState([]);
   const [animate, setAnimate] = useState(false);
   const prevSlaDataRef = useRef();
@@ -163,7 +164,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </CardContent>
+      </CardContent> {/* ✅ Balise manquante ajoutée ici */}
     </Card>
   );
 }
