@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+// src/App.js
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Box,
   Grid,
@@ -11,7 +12,6 @@ import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 
-// 🔊 Fonction de lecture audio — utilise PUBLIC_URL
 const playSound = (filename) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
@@ -21,7 +21,6 @@ const playSound = (filename) => {
   }
 };
 
-// 🕒 Horloge — MATCH EXACT DU TITRE (police, liseré, ombres, pas de cadre)
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -66,8 +65,6 @@ function Clock() {
               0 0 12px rgba(255,255,255,0.5),
               0 0 16px rgba(255,255,255,0.3);
             padding: 0.5rem 1rem;
-            /* 🔸 Bordure retirée ici 🔸 */
-            /* border: 1px solid rgba(255,255,255,0.2); */
             border-radius: 4px;
             background: transparent;
             display: inline-block;
@@ -189,14 +186,6 @@ const getLocalDateStr = (date) => {
   return localDate.toISOString().split('T')[0];
 };
 
-const formatDateToLocalISO = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-// 🔁 Hook pour réinitialiser les données quotidiennes à 8h
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -215,7 +204,6 @@ const useDailyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// 🔁 Hook pour réinitialiser les données hebdomadaires le lundi à 8h
 const useWeeklyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -409,6 +397,22 @@ const useWebSocketData = (url, onLostCall) => {
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
+  const resetDailyData = () => {
+    setCumulativeAgents({});
+    setLastUpdate(null);
+    console.log('[Reset] Réinitialisation quotidienne des KPI (agents effacés, appels conservés)');
+  };
+
+  const resetWeeklyData = () => {
+    setAllCalls([]);
+    setCumulativeAgents({});
+    setLastUpdate(null);
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('callData_'))
+      .forEach(k => localStorage.removeItem(k));
+    console.log('[Reset] Réinitialisation hebdomadaire complète');
+  };
+
   const connect = () => {
     if (!isMountedRef.current) return;
     console.log(`[WS] 🔄 Connexion à ${url}`);
@@ -454,16 +458,33 @@ const useWebSocketData = (url, onLostCall) => {
             cdr.agentName = '';
           }
 
-          const { callType } = cdr;
+          const { callType, status } = cdr;
           const dur = cdr.duration.split(':').map(Number);
           const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
 
-          if (callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
-            if (onLostCall) onLostCall();
-            return;
+          const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
+
+          if (callType !== 'ABSYS' || (callType === 'ABSYS' && durationSec > 59)) {
+            console.log('[Appel reçu]', {
+              id: callWithSec.id,
+              type: callWithSec.callType,
+              agent: callWithSec.agentName || '—',
+              caller: callWithSec.caller,
+              status: callWithSec.status,
+              durationSec: callWithSec.durationSec,
+              startTime: callWithSec.startTime?.toISOString(),
+              missed: callWithSec.callType === 'CDS_IN' && 
+                      !['src_participant_terminated', 'dst_participant_terminated'].includes(callWithSec.status),
+            });
           }
 
-          const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
+          const isLostCall = 
+            callType === 'CDS_IN' && 
+            (status.includes('missed') || status.includes('abandoned') || durationSec === 0);
+
+          if (isLostCall && !isLunchBreak(cdr.startTime)) {
+            if (onLostCall) onLostCall();
+          }
 
           if (isInBusinessHours(cdr.startTime)) {
             setAllCalls(prev => {
@@ -525,24 +546,6 @@ const useWebSocketData = (url, onLostCall) => {
     };
   };
 
-  const resetDailyData = () => {
-    setAllCalls([]);
-    setCumulativeAgents({});
-    setLastUpdate(null);
-    localStorage.removeItem(getStorageKey());
-  };
-
-  const resetTodayOnly = () => {
-    const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-    const todayCalls = allCalls.filter(call => call.startTime && call.startTime >= startOfDay);
-    setAllCalls(todayCalls);
-    const rebuiltAgents = rebuildAgentsFromCalls(todayCalls);
-    setCumulativeAgents(rebuiltAgents);
-    saveCallsToStorage(todayCalls);
-    setLastUpdate(new Date());
-  };
-
   useEffect(() => {
     isMountedRef.current = true;
     cleanupOldStorage();
@@ -551,6 +554,10 @@ const useWebSocketData = (url, onLostCall) => {
     const rebuiltAgents = rebuildAgentsFromCalls(storedCalls);
     setCumulativeAgents(rebuiltAgents);
     connect();
+
+    useDailyResetScheduler(resetDailyData);
+    useWeeklyResetScheduler(resetWeeklyData);
+
     return () => {
       isMountedRef.current = false;
       if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
@@ -568,7 +575,7 @@ const useWebSocketData = (url, onLostCall) => {
 
   const now = new Date();
   const recentCalls = allCalls.filter(call =>
-    call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
+    call.startTime && (now - call.startTime) < 7 * 24 * 60 * 60 * 1000
   );
 
   const callVolumes = halfHourSlots.map((time, index) => ({
@@ -604,81 +611,12 @@ const useWebSocketData = (url, onLostCall) => {
     reconnect,
     halfHourSlots,
     allCalls,
-    resetDailyData,
-    resetTodayOnly,
   };
 };
 
-const useWeeklyCallStats = (calls = []) => {
-  const [weeklyCalls, setWeeklyCalls] = useState([]);
-
-  const resetWeeklyCalls = useCallback(() => {
-    setWeeklyCalls([]);
-  }, []);
-
-  useWeeklyResetScheduler(resetWeeklyCalls);
-
-  useEffect(() => {
-    if (calls.length === 0) return;
-    setWeeklyCalls(prev => {
-      const now = new Date();
-      const monday = new Date(now);
-      const dayOfWeek = monday.getDay();
-      const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      monday.setDate(monday.getDate() + daysToMonday);
-      monday.setHours(0, 0, 0, 0);
-
-      const thisWeekCalls = calls.filter(call => call.startTime && call.startTime >= monday);
-      const existingIds = new Set(prev.map(c => c.id));
-      const newCalls = thisWeekCalls.filter(c => !existingIds.has(c.id));
-
-      return [...prev, ...newCalls];
-    });
-  }, [calls]);
-
-  return useMemo(() => {
-    const now = new Date();
-    const monday = new Date(now);
-    const dayOfWeek = monday.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    monday.setDate(monday.getDate() + daysToMonday);
-    monday.setHours(0, 0, 0, 0);
-
-    const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
-    const weekData = [];
-    for (let i = 0; i < 5; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      const isoDate = formatDateToLocalISO(date);
-      weekData.push({
-        date: isoDate,
-        dayLabel: dayNames[i],
-        inbound: 0,
-        outbound: 0,
-      });
-    }
-
-    weeklyCalls.forEach(call => {
-      if (!call.startTime || call.callType === 'ABSYS') return;
-      const callDate = getLocalDateStr(call.startTime);
-      const dayIndex = weekData.findIndex(d => d.date === callDate);
-      if (dayIndex !== -1) {
-        if (call.callType === 'CDS_IN') {
-          weekData[dayIndex].inbound += 1;
-        } else if (call.callType === 'CDS_OUT') {
-          weekData[dayIndex].outbound += 1;
-        }
-      }
-    });
-
-    return weekData;
-  }, [weeklyCalls]);
-};
-
-const useKpiCalculations = (employees = [], dailyStats = [], allCalls = []) => {
+const useKpiCalculations = (employees = [], allCalls = []) => {
   return useMemo(() => {
     if (!Array.isArray(employees)) employees = [];
-    if (!Array.isArray(dailyStats)) dailyStats = [];
     if (!Array.isArray(allCalls)) allCalls = [];
 
     const totals = employees.reduce((acc, emp) => {
@@ -714,8 +652,11 @@ const useKpiCalculations = (employees = [], dailyStats = [], allCalls = []) => {
 
     const totalMissed = totals.missedFromAgents + absysMissed;
     const totalInbound = totals.totalInboundCalls + absysMissed;
-    const cdsInboundTotal = dailyStats.reduce((sum, day) => sum + day.inbound, 0);
-    const cdsOutboundTotal = dailyStats.reduce((sum, day) => sum + day.outbound, 0);
+
+    const totalCallsThisWeek = allCalls.filter(
+      call => call.callType === 'CDS_IN' || call.callType === 'CDS_OUT'
+    ).length;
+
     const avgInboundAHTSec = totals.totalAnsweredInbound > 0
       ? Math.floor(totals.totalInboundHandling / totals.totalAnsweredInbound)
       : 0;
@@ -741,13 +682,11 @@ const useKpiCalculations = (employees = [], dailyStats = [], allCalls = []) => {
       abandonRate,
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
-      cdsInboundTotal,
-      cdsOutboundTotal,
+      totalCallsThisWeek,
     };
-  }, [employees, dailyStats, allCalls]);
+  }, [employees, allCalls]);
 };
 
-// 🔊 Composant principal
 const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
   const [lastScheduledSounds, setLastScheduledSounds] = useState({});
@@ -770,15 +709,34 @@ const App = () => {
     reconnect,
     halfHourSlots,
     allCalls,
-    resetDailyData,
-    resetTodayOnly,
   } = useWebSocketData(WS_URL, handleLostCall);
 
-  useDailyResetScheduler(resetDailyData);
-  const dailyStats = useWeeklyCallStats(allCalls);
-  const kpi = useKpiCalculations(employees, dailyStats, allCalls);
+  // 🔹 Normalisation : toujours afficher Lun–Ven
+  const currentWeekTemplate = [
+    { dayLabel: 'Lun', inbound: 0, outbound: 0 },
+    { dayLabel: 'Mar', inbound: 0, outbound: 0 },
+    { dayLabel: 'Mer', inbound: 0, outbound: 0 },
+    { dayLabel: 'Jeu', inbound: 0, outbound: 0 },
+    { dayLabel: 'Ven', inbound: 0, outbound: 0 },
+  ];
 
-  // 🔊 Sons horaires (début, pause, etc.)
+  const slaDataForChart = allCalls
+    .filter(call => call.startTime)
+    .reduce((acc, call) => {
+      const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+      const dayLabel = dayNames[call.startTime.getDay()];
+      if (!['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'].includes(dayLabel)) return acc;
+
+      const day = acc.find(d => d.dayLabel === dayLabel);
+      if (day) {
+        if (call.callType === 'CDS_IN') day.inbound += 1;
+        else if (call.callType === 'CDS_OUT') day.outbound += 1;
+      }
+      return acc;
+    }, [...currentWeekTemplate]);
+
+  const kpi = useKpiCalculations(employees, allCalls);
+
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -810,7 +768,6 @@ const App = () => {
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-  // ✅ Son personnalisé quand un agent devient 1er (après ≥50 appels)
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -842,10 +799,6 @@ const App = () => {
 
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
-
-  useEffect(() => {
-    console.table(dailyStats.map(d => ({ date: d.date, day: d.dayLabel, in: d.inbound, out: d.outbound })));
-  }, [dailyStats]);
 
   const unlockAudio = () => {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
@@ -883,13 +836,12 @@ const App = () => {
           <Clock />
         </Box>
 
-        {/* 🔹 LIGNE 1 */}
         <Grid container spacing={3} justifyContent="center" sx={{ mt: 4 }} aria-label="KPI Principaux">
           {[
             { title: "Total Agents", value: kpi.totalAgents, color: "info" },
             { 
               title: "Number of Calls",
-              value: (kpi.totalInboundCalls + kpi.totalOutboundCalls).toString(),
+              value: kpi.totalCallsThisWeek.toString(),
               color: "primary" 
             },
             { 
@@ -915,7 +867,6 @@ const App = () => {
           ))}
         </Grid>
 
-        {/* 🔹 LIGNE 2 */}
         <Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }} aria-label="KPI Détail Appels">
           {[
             { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default" },
@@ -951,9 +902,8 @@ const App = () => {
             <Grid size={{ xs: 12 }}>
               <Box position="relative">
                 <SLABarchart 
-                  slaData={dailyStats} 
+                  slaData={slaDataForChart} 
                   wsConnected={isConnected}
-                  onResetTodayOnly={resetTodayOnly}
                 />
                 {!audioUnlocked && (
                   <Box

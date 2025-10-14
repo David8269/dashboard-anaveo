@@ -6,7 +6,6 @@ import {
   Box,
   Skeleton,
   Chip,
-  Button,
 } from '@mui/material';
 import {
   BarChart,
@@ -20,15 +19,7 @@ import {
   Legend,
   Cell,
 } from 'recharts';
-import { keyframes } from '@emotion/react';
 
-const highlightAnimation = keyframes`
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.02); opacity: 0.9; }
-  100% { transform: scale(1); opacity: 1; }
-`;
-
-// Couleurs fixes pour la légende et les barres
 const INBOUND_COLOR = '#42A5F5'; // bleu
 const OUTBOUND_COLOR = '#66BB6A'; // vert
 
@@ -37,12 +28,11 @@ const formatNumber = (num) => {
   return num.toString();
 };
 
-// Masque les labels "0"
 const hideZeroLabels = (value) => {
   return value === 0 ? '' : formatNumber(value);
 };
 
-function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
+function SLABarchart({ slaData = [], wsConnected = false }) {
   const [data, setData] = useState([]);
   const [animate, setAnimate] = useState(false);
   const prevSlaDataRef = useRef();
@@ -86,11 +76,18 @@ function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
         maxWidth: 1150,
         width: '100%',
         borderRadius: 3,
-        ...(animate && {
-          animation: `${highlightAnimation} 0.6s ease-in-out`,
-        }),
       }}
+      style={animate ? { animation: 'highlightAnimation 0.6s ease-in-out' } : {}}
     >
+      <style>
+        {`
+          @keyframes highlightAnimation {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+        `}
+      </style>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="overline" color="text.secondary">
@@ -98,7 +95,7 @@ function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
           </Typography>
           <Chip label="🟢 Live" size="small" color="success" />
         </Box>
-        <div aria-label="Graphique à barres du nombre d'appels entrants et sortants">
+        <Box aria-label="Graphique à barres du nombre d'appels entrants et sortants">
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2f3a49" />
@@ -112,7 +109,6 @@ function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
                   color: '#fff',
                 }}
               />
-              {/* 🔥 Légende personnalisée */}
               <Legend
                 content={() => (
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, pt: 1 }}>
@@ -131,10 +127,8 @@ function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
                   </Box>
                 )}
               />
-
-              {/* Inbound */}
               <Bar dataKey="inbound" name="Inbound" fill={INBOUND_COLOR} maxBarSize={80}>
-                {data.map((entry, index) => (
+                {data.map((_, index) => (
                   <Cell key={`inbound-${index}`} fill={INBOUND_COLOR} />
                 ))}
                 <LabelList
@@ -146,10 +140,8 @@ function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
                   formatter={hideZeroLabels}
                 />
               </Bar>
-
-              {/* Outbound */}
               <Bar dataKey="outbound" name="Outbound" fill={OUTBOUND_COLOR} maxBarSize={80}>
-                {data.map((entry, index) => (
+                {data.map((_, index) => (
                   <Cell key={`outbound-${index}`} fill={OUTBOUND_COLOR} />
                 ))}
                 <LabelList
@@ -163,8 +155,8 @@ function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
-      </CardContent> {/* ✅ Balise manquante ajoutée ici */}
+        </Box>
+      </CardContent>
     </Card>
   );
 }
