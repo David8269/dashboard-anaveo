@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Box,
@@ -114,7 +113,7 @@ function Clock() {
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
-  return totalMinutes >= 750 && totalMinutes < 840;
+  return totalMinutes >= 750 && totalMinutes < 840; // 12:30 à 14:00
 };
 
 const formatSecondsToMMSS = (totalSeconds) => {
@@ -186,7 +185,7 @@ const getLocalDateStr = (date) => {
   return localDate.toISOString().split('T')[0];
 };
 
-// 🔁 Hooks de planification — à utiliser DANS LE COMPOSANT PRINCIPAL
+// 🔁 Hooks de planification
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -398,7 +397,6 @@ const useWebSocketData = (url, onLostCall) => {
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
-  // 🔹 Fonctions de reset — maintenant exposées
   const resetDailyData = () => {
     setCumulativeAgents({});
     setLastUpdate(null);
@@ -480,11 +478,17 @@ const useWebSocketData = (url, onLostCall) => {
             });
           }
 
-          const isLostCall = 
-            callType === 'CDS_IN' && 
-            (status.includes('missed') || status.includes('abandoned') || durationSec === 0);
+          // 🔥 DÉTECTION ÉTENDUE DES APPELS PERDUS
+          let isLostCall = false;
 
-          if (isLostCall && !isLunchBreak(cdr.startTime)) {
+          if (callType === 'CDS_IN') {
+            isLostCall = status.includes('missed') || status.includes('abandoned') || durationSec === 0;
+          } else if (callType === 'ABSYS') {
+            // ABSYS perdu = ≥60s ET hors pause déjeuner
+            isLostCall = durationSec >= 60 && !isLunchBreak(cdr.startTime);
+          }
+
+          if (isLostCall) {
             if (onLostCall) onLostCall();
           }
 
@@ -600,7 +604,6 @@ const useWebSocketData = (url, onLostCall) => {
   const achieved = totalInboundFromAgents > 0 ? Math.max(60, 100 - Math.round((totalMissedFromAgents / totalInboundFromAgents) * 100)) : 100;
   const slaData = [{ queue: 'Front Office', target: 90, achieved }];
 
-  // ✅ Expose les fonctions de reset
   return {
     employees,
     callVolumes,
@@ -691,7 +694,6 @@ const useKpiCalculations = (employees = [], allCalls = []) => {
 
 const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
-  const [lastScheduledSounds, setLastScheduledSounds] = useState({});
   const prevEmployeesRef = useRef([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
 
@@ -715,11 +717,9 @@ const App = () => {
     resetWeeklyData,
   } = useWebSocketData(WS_URL, handleLostCall);
 
-  // ✅ Planification des resets — AU NIVEAU RACINE DU COMPOSANT
   useDailyResetScheduler(resetDailyData);
   useWeeklyResetScheduler(resetWeeklyData);
 
-  // 🔹 Normalisation : toujours afficher Lun–Ven
   const currentWeekTemplate = [
     { dayLabel: 'Lun', inbound: 0, outbound: 0 },
     { dayLabel: 'Mar', inbound: 0, outbound: 0 },
@@ -745,37 +745,40 @@ const App = () => {
 
   const kpi = useKpiCalculations(employees, allCalls);
 
+  // 🔊 Planification précise des sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
 
-    const interval = setInterval(() => {
+    const scheduleSoundAt = (targetHour, targetMinute, soundFile) => {
       const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const timeKey = `${hours}:${minutes}`;
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), targetHour, targetMinute, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
 
-      if (lastScheduledSounds[timeKey]) return;
+      const scheduledTime = today > now ? today : tomorrow;
+      const delay = scheduledTime.getTime() - now.getTime();
 
-      let soundToPlay = null;
-      if (hours === 8 && minutes === 30) {
-        soundToPlay = 'debut.mp3';
-      } else if (hours === 12 && minutes === 30) {
-        soundToPlay = 'pause.mp3';
-      } else if (hours === 14 && minutes === 0) {
-        soundToPlay = 'reprise.mp3';
-      } else if (hours === 18 && minutes === 0) {
-        soundToPlay = 'fin.mp3';
-      }
+      const timeoutId = setTimeout(() => {
+        playSound(soundFile);
+        scheduleSoundAt(targetHour, targetMinute, soundFile);
+      }, delay);
 
-      if (soundToPlay) {
-        playSound(soundToPlay);
-        setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
-      }
-    }, 1000);
+      return timeoutId;
+    };
 
-    return () => clearInterval(interval);
-  }, [audioUnlocked, lastScheduledSounds]);
+    const timeouts = [
+      scheduleSoundAt(8, 30, 'debut.mp3'),
+      scheduleSoundAt(12, 30, 'pause.mp3'),
+      scheduleSoundAt(14, 0, 'reprise.mp3'),
+      scheduleSoundAt(18, 0, 'fin.mp3'),
+    ];
 
+    return () => {
+      timeouts.forEach(id => clearTimeout(id));
+    };
+  }, [audioUnlocked]);
+
+  // 🔊 Son quand un agent devient n°1
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
