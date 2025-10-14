@@ -560,13 +560,31 @@ const useWebSocketData = (url, onLostCall) => {
     setLastUpdate(new Date());
   };
 
+  // ✅ CHARGEMENT INITIAL DES DONNÉES AU MONTAGE
   useEffect(() => {
     isMountedRef.current = true;
     cleanupOldStorage();
+
+    // ✅ Chargement des données existantes AVANT la connexion WS
     const now = new Date();
-    setDailyCalls(loadFromStorage(getDailyKey(now)));
-    setWeeklyCalls(loadFromStorage(getWeeklyKey(now)));
+    const loadedDaily = loadFromStorage(getDailyKey(now));
+    const loadedWeekly = loadFromStorage(getWeeklyKey(now));
+
+    setDailyCalls(loadedDaily);
+    setWeeklyCalls(loadedWeekly);
+
+    // ✅ Reconstruction des agents à partir des appels chargés
+    const agents = rebuildAgentsFromCalls(loadedDaily);
+    setCumulativeAgents(agents);
+
+    // ✅ Initialisation de lastUpdate
+    if (loadedDaily.length > 0) {
+      setLastUpdate(new Date(Math.max(...loadedDaily.map(c => c.receivedAt.getTime()))); // dernier appel reçu
+    }
+
+    // ✅ Connexion WebSocket
     connect();
+
     return () => {
       isMountedRef.current = false;
       if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
