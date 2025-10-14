@@ -279,12 +279,25 @@ const useWebSocketData = (url, onLostCall) => {
       const stored = localStorage.getItem(key);
       if (stored) {
         const parsed = JSON.parse(stored);
-        return parsed.map(call => ({
-          ...call,
-          startTime: call.startTime ? new Date(call.startTime) : null,
-          endTime: call.endTime ? new Date(call.endTime) : null,
-          receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
-        })).filter(call => call.startTime);
+        return parsed.map(call => {
+          const converted = {
+            ...call,
+            startTime: call.startTime ? new Date(call.startTime) : null,
+            endTime: call.endTime ? new Date(call.endTime) : null,
+            receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
+          };
+          // ✅ Convertir startTime en locale si nécessaire
+          if (converted.startTime) {
+            converted.startTime = new Date(converted.startTime.getTime() + converted.startTime.getTimezoneOffset() * 60000);
+          }
+          if (converted.endTime) {
+            converted.endTime = new Date(converted.endTime.getTime() + converted.endTime.getTimezoneOffset() * 60000);
+          }
+          if (converted.receivedAt) {
+            converted.receivedAt = new Date(converted.receivedAt.getTime() + converted.receivedAt.getTimezoneOffset() * 60000);
+          }
+          return converted;
+        }).filter(call => call.startTime);
       }
     } catch (e) {
       console.warn(`[Storage] ⚠️ Échec chargement ${key}`, e);
@@ -297,6 +310,13 @@ const useWebSocketData = (url, onLostCall) => {
     const agents = {};
     calls.forEach(cdr => {
       if (cdr.callType === 'ABSYS') return;
+
+      // ✅ Convertir startTime en locale pour comparaison
+      let localStartTime = cdr.startTime;
+      if (localStartTime) {
+        localStartTime = new Date(localStartTime.getTime() + localStartTime.getTimezoneOffset() * 60000);
+      }
+
       const { callType, agentName } = cdr;
       if (!agentName) return;
       if (!agents[agentName]) {
@@ -387,8 +407,8 @@ const useWebSocketData = (url, onLostCall) => {
   // ✅ CORRECTION : utiliser heure locale
   const isInBusinessHours = (date) => {
     if (!date) return false;
-    const h = date.getHours();
-    const m = date.getMinutes();
+    const h = date.getHours();       // ← HEURE LOCALE
+    const m = date.getMinutes();     // ← MINUTES LOCALES
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
@@ -479,7 +499,10 @@ const useWebSocketData = (url, onLostCall) => {
         if (isInBusinessHours(callWithSec.startTime)) {
           const now = new Date();
           const todayStr = getLocalDateStr(now);
-          const callDateStr = getLocalDateStr(callWithSec.startTime);
+
+          // ✅ Convertir startTime en locale pour comparaison
+          const localStartTime = new Date(callWithSec.startTime.getTime() + callWithSec.startTime.getTimezoneOffset() * 60000);
+          const callDateStr = getLocalDateStr(localStartTime);
 
           if (callDateStr === todayStr) {
             setDailyCalls(prev => {
@@ -489,7 +512,7 @@ const useWebSocketData = (url, onLostCall) => {
             });
           }
 
-          const dayOfWeek = callWithSec.startTime.getDay(); // 1=lun ... 5=ven
+          const dayOfWeek = localStartTime.getDay(); // 1=lun ... 5=ven
           if (dayOfWeek >= 1 && dayOfWeek <= 5) {
             setWeeklyCalls(prev => {
               const updated = [...prev, callWithSec];
@@ -560,31 +583,13 @@ const useWebSocketData = (url, onLostCall) => {
     setLastUpdate(new Date());
   };
 
-  // ✅ CHARGEMENT INITIAL DES DONNÉES AU MONTAGE
   useEffect(() => {
     isMountedRef.current = true;
     cleanupOldStorage();
-
-    // ✅ Chargement des données existantes AVANT la connexion WS
     const now = new Date();
-    const loadedDaily = loadFromStorage(getDailyKey(now));
-    const loadedWeekly = loadFromStorage(getWeeklyKey(now));
-
-    setDailyCalls(loadedDaily);
-    setWeeklyCalls(loadedWeekly);
-
-    // ✅ Reconstruction des agents à partir des appels chargés
-    const agents = rebuildAgentsFromCalls(loadedDaily);
-    setCumulativeAgents(agents);
-
-    // ✅ Initialisation de lastUpdate
-    if (loadedDaily.length > 0) {
-      setLastUpdate(new Date(Math.max(...loadedDaily.map(c => c.receivedAt.getTime()))); // dernier appel reçu
-    }
-
-    // ✅ Connexion WebSocket
+    setDailyCalls(loadFromStorage(getDailyKey(now)));
+    setWeeklyCalls(loadFromStorage(getWeeklyKey(now)));
     connect();
-
     return () => {
       isMountedRef.current = false;
       if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
@@ -602,9 +607,13 @@ const useWebSocketData = (url, onLostCall) => {
 
   const callVolumes = useMemo(() => {
     const now = new Date();
-    const recentCalls = dailyCalls.filter(call =>
-      call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
-    );
+    const recentCalls = dailyCalls.filter(call => {
+      if (!call.startTime) return false;
+      // ✅ Convertir startTime en locale pour comparaison
+      const localStartTime = new Date(call.startTime.getTime() + call.startTime.getTimezoneOffset() * 60000);
+      const nowLocal = new Date();
+      return (nowLocal - localStartTime) < 24 * 60 * 60 * 1000;
+    });
 
     const volumes = halfHourSlots.map((time, index) => ({
       index,
@@ -615,8 +624,10 @@ const useWebSocketData = (url, onLostCall) => {
     }));
 
     recentCalls.forEach(call => {
-      const h = call.startTime.getHours();
-      const m = call.startTime.getMinutes();
+      // ✅ Utiliser localStartTime pour le filtrage horaire
+      const localStartTime = new Date(call.startTime.getTime() + call.startTime.getTimezoneOffset() * 60000);
+      const h = localStartTime.getHours();
+      const m = localStartTime.getMinutes();
       if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) return;
       for (let i = halfHourSlots.length - 1; i >= 0; i--) {
         const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);

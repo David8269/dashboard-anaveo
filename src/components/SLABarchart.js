@@ -6,7 +6,6 @@ import {
   Box,
   Skeleton,
   Chip,
-  Button,
 } from '@mui/material';
 import {
   BarChart,
@@ -42,7 +41,7 @@ const hideZeroLabels = (value) => {
   return value === 0 ? '' : formatNumber(value);
 };
 
-function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
+function SLABarchart({ slaData = [], wsConnected = false }) {
   const [data, setData] = useState([]);
   const [animate, setAnimate] = useState(false);
   const prevSlaDataRef = useRef();
@@ -164,32 +163,6 @@ function SLABarchart({ slaData = [], wsConnected = false, onResetTodayOnly }) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        {/* 🔁 Bouton Reset en bas à gauche */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 16,
-            left: 16,
-            zIndex: 2,
-          }}
-        >
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={onResetTodayOnly}
-            sx={{
-              fontWeight: 'bold',
-              textTransform: 'none',
-              padding: '6px 12px',
-              fontSize: '0.875rem',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-            }}
-          >
-            🔁 Reset Jour
-          </Button>
-        </Box>
       </CardContent>
     </Card>
   );
