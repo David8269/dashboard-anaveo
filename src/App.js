@@ -715,6 +715,31 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       call.startTime.getDay() <= 5
     ).length;
 
+    // ✅ Générer les données hebdomadaires pour le graphique
+    const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
+    const today = new Date();
+    const currentWeekKey = getWeekKey(today);
+    
+    // Filtrer les appels de la semaine courante
+    const currentWeekCalls = weeklyCalls.filter(call => call.weekKey === currentWeekKey);
+    
+    // Initialiser les données hebdomadaires
+    const weeklyData = weekDays.map((dayLabel, index) => {
+      const dayIndex = index + 1; // 1=lun, 2=mar, ..., 5=ven
+      const dayCalls = currentWeekCalls.filter(call => {
+        const localDate = new Date(call.startTime.getTime() + call.startTime.getTimezoneOffset() * 60000);
+        return localDate.getDay() === dayIndex;
+      });
+      const inbound = dayCalls.filter(call => call.callType === 'CDS_IN').length;
+      const outbound = dayCalls.filter(call => call.callType === 'CDS_OUT').length;
+      return {
+        date: getLocalDateStr(new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + dayIndex)),
+        dayLabel,
+        inbound,
+        outbound
+      };
+    });
+
     return {
       totalAgents: employees.length,
       onlineAgents: employees.length,
@@ -728,6 +753,7 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
       numberOfCallsThisWeek,
+      weeklyData, // ✅ Nouveau champ pour le graphique hebdomadaire
     };
   }, [employees, dailyCalls, weeklyCalls]);
 };
@@ -943,6 +969,7 @@ const App = () => {
                 <SLABarchart 
                   slaData={slaData} 
                   wsConnected={isConnected}
+                  weeklyData={kpi.weeklyData} // ✅ Passer les données hebdomadaires
                 />
                 {!audioUnlocked && (
                   <Box
