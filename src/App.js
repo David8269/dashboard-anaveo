@@ -378,10 +378,11 @@ const useWebSocketData = (url, onLostCall) => {
     }
   };
 
+  // ✅ CORRECTION MAJEURE : utiliser getHours() (locale), pas getUTCHours()
   const isInBusinessHours = (date) => {
     if (!date) return false;
-    const h = date.getUTCHours();
-    const m = date.getUTCMinutes();
+    const h = date.getHours();       // ← HEURE LOCALE
+    const m = date.getMinutes();     // ← MINUTES LOCALES
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
@@ -439,7 +440,7 @@ const useWebSocketData = (url, onLostCall) => {
       if (!isMountedRef.current) return;
       const msg = event.data;
       if (typeof msg === 'string' && msg.startsWith('Call ')) {
-        console.log(`[WS] 📥 Message brut reçu :`, msg); // 🔍 LOG ICI
+        console.log(`[WS] 📥 Message brut reçu :`, msg);
         const cdr = parseCDRLine(msg);
         if (!cdr) {
           console.warn('[WS] ❌ Parsing échoué pour ce message');
@@ -454,7 +455,6 @@ const useWebSocketData = (url, onLostCall) => {
         const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
         const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
 
-        // Appliquer pause déjeuner
         if (isLunchBreak(callWithSec.startTime)) {
           callWithSec.callType = 'ABSYS';
           callWithSec.agentName = '';
@@ -470,7 +470,6 @@ const useWebSocketData = (url, onLostCall) => {
           localDate: getLocalDateStr(callWithSec.startTime),
         });
 
-        // 🔴 Détection appel perdu
         if (callWithSec.callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(callWithSec.startTime)) {
           console.log('[Appel perdu détecté] 💀 Joue fatality.mp3');
           if (onLostCall) onLostCall();
@@ -811,7 +810,6 @@ const App = () => {
   const weeklyStats = useWeeklyCallStats(allCalls);
   const kpi = useKpiCalculations(employees, todayStats, allCalls);
 
-  // 🔊 🔔 Sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
     const interval = setInterval(() => {
@@ -836,7 +834,6 @@ const App = () => {
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-  // 🏆 Son top agent
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
     const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
