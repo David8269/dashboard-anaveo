@@ -167,7 +167,7 @@ const generateHalfHourSlots = () => {
 
 const halfHourSlots = generateHalfHourSlots();
 
-// ✅ UTILISER DATE LOCALE POUR STOCKAGE ET FILTRAGE
+// ✅ UTILISER DATE LOCALE
 const getLocalDateStr = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -175,7 +175,17 @@ const getLocalDateStr = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// 🔄 Réinitialisation quotidienne à minuit (heure locale)
+// ✅ Obtenir clé hebdomadaire ISO (ex: 2025-W42)
+const getWeekKey = (date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 4 - (d.getDay() || 7)); // jeudi de la semaine
+  const year = d.getFullYear();
+  const week = Math.ceil((((d - new Date(year, 0, 1)) / 86400000) + new Date(year, 0, 1).getDay() + 1) / 7);
+  return `${year}-W${String(week).padStart(2, '0')}`;
+};
+
+// 🔄 Réinitialisation quotidienne à minuit (locale)
 const useMidnightResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -193,19 +203,16 @@ const useMidnightResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// 🔄 Réinitialisation hebdomadaire le lundi à 8h (heure locale)
+// 🔄 Réinitialisation hebdomadaire le lundi à 00:00 (locale)
 const useWeeklyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
-      const dayOfWeek = now.getDay();
-      let daysUntilMonday = (1 - dayOfWeek + 7) % 7;
-      if (daysUntilMonday === 0 && now.getHours() >= 8) {
-        daysUntilMonday = 7;
-      }
+      const dayOfWeek = now.getDay(); // 0 = dimanche
+      let daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
       const nextReset = new Date(now);
       nextReset.setDate(now.getDate() + daysUntilMonday);
-      nextReset.setHours(8, 0, 0, 0);
+      nextReset.setHours(0, 0, 0, 0);
       const delay = nextReset.getTime() - now.getTime();
       const timeoutId = setTimeout(() => {
         resetFn();
@@ -219,8 +226,9 @@ const useWeeklyResetScheduler = (resetFn) => {
 
 // 📡 Hook WebSocket + gestion locale
 const useWebSocketData = (url, onLostCall) => {
+  const [dailyCalls, setDailyCalls] = useState([]);
+  const [weeklyCalls, setWeeklyCalls] = useState([]);
   const [cumulativeAgents, setCumulativeAgents] = useState({});
-  const [allCalls, setAllCalls] = useState([]);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
@@ -230,58 +238,56 @@ const useWebSocketData = (url, onLostCall) => {
   const connectionTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
 
-  const getStorageKey = (date = new Date()) => `callData_${getLocalDateStr(date)}`;
+  const getDailyKey = (date = new Date()) => `callData_daily_${getLocalDateStr(date)}`;
+  const getWeeklyKey = (date = new Date()) => `callData_weekly_${getWeekKey(date)}`;
 
   const cleanupOldStorage = () => {
     const now = new Date();
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key?.startsWith('callData_')) {
-        const dateStr = key.split('_')[1];
-        const date = new Date(dateStr + 'T00:00:00');
-        const daysDiff = Math.floor((now - date) / (24 * 60 * 60 * 1000));
-        if (daysDiff > 7) {
-          localStorage.removeItem(key);
+        const datePart = key.split('_').slice(-1)[0];
+        const isWeekly = key.includes('_weekly_');
+        let date;
+        if (!isWeekly) {
+          date = new Date(datePart + 'T00:00:00');
+          const daysDiff = Math.floor((now - date) / (24 * 60 * 60 * 1000));
+          if (daysDiff > 7) {
+            localStorage.removeItem(key);
+          }
         }
       }
     }
   };
 
-  const saveCallsToStorage = (calls, date = new Date()) => {
+  const saveToStorage = (key, calls) => {
     try {
-      const key = getStorageKey(date);
-      const serializableCalls = calls.map(call => ({
+      const serializable = calls.map(call => ({
         ...call,
         startTime: call.startTime?.toISOString() || null,
         endTime: call.endTime?.toISOString() || null,
         receivedAt: call.receivedAt?.toISOString() || null,
       }));
-      localStorage.setItem(key, JSON.stringify(serializableCalls));
-      console.log(`[Storage] ✅ Sauvegardé ${calls.length} appels sous ${key}`);
+      localStorage.setItem(key, JSON.stringify(serializable));
     } catch (e) {
-      console.warn('[Storage] ⚠️ Sauvegarde échouée', e);
+      console.warn(`[Storage] ⚠️ Échec sauvegarde ${key}`, e);
     }
   };
 
-  const loadCallsFromStorage = (date) => {
-    const key = getStorageKey(date);
+  const loadFromStorage = (key) => {
     try {
       const stored = localStorage.getItem(key);
       if (stored) {
         const parsed = JSON.parse(stored);
-        const calls = parsed.map(call => ({
+        return parsed.map(call => ({
           ...call,
           startTime: call.startTime ? new Date(call.startTime) : null,
           endTime: call.endTime ? new Date(call.endTime) : null,
           receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
         })).filter(call => call.startTime);
-        console.log(`[Storage] 🔽 Chargé ${calls.length} appels depuis ${key}`);
-        return calls;
-      } else {
-        console.log(`[Storage] 📁 Aucun appel trouvé pour ${key}`);
       }
     } catch (e) {
-      console.warn(`[Storage] ⚠️ Chargement échoué pour ${key}`, e);
+      console.warn(`[Storage] ⚠️ Échec chargement ${key}`, e);
       localStorage.removeItem(key);
     }
     return [];
@@ -378,28 +384,12 @@ const useWebSocketData = (url, onLostCall) => {
     }
   };
 
-  // ✅ CORRECTION MAJEURE : utiliser getHours() (locale), pas getUTCHours()
+  // ✅ CORRECTION : utiliser heure locale
   const isInBusinessHours = (date) => {
     if (!date) return false;
-    const h = date.getHours();       // ← HEURE LOCALE
-    const m = date.getMinutes();     // ← MINUTES LOCALES
-    return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
-  };
-
-  const getLocalSlotIndex = (date) => {
-    if (!date) return -1;
     const h = date.getHours();
     const m = date.getMinutes();
-    if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) {
-      return -1;
-    }
-    for (let i = halfHourSlots.length - 1; i >= 0; i--) {
-      const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
-      if (h > slotH || (h === slotH && m >= slotM)) {
-        return i;
-      }
-    }
-    return -1;
+    return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
   const connect = () => {
@@ -440,92 +430,100 @@ const useWebSocketData = (url, onLostCall) => {
       if (!isMountedRef.current) return;
       const msg = event.data;
       if (typeof msg === 'string' && msg.startsWith('Call ')) {
-        console.log(`[WS] 📥 Message brut reçu :`, msg);
         const cdr = parseCDRLine(msg);
-        if (!cdr) {
-          console.warn('[WS] ❌ Parsing échoué pour ce message');
-          return;
-        }
-        if (!cdr.startTime) {
-          console.warn('[WS] ⚠️ Appel sans startTime valide', cdr);
-          return;
-        }
+        if (!cdr || !cdr.startTime) return;
 
         const dur = cdr.duration.split(':').map(Number);
         const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
         const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
+
+        // 🔍 LOG DÉTAILLÉ POUR DIAGNOSTIC
+        console.log(`[WS] 📥 Message brut :`, msg);
+        console.log(`[WS] 📞 Appel parsé :`, {
+          id: callWithSec.id,
+          startTime: callWithSec.startTime,
+          callType: callWithSec.callType,
+          status: callWithSec.status,
+          agent: callWithSec.agentName,
+          durationSec: callWithSec.durationSec,
+          isLunchBreak: isLunchBreak(callWithSec.startTime),
+        });
 
         if (isLunchBreak(callWithSec.startTime)) {
           callWithSec.callType = 'ABSYS';
           callWithSec.agentName = '';
         }
 
-        console.log(`[WS] 📞 Appel parsé :`, {
-          id: callWithSec.id,
-          startTime: callWithSec.startTime,
-          callType: callWithSec.callType,
-          agent: callWithSec.agentName,
-          durationSec,
-          status: callWithSec.status,
-          localDate: getLocalDateStr(callWithSec.startTime),
-        });
-
+        // 🔴 DÉTECTION D'UN APPEL PERDU : ABSYS <60s HORS PAUSE
         if (callWithSec.callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(callWithSec.startTime)) {
           console.log('[Appel perdu détecté] 💀 Joue fatality.mp3');
           if (onLostCall) onLostCall();
           return;
         }
-        if (callWithSec.callType === 'CDS_IN' && (callWithSec.status.includes('missed') || callWithSec.status.includes('abandoned'))) {
-          console.log('[Appel manqué détecté] 💀 Joue fatality.mp3');
-          if (onLostCall) onLostCall();
+
+        // 🔴 DÉTECTION ROBUSTE D'UN APPEL MANQUÉ
+        let isMissedStatus = false;
+        if (callWithSec.callType === 'CDS_IN') {
+          const statusLower = callWithSec.status.toLowerCase();
+          isMissedStatus = [
+            'missed', 'abandoned', 'missed_call', 'abandoned_call',
+            'call_missed', 'call_abandoned', 'no_answer', 'timeout'
+          ].some(keyword => statusLower.includes(keyword));
+
+          if (isMissedStatus) {
+            console.log(`[Appel manqué détecté] 💀 Statut: "${callWithSec.status}" → Joue fatality.mp3`);
+            if (onLostCall) onLostCall();
+          }
         }
 
         if (isInBusinessHours(callWithSec.startTime)) {
-          const today = new Date();
-          const todayStr = getLocalDateStr(today);
+          const now = new Date();
+          const todayStr = getLocalDateStr(now);
           const callDateStr = getLocalDateStr(callWithSec.startTime);
-          console.log(`[Filtre] Appel du ${callDateStr}, aujourd’hui = ${todayStr}`);
 
           if (callDateStr === todayStr) {
-            setAllCalls(prev => {
+            setDailyCalls(prev => {
               const updated = [...prev, callWithSec];
-              saveCallsToStorage(updated, today);
-              console.log(`[State] ➕ Ajouté à allCalls (total: ${updated.length})`);
+              saveToStorage(getDailyKey(now), updated);
               return updated;
             });
-
-            if (callWithSec.agentName && callWithSec.callType !== 'ABSYS') {
-              setCumulativeAgents(prev => {
-                const agent = prev[callWithSec.agentName] || {
-                  name: callWithSec.agentName,
-                  status: 'online',
-                  inbound: 0,
-                  missed: 0,
-                  outbound: 0,
-                  inboundHandlingTimeSec: 0,
-                  outboundHandlingTimeSec: 0,
-                };
-                const updated = { ...agent };
-                if (callWithSec.callType === 'CDS_IN') {
-                  if (['src_participant_terminated', 'dst_participant_terminated'].includes(callWithSec.status)) {
-                    updated.inbound += 1;
-                    updated.inboundHandlingTimeSec += durationSec;
-                  } else if (callWithSec.status.includes('missed') || callWithSec.status.includes('abandoned')) {
-                    updated.missed += 1;
-                  }
-                } else if (callWithSec.callType === 'CDS_OUT') {
-                  updated.outbound += 1;
-                  updated.outboundHandlingTimeSec += durationSec;
-                }
-                console.log(`[Agent] Mise à jour :`, updated);
-                return { ...prev, [callWithSec.agentName]: updated };
-              });
-            }
-          } else {
-            console.log(`[Filtre] ❌ Appel ignoré (pas aujourd’hui) : ${callDateStr}`);
           }
-        } else {
-          console.log(`[Filtre] ❌ Hors heures d’ouverture :`, callWithSec.startTime);
+
+          const dayOfWeek = callWithSec.startTime.getDay(); // 1=lun ... 5=ven
+          if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+            setWeeklyCalls(prev => {
+              const updated = [...prev, callWithSec];
+              saveToStorage(getWeeklyKey(now), updated);
+              return updated;
+            });
+          }
+
+          if (callDateStr === todayStr && callWithSec.agentName && callWithSec.callType !== 'ABSYS') {
+            setCumulativeAgents(prev => {
+              const agent = prev[callWithSec.agentName] || {
+                name: callWithSec.agentName,
+                status: 'online',
+                inbound: 0,
+                missed: 0,
+                outbound: 0,
+                inboundHandlingTimeSec: 0,
+                outboundHandlingTimeSec: 0,
+              };
+              const updated = { ...agent };
+              if (callWithSec.callType === 'CDS_IN') {
+                if (['src_participant_terminated', 'dst_participant_terminated'].includes(callWithSec.status)) {
+                  updated.inbound += 1;
+                  updated.inboundHandlingTimeSec += durationSec;
+                } else if (isMissedStatus) {
+                  updated.missed += 1;
+                }
+              } else if (callWithSec.callType === 'CDS_OUT') {
+                updated.outbound += 1;
+                updated.outboundHandlingTimeSec += durationSec;
+              }
+              return { ...prev, [callWithSec.agentName]: updated };
+            });
+          }
         }
         setLastUpdate(new Date());
       }
@@ -539,12 +537,7 @@ const useWebSocketData = (url, onLostCall) => {
       if (!isMountedRef.current) return;
       console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
       setIsConnected(false);
-
-      if (wsRef.current?.heartbeatInterval) {
-        clearInterval(wsRef.current.heartbeatInterval);
-        wsRef.current.heartbeatInterval = null;
-      }
-
+      if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
       if (e.code !== 1000 && isMountedRef.current) {
         reconnectTimeoutRef.current = setTimeout(connect, 5000);
       }
@@ -553,38 +546,26 @@ const useWebSocketData = (url, onLostCall) => {
 
   const resetDailyData = () => {
     const today = new Date();
-    const todayCalls = loadCallsFromStorage(today);
-    setAllCalls(todayCalls);
-    const rebuiltAgents = rebuildAgentsFromCalls(todayCalls);
-    setCumulativeAgents(rebuiltAgents);
+    const calls = loadFromStorage(getDailyKey(today));
+    setDailyCalls(calls);
+    const agents = rebuildAgentsFromCalls(calls);
+    setCumulativeAgents(agents);
     setLastUpdate(new Date());
-    console.log(`[Reset] 🔄 Données quotidiennes réinitialisées (${todayCalls.length} appels chargés)`);
   };
 
   const resetWeeklyData = () => {
     const now = new Date();
-    const dayOfWeek = now.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + daysToMonday);
-    for (let i = 0; i < 5; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      localStorage.removeItem(getStorageKey(date));
-    }
-    resetDailyData();
-    console.log(`[Reset] 📅 Données hebdomadaires réinitialisées`);
+    const calls = loadFromStorage(getWeeklyKey(now));
+    setWeeklyCalls(calls);
+    setLastUpdate(new Date());
   };
 
   useEffect(() => {
     isMountedRef.current = true;
     cleanupOldStorage();
-    const today = new Date();
-    const todayCalls = loadCallsFromStorage(today);
-    setAllCalls(todayCalls);
-    const rebuiltAgents = rebuildAgentsFromCalls(todayCalls);
-    setCumulativeAgents(rebuiltAgents);
-    console.log(`[Init] Chargement initial terminé (${todayCalls.length} appels)`);
+    const now = new Date();
+    setDailyCalls(loadFromStorage(getDailyKey(now)));
+    setWeeklyCalls(loadFromStorage(getWeeklyKey(now)));
     connect();
     return () => {
       isMountedRef.current = false;
@@ -601,27 +582,36 @@ const useWebSocketData = (url, onLostCall) => {
     connect();
   };
 
-  const now = new Date();
-  const recentCalls = allCalls.filter(call =>
-    call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
-  );
+  const callVolumes = useMemo(() => {
+    const now = new Date();
+    const recentCalls = dailyCalls.filter(call =>
+      call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
+    );
 
-  const callVolumes = halfHourSlots.map((time, index) => ({
-    index,
-    time,
-    CDS_IN: 0,
-    CDS_OUT: 0,
-    ABSYS: 0,
-  }));
+    const volumes = halfHourSlots.map((time, index) => ({
+      index,
+      time,
+      CDS_IN: 0,
+      CDS_OUT: 0,
+      ABSYS: 0,
+    }));
 
-  recentCalls.forEach(call => {
-    const slotIndex = getLocalSlotIndex(call.startTime);
-    if (slotIndex >= 0 && slotIndex < callVolumes.length) {
-      if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
-      else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
-      else if (call.callType === 'ABSYS') callVolumes[slotIndex].ABSYS += 1;
-    }
-  });
+    recentCalls.forEach(call => {
+      const h = call.startTime.getHours();
+      const m = call.startTime.getMinutes();
+      if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) return;
+      for (let i = halfHourSlots.length - 1; i >= 0; i--) {
+        const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
+        if (h > slotH || (h === slotH && m >= slotM)) {
+          if (call.callType === 'CDS_IN') volumes[i].CDS_IN += 1;
+          else if (call.callType === 'CDS_OUT') volumes[i].CDS_OUT += 1;
+          else if (call.callType === 'ABSYS') volumes[i].ABSYS += 1;
+          break;
+        }
+      }
+    });
+    return volumes;
+  }, [dailyCalls]);
 
   const employees = Object.values(cumulativeAgents);
   const totalInboundFromAgents = employees.reduce((sum, a) => sum + a.inbound + a.missed, 0);
@@ -638,75 +628,17 @@ const useWebSocketData = (url, onLostCall) => {
     error,
     reconnect,
     halfHourSlots,
-    allCalls,
+    dailyCalls,
+    weeklyCalls,
     resetDailyData,
     resetWeeklyData,
   };
 };
 
-const useTodayCallStats = (calls = []) => {
-  return useMemo(() => {
-    const today = new Date();
-    const todayStr = getLocalDateStr(today);
-    const todayCalls = calls.filter(call => {
-      const callDateStr = getLocalDateStr(call.startTime);
-      return callDateStr === todayStr;
-    });
-    console.log(`[Stats] Appels d’aujourd’hui (${todayStr}) : ${todayCalls.length}`);
-    let inbound = 0, outbound = 0;
-    todayCalls.forEach(call => {
-      if (call.callType === 'CDS_IN') inbound++;
-      else if (call.callType === 'CDS_OUT') outbound++;
-    });
-    return { inbound, outbound, total: inbound + outbound };
-  }, [calls]);
-};
-
-const useWeeklyCallStats = (calls = []) => {
-  return useMemo(() => {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + daysToMonday);
-    monday.setHours(0, 0, 0, 0);
-
-    const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
-    const weekData = [];
-    for (let i = 0; i < 5; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      const isoDate = getLocalDateStr(date);
-      weekData.push({
-        date: isoDate,
-        dayLabel: dayNames[i],
-        inbound: 0,
-        outbound: 0,
-      });
-    }
-
-    calls.forEach(call => {
-      if (!call.startTime || call.callType === 'ABSYS') return;
-      const callDate = getLocalDateStr(call.startTime);
-      const dayIndex = weekData.findIndex(d => d.date === callDate);
-      if (dayIndex !== -1) {
-        if (call.callType === 'CDS_IN') {
-          weekData[dayIndex].inbound += 1;
-        } else if (call.callType === 'CDS_OUT') {
-          weekData[dayIndex].outbound += 1;
-        }
-      }
-    });
-
-    console.log(`[Stats] Données hebdomadaires :`, weekData);
-    return weekData;
-  }, [calls]);
-};
-
-const useKpiCalculations = (employees = [], todayStats = {}, allCalls = []) => {
+const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) => {
   return useMemo(() => {
     if (!Array.isArray(employees)) employees = [];
-    if (!Array.isArray(allCalls)) allCalls = [];
+    if (!Array.isArray(dailyCalls)) dailyCalls = [];
 
     const totals = employees.reduce((acc, emp) => {
       acc.totalInboundCalls += (emp.inbound || 0) + (emp.missed || 0);
@@ -729,7 +661,7 @@ const useKpiCalculations = (employees = [], todayStats = {}, allCalls = []) => {
       totalAnsweredOutbound: 0,
     });
 
-    const absysMissed = allCalls.filter(call => {
+    const absysMissed = dailyCalls.filter(call => {
       if (call.callType !== 'ABSYS' || call.durationSec < 60) return false;
       const start = call.startTime;
       if (!start) return true;
@@ -754,6 +686,10 @@ const useKpiCalculations = (employees = [], todayStats = {}, allCalls = []) => {
       ? `${Math.round((totalMissed / totalInbound) * 100)}%`
       : '0%';
 
+    const numberOfCallsThisWeek = weeklyCalls.filter(call =>
+      call.callType === 'CDS_IN' || call.callType === 'CDS_OUT'
+    ).length;
+
     return {
       totalAgents: employees.length,
       onlineAgents: employees.length,
@@ -766,11 +702,9 @@ const useKpiCalculations = (employees = [], todayStats = {}, allCalls = []) => {
       abandonRate,
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
-      cdsInboundTotal: todayStats.inbound || 0,
-      cdsOutboundTotal: todayStats.outbound || 0,
-      numberOfCallsToday: todayStats.total || 0,
+      numberOfCallsThisWeek,
     };
-  }, [employees, todayStats, allCalls]);
+  }, [employees, dailyCalls, weeklyCalls]);
 };
 
 // 🔊 Composant principal
@@ -798,7 +732,8 @@ const App = () => {
     error,
     reconnect,
     halfHourSlots,
-    allCalls,
+    dailyCalls,
+    weeklyCalls,
     resetDailyData,
     resetWeeklyData,
   } = useWebSocketData(WS_URL, handleLostCall);
@@ -806,54 +741,74 @@ const App = () => {
   useMidnightResetScheduler(resetDailyData);
   useWeeklyResetScheduler(resetWeeklyData);
 
-  const todayStats = useTodayCallStats(allCalls);
-  const weeklyStats = useWeeklyCallStats(allCalls);
-  const kpi = useKpiCalculations(employees, todayStats, allCalls);
+  const kpi = useKpiCalculations(employees, dailyCalls, weeklyCalls);
 
+  // 🔊 🔔 Sons horaires EXACTS à la seconde 0
   useEffect(() => {
     if (!audioUnlocked) return;
+
     const interval = setInterval(() => {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
       const seconds = now.getSeconds();
+
       if (seconds !== 0) return;
+
       const timeKey = `${hours}:${minutes}:00`;
+
       if (lastScheduledSounds[timeKey]) return;
+
       let soundToPlay = null;
-      if (hours === 8 && minutes === 30) soundToPlay = 'debut.mp3';
-      else if (hours === 12 && minutes === 30) soundToPlay = 'pause.mp3';
-      else if (hours === 14 && minutes === 0) soundToPlay = 'reprise.mp3';
-      else if (hours === 18 && minutes === 0) soundToPlay = 'fin.mp3';
+      if (hours === 8 && minutes === 30) {
+        soundToPlay = 'debut.mp3';
+      } else if (hours === 12 && minutes === 30) {
+        soundToPlay = 'pause.mp3';
+      } else if (hours === 14 && minutes === 0) {
+        soundToPlay = 'reprise.mp3';
+      } else if (hours === 18 && minutes === 0) {
+        soundToPlay = 'fin.mp3';
+      }
+
       if (soundToPlay) {
         console.log(`🔊 Lecture de ${soundToPlay} à ${timeKey}`);
         playSound(soundToPlay);
         setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
       }
     }, 1000);
+
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
+  // 🏆 Son quand un agent devient 1er — ✅ RÉINTÉGRÉ ET FONCTIONNEL
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
+
     const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
     if (totalCalls < 50) return;
+
     const prevEmployees = prevEmployeesRef.current;
     const currentTopAgent = employees.reduce((best, emp) => {
       const total = (emp.inbound || 0) + (emp.outbound || 0);
       return total > (best.total || 0) ? { ...emp, total } : best;
     }, { total: -1, name: '' });
+
     const prevTopAgent = prevEmployees.reduce((best, emp) => {
       const total = (emp.inbound || 0) + (emp.outbound || 0);
       return total > (best.total || 0) ? { ...emp, total } : best;
     }, { total: -1, name: '' });
+
     if (currentTopAgent.name && currentTopAgent.name !== prevTopAgent.name) {
-      const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik']);
+      const allowedFirstNames = new Set([
+        'xavier', 'rana', 'mathys', 'romain',
+        'nicolas', 'julien', 'benjamin', 'malik'
+      ]);
       const firstName = currentTopAgent.name.split(' ')[0]?.toLowerCase() || '';
       const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
       console.log(`🔊 ${currentTopAgent.name} est en tête ! Lecture de ${soundToPlay}`);
       playSound(soundToPlay);
     }
+
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
 
@@ -898,8 +853,8 @@ const App = () => {
           {[
             { title: "Total Agents", value: kpi.totalAgents, color: "info" },
             { 
-              title: "Number of Calls",
-              value: kpi.numberOfCallsToday.toString(),
+              title: "Number of calls",
+              value: kpi.numberOfCallsThisWeek.toString(),
               color: "primary" 
             },
             { 
@@ -961,7 +916,7 @@ const App = () => {
             <Grid size={{ xs: 12 }}>
               <Box position="relative">
                 <SLABarchart 
-                  slaData={weeklyStats} 
+                  slaData={slaData} 
                   wsConnected={isConnected}
                 />
                 {!audioUnlocked && (
