@@ -41,21 +41,21 @@ const hideZeroLabels = (value) => {
   return value === 0 ? '' : formatNumber(value);
 };
 
-function SLABarchart({ slaData = [], wsConnected = false, weeklyData = [] }) {
+function SLABarchart({ slaData = [], wsConnected = false }) {
   const [data, setData] = useState([]);
   const [animate, setAnimate] = useState(false);
-  const prevWeeklyDataRef = useRef();
+  const prevSlaDataRef = useRef();
 
   useEffect(() => {
-    const prev = prevWeeklyDataRef.current;
-    if (JSON.stringify(weeklyData) !== JSON.stringify(prev)) {
-      setData(weeklyData);
+    const prev = prevSlaDataRef.current;
+    if (JSON.stringify(slaData) !== JSON.stringify(prev)) {
+      setData(slaData);
       setAnimate(true);
       const timer = setTimeout(() => setAnimate(false), 600);
       return () => clearTimeout(timer);
     }
-    prevWeeklyDataRef.current = weeklyData;
-  }, [weeklyData]);
+    prevSlaDataRef.current = slaData;
+  }, [slaData]);
 
   if (data.length === 0) {
     return (

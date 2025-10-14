@@ -629,16 +629,60 @@ const useWebSocketData = (url, onLostCall) => {
     return volumes;
   }, [dailyCalls]);
 
+  // ✅ Calcul du tableau slaData pour SLABarchart à partir de weeklyCalls
+  const slaData = useMemo(() => {
+    const today = new Date();
+    const weekKey = getWeekKey(today);
+    const thisWeekCalls = weeklyCalls.filter(call => call.weekKey === weekKey);
+
+    // Filtrer les appels de la semaine pour les jours ouvrés (lundi à vendredi)
+    const weekdayCalls = thisWeekCalls.filter(call => {
+      const dayOfWeek = call.startTime?.getDay() || 0;
+      return dayOfWeek >= 1 && dayOfWeek <= 5; // 1=lun, 5=ven
+    });
+
+    // Grouper par date et par type d'appel
+    const groupedByDate = weekdayCalls.reduce((acc, call) => {
+      const dateStr = getLocalDateStr(call.startTime);
+      if (!acc[dateStr]) {
+        acc[dateStr] = { date: dateStr, dayLabel: '', inbound: 0, outbound: 0 };
+      }
+      if (call.callType === 'CDS_IN') {
+        acc[dateStr].inbound += 1;
+      } else if (call.callType === 'CDS_OUT') {
+        acc[dateStr].outbound += 1;
+      }
+      return acc;
+    }, {});
+
+    // Ajouter les labels de jour (Lun, Mar, etc.)
+    const days = Object.values(groupedByDate).map(item => {
+      const date = new Date(item.date);
+      const dayIndex = date.getDay(); // 0=dim, 1=lun, ..., 6=sam
+      const dayLabels = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+      item.dayLabel = dayLabels[dayIndex];
+      return item;
+    });
+
+    // Trier par date (le plus récent en premier)
+    days.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Retourner les 5 derniers jours ouvrés
+    return days.slice(0, 5).reverse(); // Inverser pour avoir le plus ancien en premier
+
+  }, [weeklyCalls]);
+
   const employees = Object.values(cumulativeAgents);
   const totalInboundFromAgents = employees.reduce((sum, a) => sum + a.inbound + a.missed, 0);
   const totalMissedFromAgents = employees.reduce((sum, a) => sum + a.missed, 0);
   const achieved = totalInboundFromAgents > 0 ? Math.max(60, 100 - Math.round((totalMissedFromAgents / totalInboundFromAgents) * 100)) : 100;
-  const slaData = [{ queue: 'Front Office', target: 90, achieved }];
+  const slaDataForKpi = [{ queue: 'Front Office', target: 90, achieved }];
 
   return {
     employees,
     callVolumes,
-    slaData,
+    slaData, // ✅ Utilisé par SLABarchart
+    slaDataForKpi, // ✅ Utilisé pour le KPI global (si nécessaire)
     lastUpdate,
     isConnected,
     error,
@@ -715,31 +759,6 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       call.startTime.getDay() <= 5
     ).length;
 
-    // ✅ Générer les données hebdomadaires pour le graphique
-    const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
-    const today = new Date();
-    const currentWeekKey = getWeekKey(today);
-    
-    // Filtrer les appels de la semaine courante
-    const currentWeekCalls = weeklyCalls.filter(call => call.weekKey === currentWeekKey);
-    
-    // Initialiser les données hebdomadaires
-    const weeklyData = weekDays.map((dayLabel, index) => {
-      const dayIndex = index + 1; // 1=lun, 2=mar, ..., 5=ven
-      const dayCalls = currentWeekCalls.filter(call => {
-        const localDate = new Date(call.startTime.getTime() + call.startTime.getTimezoneOffset() * 60000);
-        return localDate.getDay() === dayIndex;
-      });
-      const inbound = dayCalls.filter(call => call.callType === 'CDS_IN').length;
-      const outbound = dayCalls.filter(call => call.callType === 'CDS_OUT').length;
-      return {
-        date: getLocalDateStr(new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + dayIndex)),
-        dayLabel,
-        inbound,
-        outbound
-      };
-    });
-
     return {
       totalAgents: employees.length,
       onlineAgents: employees.length,
@@ -753,7 +772,6 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
       numberOfCallsThisWeek,
-      weeklyData, // ✅ Nouveau champ pour le graphique hebdomadaire
     };
   }, [employees, dailyCalls, weeklyCalls]);
 };
@@ -777,7 +795,7 @@ const App = () => {
   const {
     employees,
     callVolumes,
-    slaData,
+    slaData, // ✅ Données pour SLABarchart
     lastUpdate,
     isConnected,
     error,
@@ -967,9 +985,8 @@ const App = () => {
             <Grid size={{ xs: 12 }}>
               <Box position="relative">
                 <SLABarchart 
-                  slaData={slaData} 
+                  slaData={slaData} // ✅ Passer les données hebdomadaires filtrées
                   wsConnected={isConnected}
-                  weeklyData={kpi.weeklyData} // ✅ Passer les données hebdomadaires
                 />
                 {!audioUnlocked && (
                   <Box
