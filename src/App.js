@@ -238,7 +238,7 @@ const useWebSocketData = (url, onLostCall) => {
   const connectionTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
 
-  const getDailyKey = (date = new Date()) => `callData_daily_${getLocalDateStr(date)}`;
+  const getDailyKey = (dateStr) => `callData_daily_${dateStr}`;
   const getWeeklyKey = (date = new Date()) => `callData_weekly_${getWeekKey(date)}`;
 
   const cleanupOldStorage = () => {
@@ -279,25 +279,12 @@ const useWebSocketData = (url, onLostCall) => {
       const stored = localStorage.getItem(key);
       if (stored) {
         const parsed = JSON.parse(stored);
-        return parsed.map(call => {
-          const converted = {
-            ...call,
-            startTime: call.startTime ? new Date(call.startTime) : null,
-            endTime: call.endTime ? new Date(call.endTime) : null,
-            receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
-          };
-          // ✅ Convertir startTime en locale si nécessaire
-          if (converted.startTime) {
-            converted.startTime = new Date(converted.startTime.getTime() + converted.startTime.getTimezoneOffset() * 60000);
-          }
-          if (converted.endTime) {
-            converted.endTime = new Date(converted.endTime.getTime() + converted.endTime.getTimezoneOffset() * 60000);
-          }
-          if (converted.receivedAt) {
-            converted.receivedAt = new Date(converted.receivedAt.getTime() + converted.receivedAt.getTimezoneOffset() * 60000);
-          }
-          return converted;
-        }).filter(call => call.startTime);
+        return parsed.map(call => ({
+          ...call,
+          startTime: call.startTime ? new Date(call.startTime) : null,
+          endTime: call.endTime ? new Date(call.endTime) : null,
+          receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
+        })).filter(call => call.startTime);
       }
     } catch (e) {
       console.warn(`[Storage] ⚠️ Échec chargement ${key}`, e);
@@ -310,13 +297,6 @@ const useWebSocketData = (url, onLostCall) => {
     const agents = {};
     calls.forEach(cdr => {
       if (cdr.callType === 'ABSYS') return;
-
-      // ✅ Convertir startTime en locale pour comparaison
-      let localStartTime = cdr.startTime;
-      if (localStartTime) {
-        localStartTime = new Date(localStartTime.getTime() + localStartTime.getTimezoneOffset() * 60000);
-      }
-
       const { callType, agentName } = cdr;
       if (!agentName) return;
       if (!agents[agentName]) {
@@ -500,14 +480,15 @@ const useWebSocketData = (url, onLostCall) => {
           const now = new Date();
           const todayStr = getLocalDateStr(now);
 
-          // ✅ Convertir startTime en locale pour comparaison
+          // ✅ Ajouter localDateStr à l'appel
           const localStartTime = new Date(callWithSec.startTime.getTime() + callWithSec.startTime.getTimezoneOffset() * 60000);
           const callDateStr = getLocalDateStr(localStartTime);
+          const enrichedCall = { ...callWithSec, localDateStr: callDateStr };
 
           if (callDateStr === todayStr) {
             setDailyCalls(prev => {
-              const updated = [...prev, callWithSec];
-              saveToStorage(getDailyKey(now), updated);
+              const updated = [...prev, enrichedCall];
+              saveToStorage(getDailyKey(todayStr), updated);
               return updated;
             });
           }
@@ -515,16 +496,16 @@ const useWebSocketData = (url, onLostCall) => {
           const dayOfWeek = localStartTime.getDay(); // 1=lun ... 5=ven
           if (dayOfWeek >= 1 && dayOfWeek <= 5) {
             setWeeklyCalls(prev => {
-              const updated = [...prev, callWithSec];
+              const updated = [...prev, enrichedCall];
               saveToStorage(getWeeklyKey(now), updated);
               return updated;
             });
           }
 
-          if (callDateStr === todayStr && callWithSec.agentName && callWithSec.callType !== 'ABSYS') {
+          if (callDateStr === todayStr && enrichedCall.agentName && enrichedCall.callType !== 'ABSYS') {
             setCumulativeAgents(prev => {
-              const agent = prev[callWithSec.agentName] || {
-                name: callWithSec.agentName,
+              const agent = prev[enrichedCall.agentName] || {
+                name: enrichedCall.agentName,
                 status: 'online',
                 inbound: 0,
                 missed: 0,
@@ -533,18 +514,18 @@ const useWebSocketData = (url, onLostCall) => {
                 outboundHandlingTimeSec: 0,
               };
               const updated = { ...agent };
-              if (callWithSec.callType === 'CDS_IN') {
-                if (['src_participant_terminated', 'dst_participant_terminated'].includes(callWithSec.status)) {
+              if (enrichedCall.callType === 'CDS_IN') {
+                if (['src_participant_terminated', 'dst_participant_terminated'].includes(enrichedCall.status)) {
                   updated.inbound += 1;
                   updated.inboundHandlingTimeSec += durationSec;
                 } else if (isMissedStatus) {
                   updated.missed += 1;
                 }
-              } else if (callWithSec.callType === 'CDS_OUT') {
+              } else if (enrichedCall.callType === 'CDS_OUT') {
                 updated.outbound += 1;
                 updated.outboundHandlingTimeSec += durationSec;
               }
-              return { ...prev, [callWithSec.agentName]: updated };
+              return { ...prev, [enrichedCall.agentName]: updated };
             });
           }
         }
@@ -568,10 +549,15 @@ const useWebSocketData = (url, onLostCall) => {
   };
 
   const resetDailyData = () => {
-    const today = new Date();
-    const calls = loadFromStorage(getDailyKey(today));
-    setDailyCalls(calls);
-    const agents = rebuildAgentsFromCalls(calls);
+    const todayStr = getLocalDateStr(new Date());
+    const calls = loadFromStorage(getDailyKey(todayStr));
+    // ✅ Ajouter localDateStr aux appels chargés
+    const callsWithLocalDate = calls.map(call => ({
+      ...call,
+      localDateStr: todayStr
+    }));
+    setDailyCalls(callsWithLocalDate);
+    const agents = rebuildAgentsFromCalls(callsWithLocalDate);
     setCumulativeAgents(agents);
     setLastUpdate(new Date());
   };
@@ -586,9 +572,8 @@ const useWebSocketData = (url, onLostCall) => {
   useEffect(() => {
     isMountedRef.current = true;
     cleanupOldStorage();
-    const now = new Date();
-    setDailyCalls(loadFromStorage(getDailyKey(now)));
-    setWeeklyCalls(loadFromStorage(getWeeklyKey(now)));
+    resetDailyData();
+    resetWeeklyData();
     connect();
     return () => {
       isMountedRef.current = false;
@@ -607,13 +592,8 @@ const useWebSocketData = (url, onLostCall) => {
 
   const callVolumes = useMemo(() => {
     const now = new Date();
-    const recentCalls = dailyCalls.filter(call => {
-      if (!call.startTime) return false;
-      // ✅ Convertir startTime en locale pour comparaison
-      const localStartTime = new Date(call.startTime.getTime() + call.startTime.getTimezoneOffset() * 60000);
-      const nowLocal = new Date();
-      return (nowLocal - localStartTime) < 24 * 60 * 60 * 1000;
-    });
+    const todayStr = getLocalDateStr(now);
+    const recentCalls = dailyCalls.filter(call => call.localDateStr === todayStr);
 
     const volumes = halfHourSlots.map((time, index) => ({
       index,
@@ -624,7 +604,6 @@ const useWebSocketData = (url, onLostCall) => {
     }));
 
     recentCalls.forEach(call => {
-      // ✅ Utiliser localStartTime pour le filtrage horaire
       const localStartTime = new Date(call.startTime.getTime() + call.startTime.getTimezoneOffset() * 60000);
       const h = localStartTime.getHours();
       const m = localStartTime.getMinutes();
@@ -669,6 +648,11 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
     if (!Array.isArray(employees)) employees = [];
     if (!Array.isArray(dailyCalls)) dailyCalls = [];
 
+    const todayStr = getLocalDateStr(new Date());
+
+    // ✅ Filtrer les appels du jour avec localDateStr
+    const todayCalls = dailyCalls.filter(call => call.localDateStr === todayStr);
+
     const totals = employees.reduce((acc, emp) => {
       acc.totalInboundCalls += (emp.inbound || 0) + (emp.missed || 0);
       acc.totalAnsweredCalls += emp.inbound || 0;
@@ -690,7 +674,7 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       totalAnsweredOutbound: 0,
     });
 
-    const absysMissed = dailyCalls.filter(call => {
+    const absysMissed = todayCalls.filter(call => {
       if (call.callType !== 'ABSYS' || call.durationSec < 60) return false;
       const start = call.startTime;
       if (!start) return true;
@@ -715,6 +699,7 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       ? `${Math.round((totalMissed / totalInbound) * 100)}%`
       : '0%';
 
+    // ✅ Compter les appels de la semaine (y compris aujourd'hui)
     const numberOfCallsThisWeek = weeklyCalls.filter(call =>
       call.callType === 'CDS_IN' || call.callType === 'CDS_OUT'
     ).length;
