@@ -21,7 +21,7 @@ const playSound = (filename) => {
   }
 };
 
-// 🕒 Horloge
+// 🕒 Horloge — MATCH EXACT DU TITRE (police, liseré, ombres, pas de cadre)
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -66,6 +66,7 @@ function Clock() {
               0 0 12px rgba(255,255,255,0.5),
               0 0 16px rgba(255,255,255,0.3);
             padding: 0.5rem 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
             border-radius: 4px;
             background: transparent;
             display: inline-block;
@@ -115,7 +116,7 @@ function Clock() {
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
-  return totalMinutes >= 750 && totalMinutes < 840; // 12:30–14:00
+  return totalMinutes >= 750 && totalMinutes < 840;
 };
 
 const formatSecondsToMMSS = (totalSeconds) => {
@@ -194,16 +195,14 @@ const formatDateToLocalISO = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// 🔁 Réinitialisation quotidienne à 8h
-const useDailyResetAt8AM = (resetFn) => {
+// 🔁 Hook pour réinitialiser les données quotidiennes à 8h
+const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
       const nextReset = new Date();
       nextReset.setHours(8, 0, 0, 0);
-      if (now >= nextReset) {
-        nextReset.setDate(nextReset.getDate() + 1);
-      }
+      if (now >= nextReset) nextReset.setDate(nextReset.getDate() + 1);
       const delay = nextReset.getTime() - now.getTime();
       const timeoutId = setTimeout(() => {
         resetFn();
@@ -215,21 +214,25 @@ const useDailyResetAt8AM = (resetFn) => {
   }, [resetFn]);
 };
 
-// 🔁 Réinitialisation hebdomadaire le lundi à 8h
-const useWeeklyResetOnMonday8AM = (resetFn) => {
+// 🔁 Hook pour réinitialiser les données hebdomadaires le lundi à 8h
+const useWeeklyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
       const nextReset = new Date();
 
       // Prochain lundi à 8h
-      const dayOfWeek = now.getDay(); // 0 = dim, 1 = lun
-      let daysUntilMonday = (1 - dayOfWeek + 7) % 7;
-      if (daysUntilMonday === 0 && now.getHours() >= 8) {
-        daysUntilMonday = 7;
-      }
+      const dayOfWeek = now.getDay(); // 0 = dimanche
+      let daysUntilMonday = 1 - dayOfWeek; // lundi = 1
+      if (daysUntilMonday <= 0) daysUntilMonday += 7;
+
       nextReset.setDate(now.getDate() + daysUntilMonday);
       nextReset.setHours(8, 0, 0, 0);
+
+      // Si on est lundi après 8h, on prend le lundi suivant
+      if (dayOfWeek === 1 && now.getHours() >= 8) {
+        nextReset.setDate(nextReset.getDate() + 7);
+      }
 
       const delay = nextReset.getTime() - now.getTime();
       const timeoutId = setTimeout(() => {
@@ -255,23 +258,26 @@ const useWebSocketData = (url, onLostCall) => {
   const connectionTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
 
-  const getStorageKey = (date = new Date()) => `callData_${getLocalDateStr(date)}`;
+  const getStorageKey = () => `callData_${getLocalDateStr(new Date())}`;
 
-  // Nettoyage hebdomadaire : appelé le lundi à 8h
-  const cleanupPreviousWeek = () => {
-    const keysToRemove = [];
+  const cleanupOldStorage = () => {
+    const now = new Date();
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key?.startsWith('callData_')) {
-        keysToRemove.push(key);
+        const dateStr = key.split('_')[1];
+        const date = new Date(dateStr + 'T00:00:00');
+        const daysDiff = Math.floor((now - date) / (24 * 60 * 60 * 1000));
+        if (daysDiff > 7) {
+          localStorage.removeItem(key);
+        }
       }
     }
-    keysToRemove.forEach(key => localStorage.removeItem(key));
   };
 
-  const saveCallsToStorage = (calls, date = new Date()) => {
+  const saveCallsToStorage = (calls) => {
     try {
-      const key = getStorageKey(date);
+      const key = getStorageKey();
       const serializableCalls = calls.map(call => ({
         ...call,
         startTime: call.startTime?.toISOString() || null,
@@ -287,17 +293,10 @@ const useWebSocketData = (url, onLostCall) => {
   const loadCallsFromStorage = () => {
     const calls = [];
     const today = new Date();
-    // Charger uniquement les 5 jours ouvrés de cette semaine
-    const monday = new Date(today);
-    const dayOfWeek = monday.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    monday.setDate(today.getDate() + daysToMonday);
-    monday.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < 5; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      const key = getStorageKey(date);
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const key = `callData_${getLocalDateStr(date)}`;
       try {
         const stored = localStorage.getItem(key);
         if (stored) {
@@ -470,7 +469,7 @@ const useWebSocketData = (url, onLostCall) => {
           if (isInBusinessHours(cdr.startTime)) {
             setAllCalls(prev => {
               const updated = [...prev, callWithSec];
-              saveCallsToStorage(updated.filter(c => getLocalDateStr(c.startTime) === getLocalDateStr(new Date())));
+              saveCallsToStorage(updated);
               return updated;
             });
 
@@ -528,25 +527,26 @@ const useWebSocketData = (url, onLostCall) => {
   };
 
   const resetDailyData = () => {
-    // Réinitialise uniquement les données du jour courant
-    const todayKey = getStorageKey();
-    localStorage.removeItem(todayKey);
-    const now = new Date();
-    const todayCalls = allCalls.filter(call => call.startTime && getLocalDateStr(call.startTime) === getLocalDateStr(now));
-    setCumulativeAgents(rebuildAgentsFromCalls(todayCalls));
-    setAllCalls(todayCalls);
-    setLastUpdate(new Date());
-  };
-
-  const resetWeeklyData = () => {
-    cleanupPreviousWeek();
     setAllCalls([]);
     setCumulativeAgents({});
     setLastUpdate(null);
+    localStorage.removeItem(getStorageKey());
+  };
+
+  const resetTodayOnly = () => {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const todayCalls = allCalls.filter(call => call.startTime && call.startTime >= startOfDay);
+    setAllCalls(todayCalls);
+    const rebuiltAgents = rebuildAgentsFromCalls(todayCalls);
+    setCumulativeAgents(rebuiltAgents);
+    saveCallsToStorage(todayCalls);
+    setLastUpdate(new Date());
   };
 
   useEffect(() => {
     isMountedRef.current = true;
+    cleanupOldStorage();
     const storedCalls = loadCallsFromStorage();
     setAllCalls(storedCalls);
     const rebuiltAgents = rebuildAgentsFromCalls(storedCalls);
@@ -569,7 +569,7 @@ const useWebSocketData = (url, onLostCall) => {
 
   const now = new Date();
   const recentCalls = allCalls.filter(call =>
-    call.startTime && (now - call.startTime) < 7 * 24 * 60 * 60 * 1000
+    call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
   );
 
   const callVolumes = halfHourSlots.map((time, index) => ({
@@ -606,26 +606,50 @@ const useWebSocketData = (url, onLostCall) => {
     halfHourSlots,
     allCalls,
     resetDailyData,
-    resetWeeklyData,
+    resetTodayOnly,
   };
 };
 
-// Statistiques quotidiennes (seulement le jour courant)
-const useTodayCallStats = (calls = []) => {
-  return useMemo(() => {
-    const today = getLocalDateStr(new Date());
-    return calls.filter(call => call.startTime && getLocalDateStr(call.startTime) === today);
-  }, [calls]);
-};
-
-// Statistiques hebdomadaires (lun–ven de la semaine en cours)
+// ✅ useWeeklyCallStats avec réinitialisation hebdomadaire
 const useWeeklyCallStats = (calls = []) => {
+  const [weeklyCalls, setWeeklyCalls] = useState([]);
+
+  const resetWeeklyCalls = useCallback(() => {
+    setWeeklyCalls([]);
+  }, []);
+
+  useWeeklyResetScheduler(resetWeeklyCalls);
+
+  useEffect(() => {
+    if (calls.length === 0) return;
+    setWeeklyCalls(prev => {
+      const now = new Date();
+      const monday = new Date(now);
+      const dayOfWeek = monday.getDay();
+      const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      monday.setDate(monday.getDate() + daysToMonday);
+      monday.setHours(0, 0, 0, 0);
+
+      // Filtrer les appels de cette semaine
+      const thisWeekCalls = calls.filter(call => {
+        if (!call.startTime) return false;
+        return call.startTime >= monday;
+      });
+
+      // Éviter les doublons
+      const existingIds = new Set(prev.map(c => c.id));
+      const newCalls = thisWeekCalls.filter(c => !existingIds.has(c.id));
+
+      return [...prev, ...newCalls];
+    });
+  }, [calls]);
+
   return useMemo(() => {
     const now = new Date();
     const monday = new Date(now);
     const dayOfWeek = monday.getDay();
     const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    monday.setDate(now.getDate() + daysToMonday);
+    monday.setDate(monday.getDate() + daysToMonday);
     monday.setHours(0, 0, 0, 0);
 
     const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
@@ -642,7 +666,7 @@ const useWeeklyCallStats = (calls = []) => {
       });
     }
 
-    calls.forEach(call => {
+    weeklyCalls.forEach(call => {
       if (!call.startTime || call.callType === 'ABSYS') return;
       const callDate = getLocalDateStr(call.startTime);
       const dayIndex = weekData.findIndex(d => d.date === callDate);
@@ -656,13 +680,14 @@ const useWeeklyCallStats = (calls = []) => {
     });
 
     return weekData;
-  }, [calls]);
+  }, [weeklyCalls]);
 };
 
-const useKpiCalculations = (employees = [], todayCalls = []) => {
+const useKpiCalculations = (employees = [], dailyStats = [], allCalls = []) => {
   return useMemo(() => {
     if (!Array.isArray(employees)) employees = [];
-    if (!Array.isArray(todayCalls)) todayCalls = [];
+    if (!Array.isArray(dailyStats)) dailyStats = [];
+    if (!Array.isArray(allCalls)) allCalls = [];
 
     const totals = employees.reduce((acc, emp) => {
       acc.totalInboundCalls += (emp.inbound || 0) + (emp.missed || 0);
@@ -685,7 +710,7 @@ const useKpiCalculations = (employees = [], todayCalls = []) => {
       totalAnsweredOutbound: 0,
     });
 
-    const absysMissed = todayCalls.filter(call => {
+    const absysMissed = allCalls.filter(call => {
       if (call.callType !== 'ABSYS' || call.durationSec < 60) return false;
       const start = call.startTime;
       if (!start) return true;
@@ -697,6 +722,8 @@ const useKpiCalculations = (employees = [], todayCalls = []) => {
 
     const totalMissed = totals.missedFromAgents + absysMissed;
     const totalInbound = totals.totalInboundCalls + absysMissed;
+    const cdsInboundTotal = dailyStats.reduce((sum, day) => sum + day.inbound, 0);
+    const cdsOutboundTotal = dailyStats.reduce((sum, day) => sum + day.outbound, 0);
     const avgInboundAHTSec = totals.totalAnsweredInbound > 0
       ? Math.floor(totals.totalInboundHandling / totals.totalAnsweredInbound)
       : 0;
@@ -722,8 +749,10 @@ const useKpiCalculations = (employees = [], todayCalls = []) => {
       abandonRate,
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
+      cdsInboundTotal,
+      cdsOutboundTotal,
     };
-  }, [employees, todayCalls]);
+  }, [employees, dailyStats, allCalls]);
 };
 
 // 🔊 Composant principal
@@ -750,17 +779,14 @@ const App = () => {
     halfHourSlots,
     allCalls,
     resetDailyData,
-    resetWeeklyData,
+    resetTodayOnly,
   } = useWebSocketData(WS_URL, handleLostCall);
 
-  useDailyResetAt8AM(resetDailyData);
-  useWeeklyResetOnMonday8AM(resetWeeklyData);
+  useDailyResetScheduler(resetDailyData);
+  const dailyStats = useWeeklyCallStats(allCalls);
+  const kpi = useKpiCalculations(employees, dailyStats, allCalls);
 
-  const todayCalls = useTodayCallStats(allCalls);
-  const weeklyStats = useWeeklyCallStats(allCalls);
-  const kpi = useKpiCalculations(employees, todayCalls);
-
-  // 🔊 Sons horaires
+  // 🔊 Gestion fiable des sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -792,12 +818,24 @@ const App = () => {
     return () => clearInterval(interval);
   }, [audioUnlocked, lastScheduledSounds]);
 
-  // ✅ Son personnalisé quand un agent devient 1er
+  // ✅ CORRIGÉ : Joue le son personnalisé selon le prénom de l'agent qui devient 1er
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
-    const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
-    if (totalCalls < 50) return;
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(8, 30, 0, 0);
+    if (now < startOfDay) {
+      startOfDay.setDate(startOfDay.getDate() - 1);
+    }
+
+    const totalRelevantCalls = allCalls.filter(call =>
+      call.startTime &&
+      call.startTime >= startOfDay &&
+      (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT')
+    ).length;
+
+    if (totalRelevantCalls < 50) return;
 
     const prevEmployees = prevEmployeesRef.current;
     const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
@@ -823,7 +861,7 @@ const App = () => {
     }
 
     prevEmployeesRef.current = [...employees];
-  }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
+  }, [employees, audioUnlocked, allCalls]);
 
   const unlockAudio = () => {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
@@ -929,9 +967,9 @@ const App = () => {
             <Grid size={{ xs: 12 }}>
               <Box position="relative">
                 <SLABarchart 
-                  slaData={weeklyStats} 
+                  slaData={dailyStats} 
                   wsConnected={isConnected}
-                  onResetTodayOnly={resetDailyData}
+                  onResetTodayOnly={resetTodayOnly}
                 />
                 {!audioUnlocked && (
                   <Box
