@@ -239,7 +239,7 @@ const useWebSocketData = (url, onLostCall) => {
   const isMountedRef = useRef(true);
 
   const getDailyKey = (dateStr) => `callData_daily_${dateStr}`;
-  const getWeeklyKey = (date = new Date()) => `callData_weekly_${getWeekKey(date)}`;
+  const getWeeklyKey = (dateStr) => `callData_weekly_${dateStr}`;
 
   const cleanupOldStorage = () => {
     const now = new Date();
@@ -479,11 +479,12 @@ const useWebSocketData = (url, onLostCall) => {
         if (isInBusinessHours(callWithSec.startTime)) {
           const now = new Date();
           const todayStr = getLocalDateStr(now);
+          const weekKey = getWeekKey(now);
 
-          // ✅ Ajouter localDateStr à l'appel
+          // ✅ Ajouter localDateStr et weekKey à l'appel
           const localStartTime = new Date(callWithSec.startTime.getTime() + callWithSec.startTime.getTimezoneOffset() * 60000);
           const callDateStr = getLocalDateStr(localStartTime);
-          const enrichedCall = { ...callWithSec, localDateStr: callDateStr };
+          const enrichedCall = { ...callWithSec, localDateStr: callDateStr, weekKey };
 
           if (callDateStr === todayStr) {
             setDailyCalls(prev => {
@@ -497,7 +498,7 @@ const useWebSocketData = (url, onLostCall) => {
           if (dayOfWeek >= 1 && dayOfWeek <= 5) {
             setWeeklyCalls(prev => {
               const updated = [...prev, enrichedCall];
-              saveToStorage(getWeeklyKey(now), updated);
+              saveToStorage(getWeeklyKey(weekKey), updated);
               return updated;
             });
           }
@@ -551,7 +552,6 @@ const useWebSocketData = (url, onLostCall) => {
   const resetDailyData = () => {
     const todayStr = getLocalDateStr(new Date());
     const calls = loadFromStorage(getDailyKey(todayStr));
-    // ✅ Ajouter localDateStr aux appels chargés
     const callsWithLocalDate = calls.map(call => ({
       ...call,
       localDateStr: todayStr
@@ -564,7 +564,8 @@ const useWebSocketData = (url, onLostCall) => {
 
   const resetWeeklyData = () => {
     const now = new Date();
-    const calls = loadFromStorage(getWeeklyKey(now));
+    const weekKey = getWeekKey(now);
+    const calls = loadFromStorage(getWeeklyKey(weekKey));
     setWeeklyCalls(calls);
     setLastUpdate(new Date());
   };
@@ -591,9 +592,8 @@ const useWebSocketData = (url, onLostCall) => {
   };
 
   const callVolumes = useMemo(() => {
-    const now = new Date();
-    const todayStr = getLocalDateStr(now);
-    const recentCalls = dailyCalls.filter(call => call.localDateStr === todayStr);
+    const todayStr = getLocalDateStr(new Date());
+    const todayCalls = dailyCalls.filter(call => call.localDateStr === todayStr);
 
     const volumes = halfHourSlots.map((time, index) => ({
       index,
@@ -603,7 +603,7 @@ const useWebSocketData = (url, onLostCall) => {
       ABSYS: 0,
     }));
 
-    recentCalls.forEach(call => {
+    todayCalls.forEach(call => {
       const localStartTime = new Date(call.startTime.getTime() + call.startTime.getTimezoneOffset() * 60000);
       const h = localStartTime.getHours();
       const m = localStartTime.getMinutes();
@@ -647,10 +647,9 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
   return useMemo(() => {
     if (!Array.isArray(employees)) employees = [];
     if (!Array.isArray(dailyCalls)) dailyCalls = [];
+    if (!Array.isArray(weeklyCalls)) weeklyCalls = [];
 
     const todayStr = getLocalDateStr(new Date());
-
-    // ✅ Filtrer les appels du jour avec localDateStr
     const todayCalls = dailyCalls.filter(call => call.localDateStr === todayStr);
 
     const totals = employees.reduce((acc, emp) => {
@@ -699,7 +698,7 @@ const useKpiCalculations = (employees = [], dailyCalls = [], weeklyCalls = []) =
       ? `${Math.round((totalMissed / totalInbound) * 100)}%`
       : '0%';
 
-    // ✅ Compter les appels de la semaine (y compris aujourd'hui)
+    // ✅ Compter les appels de la semaine (CDS_IN + CDS_OUT)
     const numberOfCallsThisWeek = weeklyCalls.filter(call =>
       call.callType === 'CDS_IN' || call.callType === 'CDS_OUT'
     ).length;
@@ -868,7 +867,7 @@ const App = () => {
             { title: "Total Agents", value: kpi.totalAgents, color: "info" },
             { 
               title: "Number of calls",
-              value: kpi.numberOfCallsThisWeek.toString(),
+              value: kpi.numberOfCallsThisWeek != null ? kpi.numberOfCallsThisWeek.toString() : "0",
               color: "primary" 
             },
             { 
