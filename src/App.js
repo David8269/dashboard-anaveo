@@ -186,6 +186,7 @@ const getLocalDateStr = (date) => {
   return localDate.toISOString().split('T')[0];
 };
 
+// 🔁 Hooks de planification — à utiliser DANS LE COMPOSANT PRINCIPAL
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -397,6 +398,7 @@ const useWebSocketData = (url, onLostCall) => {
     return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
   };
 
+  // 🔹 Fonctions de reset — maintenant exposées
   const resetDailyData = () => {
     setCumulativeAgents({});
     setLastUpdate(null);
@@ -555,9 +557,6 @@ const useWebSocketData = (url, onLostCall) => {
     setCumulativeAgents(rebuiltAgents);
     connect();
 
-    useDailyResetScheduler(resetDailyData);
-    useWeeklyResetScheduler(resetWeeklyData);
-
     return () => {
       isMountedRef.current = false;
       if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
@@ -601,6 +600,7 @@ const useWebSocketData = (url, onLostCall) => {
   const achieved = totalInboundFromAgents > 0 ? Math.max(60, 100 - Math.round((totalMissedFromAgents / totalInboundFromAgents) * 100)) : 100;
   const slaData = [{ queue: 'Front Office', target: 90, achieved }];
 
+  // ✅ Expose les fonctions de reset
   return {
     employees,
     callVolumes,
@@ -611,6 +611,8 @@ const useWebSocketData = (url, onLostCall) => {
     reconnect,
     halfHourSlots,
     allCalls,
+    resetDailyData,
+    resetWeeklyData,
   };
 };
 
@@ -709,7 +711,13 @@ const App = () => {
     reconnect,
     halfHourSlots,
     allCalls,
+    resetDailyData,
+    resetWeeklyData,
   } = useWebSocketData(WS_URL, handleLostCall);
+
+  // ✅ Planification des resets — AU NIVEAU RACINE DU COMPOSANT
+  useDailyResetScheduler(resetDailyData);
+  useWeeklyResetScheduler(resetWeeklyData);
 
   // 🔹 Normalisation : toujours afficher Lun–Ven
   const currentWeekTemplate = [
