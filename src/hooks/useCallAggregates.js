@@ -1,3 +1,4 @@
+// src/hooks/useCallAggregates.js
 import { useMemo } from 'react';
 
 // === Helpers internes ===
@@ -53,7 +54,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       (now - call.startTime) < SEVEN_DAYS
     );
 
-    // ✅ 1. Call Volumes : TOUS les appels (y compris non autorisés)
+    // ✅ Call Volumes : exclure TOUS les appels de durée = 0
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -62,16 +63,18 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       ABSYS: 0,
     }));
 
-    recentCalls.forEach(call => {
-      const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
-      if (slotIndex >= 0 && slotIndex < callVolumes.length) {
-        if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
-        else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
-        else callVolumes[slotIndex].ABSYS += 1; // inclut OTHER, ABSYS, etc.
-      }
-    });
+    recentCalls
+      .filter(call => call.durationSec > 0) // 🔥 EXCLUSION DES DURÉES = 0
+      .forEach(call => {
+        const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
+        if (slotIndex >= 0 && slotIndex < callVolumes.length) {
+          if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
+          else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
+          else callVolumes[slotIndex].ABSYS += 1;
+        }
+      });
 
-    // ✅ 2. KPI et agents : SEULEMENT appels autorisés (CDS_IN/CDS_OUT avec agentName)
+    // ✅ KPI et agents : SEULEMENT appels autorisés
     const authorizedCalls = recentCalls.filter(call => 
       (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') && call.agentName
     );
@@ -166,8 +169,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
 
     return {
       employees,
-      callVolumes, // ✅ inclut TOUS les appels
-      kpi,         // ✅ seulement appels autorisés
+      callVolumes,
+      kpi,
     };
   }, [allCalls, halfHourSlots]);
 };

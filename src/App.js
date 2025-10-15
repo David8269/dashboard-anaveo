@@ -12,7 +12,7 @@ import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 import { useCallAggregates } from './hooks/useCallAggregates';
 import { parseCDRLine } from './utils/cdrParser';
-import { AUTHORIZED_AGENTS } from './config/agents'; // ← Import ajouté
+import { AUTHORIZED_AGENTS } from './config/agents';
 
 // === Helpers ===
 const isLunchBreak = (date) => {
@@ -363,12 +363,15 @@ const useWebSocketData = (url, onLostCall) => {
           });
         }
 
-        // ✅ Détection étendue des appels perdus (inclut les agents non autorisés)
+        // ✅ DÉTECTION MODIFIÉE : exclure les appels de durée 0 du son fatality
         let isLostCall = false;
         if (cdr.callType === 'CDS_IN') {
-          isLostCall = cdr.status.includes('missed') || cdr.status.includes('abandoned') || cdr.durationSec === 0;
+          // 🔥 Seulement si durée > 0 ET statut "missed/abandoned"
+          isLostCall = 
+            cdr.durationSec > 0 && 
+            (cdr.status.includes('missed') || cdr.status.includes('abandoned'));
         } else if (cdr.callType === 'ABSYS' || cdr.callType === 'OTHER') {
-          // ABSYS ou OTHER (agent non autorisé) → perdu si ≥60s et hors pause déjeuner
+          // ABSYS/OTHER perdus : ≥60s ET hors pause
           isLostCall = cdr.durationSec >= 60 && !isLunchBreak(cdr.startTime);
         }
         if (isLostCall && onLostCall) onLostCall();
@@ -498,7 +501,7 @@ const App = () => {
   useDailyResetScheduler(resetDailyData);
   useWeeklyResetScheduler(resetWeeklyData);
 
-  // ✅ KPI quotidiens (seulement agents autorisés grâce au parsing)
+  // ✅ KPI quotidiens (seulement agents autorisés)
   const { employees, callVolumes, kpi } = useCallAggregates(dailyCalls, halfHourSlots);
 
   // ✅ SLA hebdomadaire
@@ -553,7 +556,7 @@ const App = () => {
     return () => timeouts.forEach(id => clearTimeout(id));
   }, [audioUnlocked]);
 
-  // 🔊 Son top agent (seulement parmi les autorisés)
+  // 🔊 Son top agent
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
