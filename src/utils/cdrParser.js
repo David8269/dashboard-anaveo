@@ -111,7 +111,7 @@ export const parseCDRLine = (line) => {
       return null;
     }
 
-    // Extraction du nom de l'agent (de la fin vers le début), en ignorant les mots techniques
+    // Extraction du nom de l'agent (de la fin vers le début)
     let agentName = '';
     for (let i = rawFields.length - 1; i >= 0; i--) {
       const field = (rawFields[i] || '').trim();
@@ -130,10 +130,8 @@ export const parseCDRLine = (line) => {
       agentName = '';
     }
 
-    // Vérification agent autorisé
     const isAgentAuthorized = agentName && AUTHORIZED_AGENTS.has(agentName.toLowerCase());
 
-    // Détection du type d'appel
     const isFrontOffice = line.includes(',Front Office,');
     let callType = 'OTHER';
 
@@ -141,8 +139,13 @@ export const parseCDRLine = (line) => {
       callType = isAgentAuthorized ? 'CDS_IN' : 'ABSYS';
       if (!isAgentAuthorized) agentName = '';
     } else if (caller.startsWith('Ext.')) {
-      callType = isAgentAuthorized ? 'CDS_OUT' : 'OTHER';
-      if (!isAgentAuthorized) agentName = '';
+      // ✅ CORRECTION : même si non autorisé, on garde le type CDS_OUT si agentName est détecté
+      // Mais on ne le compte dans les KPI que s'il est autorisé → délégué au hook
+      if (agentName) {
+        callType = 'CDS_OUT';
+      } else {
+        callType = 'OTHER';
+      }
     }
 
     // Conversion durée en secondes

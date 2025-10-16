@@ -53,6 +53,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       (now - call.startTime) < SEVEN_DAYS
     );
 
+    // === Call Volumes ===
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -63,9 +64,11 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
 
     recentCalls
       .filter(call => {
+        // ✅ Inclure TOUS les CDS_IN et CDS_OUT dans le volume (même non autorisés ou durée = 0)
         if (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') {
           return true;
         }
+        // ❌ Exclure ABSYS/OTHER orphelins abandonnés < 59s
         if (call.durationSec < 59 && isAbandonedCall(call)) {
           return false;
         }
@@ -80,10 +83,13 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         }
       });
 
+    // === KPI & Agents (seulement agents autorisés) ===
     const authorizedCalls = recentCalls.filter(call => {
       if (call.callType === 'CDS_OUT') {
+        // ✅ Seulement les CDS_OUT avec agentName (on suppose qu'il est autorisé si présent)
         return !!call.agentName;
       } else if (call.callType === 'CDS_IN') {
+        // ✅ Tous les CDS_IN sont inclus (même sans agent → mais ils seront marqués comme manqués)
         return true;
       }
       return false;
