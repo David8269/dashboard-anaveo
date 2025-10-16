@@ -1,6 +1,6 @@
+// useCallAggregates.js
 import { useMemo } from 'react';
 
-// === Helpers internes ===
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -30,17 +30,9 @@ const getSlotIndex = (date, slots) => {
   return -1;
 };
 
-// Fonction pour détecter un appel abandonné (utilisée uniquement pour les appels SANS agent)
-// ✅ MODIFICATION : si durationSec > 0 → pas abandonné
 const isAbandonedCall = (call) => {
   const status = (call.status || '').toLowerCase();
-  
-  // Si l'appel a une durée > 0, il a été traité → pas abandonné
-  if (call.durationSec > 0) {
-    return false;
-  }
-
-  // Sinon, vérifier les statuts d'abandon
+  if (call.durationSec > 0) return false;
   return (
     status === 'src_participant_terminated' ||
     status === 'dst_participant_terminated' ||
@@ -49,7 +41,6 @@ const isAbandonedCall = (call) => {
   );
 };
 
-// === Hook principal ===
 export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
   return useMemo(() => {
     const now = new Date();
@@ -62,9 +53,6 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       (now - call.startTime) < SEVEN_DAYS
     );
 
-    // ✅ Call Volumes :
-    // - TOUS les appels avec agent (CDS_IN / CDS_OUT) sont inclus, même < 60s
-    // - Seuls les appels SANS agent (ABSYS/OTHER) abandonnés < 59s sont exclus
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -75,16 +63,12 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
 
     recentCalls
       .filter(call => {
-        // ✅ Toujours inclure les appels liés à un agent
         if (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') {
           return true;
         }
-
-        // ❌ Exclure les appels orphelins abandonnés de MOINS DE 59 secondes
         if (call.durationSec < 59 && isAbandonedCall(call)) {
           return false;
         }
-
         return true;
       })
       .forEach(call => {
@@ -96,14 +80,11 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         }
       });
 
-    // ✅ KPI et agents : 
-    //   - Pour CDS_OUT : seulement avec agent
-    //   - Pour CDS_IN : tous inclus (avec ou sans agent), mais on distingue répondu vs abandonné
     const authorizedCalls = recentCalls.filter(call => {
       if (call.callType === 'CDS_OUT') {
-        return !!call.agentName; // Sortants : besoin d'agent
+        return !!call.agentName;
       } else if (call.callType === 'CDS_IN') {
-        return true; // Entrants : tous inclus
+        return true;
       }
       return false;
     });
@@ -134,7 +115,6 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
           counts.answeredOutbound += 1;
           counts.outboundHandlingTime += call.durationSec || 0;
         }
-        // Si pas d'agent, on ne compte pas comme "répondu" — logique existante
       }
 
       if (call.agentName) {
@@ -188,8 +168,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       totalAgents: employees.length,
       onlineAgents: employees.length,
       totalInboundCalls: totalInbound,
-      totalAnsweredCalls: counts.answeredInbound, // ✅ Maintenant inclut aussi les CDS_IN sans agent mais avec durée > 0
-      missedCallsTotal: totalMissed, // ✅ Seulement ceux avec durationSec === 0
+      totalAnsweredCalls: counts.answeredInbound,
+      missedCallsTotal: totalMissed,
       totalOutboundCalls: counts.totalOutbound,
       globalAHTSec,
       averageHandlingTime: formatSecondsToMMSS(globalAHTSec),

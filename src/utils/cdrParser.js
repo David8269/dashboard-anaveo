@@ -1,3 +1,4 @@
+// cdrParser.js
 import { AUTHORIZED_AGENTS } from '../config/agents';
 
 /**
@@ -5,7 +6,7 @@ import { AUTHORIZED_AGENTS } from '../config/agents';
  */
 const TECHNICAL_KEYWORDS = new Set([
   'provider', 'queue', 'extension', 'external_line', 'default',
-  'ReplacedDst', 'Chain:', 'Front Office', 'Sortante', 'outbound_rule',
+  'replaceddst', 'chain:', 'front office', 'sortante', 'entrante', 'outbound_rule',
   'anonymous', 'unknown', 'caller', 'callee', 'system',
   '', 'null', 'undefined'
 ]);
@@ -110,38 +111,36 @@ export const parseCDRLine = (line) => {
       return null;
     }
 
-    // Extraction du nom de l'agent (de la fin vers le début)
+    // Extraction du nom de l'agent (de la fin vers le début), en ignorant les mots techniques
     let agentName = '';
     for (let i = rawFields.length - 1; i >= 0; i--) {
       const field = (rawFields[i] || '').trim();
       if (isLikelyName(field)) {
         agentName = field
-          .replace(/\s*\(.*?\)\s*/g, '') // Supprime (Ext.1001)
-          .replace(/\s*\..*$/, '')       // Supprime .suffixe
-          .replace(/\s+/g, ' ')          // Normalise espaces
+          .replace(/\s*\(.*?\)\s*/g, '')
+          .replace(/\s*\..*$/, '')
+          .replace(/\s+/g, ' ')
           .trim();
         break;
       }
     }
 
-    // ✅ Vérification agent autorisé
-    const isAgentAuthorized = agentName && AUTHORIZED_AGENTS.has(agentName.toLowerCase());
-
-    // Nettoyage des noms techniques
+    // Nettoyage des faux noms
     if (agentName && (/^\d+$/i.test(agentName) || agentName.toLowerCase().startsWith('chain'))) {
       agentName = '';
     }
 
-    // Détection du type d'appel avec restriction agents
+    // Vérification agent autorisé
+    const isAgentAuthorized = agentName && AUTHORIZED_AGENTS.has(agentName.toLowerCase());
+
+    // Détection du type d'appel
     const isFrontOffice = line.includes(',Front Office,');
     let callType = 'OTHER';
 
     if (isFrontOffice) {
-      // Appel entrant : seulement si agent autorisé
       callType = isAgentAuthorized ? 'CDS_IN' : 'ABSYS';
-      if (!isAgentAuthorized) agentName = ''; // masquer le nom
+      if (!isAgentAuthorized) agentName = '';
     } else if (caller.startsWith('Ext.')) {
-      // Appel sortant : seulement si agent autorisé
       callType = isAgentAuthorized ? 'CDS_OUT' : 'OTHER';
       if (!isAgentAuthorized) agentName = '';
     }
