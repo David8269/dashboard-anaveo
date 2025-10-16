@@ -656,18 +656,19 @@ const App = () => {
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
 
-  const unlockAudio = () => {
-    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
-    audio.play()
-      .then(() => {
-        console.log('✅ Sons activés via silent.wav');
-        setAudioUnlocked(true);
-        playSound('unlock.mp3', 'Activation des sons'); // Optionnel : son de confirmation
-      })
-      .catch(err => {
-        console.warn('❌ Échec activation sons :', err);
-      });
-  };
+const unlockAudio = () => {
+  // silent.wav est requis pour déverrouiller l'API Audio
+  const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
+  audio.play()
+    .then(() => {
+      console.log('✅ Sons activés via silent.wav');
+      setAudioUnlocked(true);
+      // 🔊 Aucun autre son ici → pas de 404
+    })
+    .catch(err => {
+      console.warn('❌ Échec activation des sons (silent.wav) :', err);
+    });
+};
 
   return (
     <Box
