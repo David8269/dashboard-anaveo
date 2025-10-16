@@ -11,7 +11,7 @@ import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 import { useCallAggregates } from './hooks/useCallAggregates';
-import { parseCDRLine } from './utils/cdrParser'; // ✅ Import correct
+import { parseCDRLine } from './utils/cdrParser';
 import { AUTHORIZED_AGENTS } from './config/agents';
 
 // === Helpers ===
@@ -70,6 +70,18 @@ const isInBusinessHours = (date) => {
   const h = date.getHours();
   const m = date.getMinutes();
   return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
+};
+
+// ✅ Fonction pour détecter un appel abandonné (utilisée pour fatality.mp3)
+const isAbandonedCall = (call) => {
+  const status = (call.status || '').toLowerCase();
+  return (
+    status === 'src_participant_terminated' ||
+    status === 'dst_participant_terminated' ||
+    status.includes('missed') ||
+    status.includes('abandoned') ||
+    call.durationSec === 0
+  );
 };
 
 // === Clock ===
@@ -373,20 +385,15 @@ const useWebSocketData = (url, onLostCall) => {
         }
 
         if (isLunchBreak(cdr.startTime)) {
-          // On ne modifie pas le type ici, car votre parser gère déjà ABSYS
-          // Mais on peut loguer
           console.debug(`[Appel] 🥪 Pause déjeuner détectée pour : ${cdr.id}`);
         }
 
         const callWithSec = { ...cdr, receivedAt: new Date() };
 
+        // ✅ NOUVELLE LOGIQUE : fatality.mp3 uniquement pour orphelins ≥59s ET abandonnés
         let isLostCall = false;
-        if (cdr.callType === 'CDS_IN') {
-          isLostCall = 
-            cdr.durationSec > 0 && 
-            (cdr.status.includes('missed') || cdr.status.includes('abandoned'));
-        } else if (cdr.callType === 'ABSYS' || cdr.callType === 'OTHER') {
-          isLostCall = cdr.durationSec >= 60 && !isLunchBreak(cdr.startTime);
+        if ((cdr.callType === 'ABSYS' || cdr.callType === 'OTHER') && !isLunchBreak(cdr.startTime)) {
+          isLostCall = cdr.durationSec >= 59 && isAbandonedCall(cdr);
         }
 
         if (isInBusinessHours(cdr.startTime)) {

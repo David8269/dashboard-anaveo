@@ -57,7 +57,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
 
     // ✅ Call Volumes :
     // - TOUS les appels avec agent (CDS_IN / CDS_OUT) sont inclus, même < 60s
-    // - Seuls les appels SANS agent (ABSYS/OTHER) abandonnés < 60s sont exclus
+    // - Seuls les appels SANS agent (ABSYS/OTHER) abandonnés < 59s sont exclus
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -73,8 +73,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
           return true;
         }
 
-        // ❌ Exclure les appels orphelins (ABSYS/OTHER) abandonnés et < 60s
-        if (call.durationSec < 60 && isAbandonedCall(call)) {
+        // ❌ Exclure les appels orphelins abandonnés de MOINS DE 59 secondes
+        if (call.durationSec < 59 && isAbandonedCall(call)) {
           return false;
         }
 
