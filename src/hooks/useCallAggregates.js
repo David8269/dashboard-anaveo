@@ -47,8 +47,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
   return useMemo(() => {
     const now = new Date();
     const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-    
-    const recentCalls = allCalls.filter(call => 
+
+    const recentCalls = allCalls.filter(call =>
       call &&
       call.startTime instanceof Date &&
       !isNaN(call.startTime) &&
@@ -68,16 +68,12 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
 
     recentCalls
       .filter(call => {
-        // ✅ Toujours inclure les appels liés à un agent
         if (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') {
           return true;
         }
-
-        // ❌ Exclure les appels orphelins abandonnés de MOINS DE 59 secondes
         if (call.durationSec < 59 && isAbandonedCall(call)) {
           return false;
         }
-
         return true;
       })
       .forEach(call => {
@@ -89,37 +85,43 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         }
       });
 
-    // ✅ KPI et agents : SEULEMENT appels autorisés (CDS_IN / CDS_OUT avec agent)
-    const authorizedCalls = recentCalls.filter(call => 
-      (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') && call.agentName
+    // ✅ KPI : maintenant basés sur TOUS les appels CDS_IN (entrants), même sans agent
+    const allInboundCalls = recentCalls.filter(call => call.callType === 'CDS_IN');
+    const outboundCallsWithAgent = recentCalls.filter(
+      call => call.callType === 'CDS_OUT' && call.agentName
     );
 
-    const agentsMap = {};
     const counts = {
       totalInbound: 0,
       totalOutbound: 0,
       answeredInbound: 0,
       answeredOutbound: 0,
-      missedFromAgents: 0,
+      missedInbound: 0,
       inboundHandlingTime: 0,
       outboundHandlingTime: 0,
     };
 
-    for (const call of authorizedCalls) {
-      if (call.callType === 'CDS_IN') {
-        counts.totalInbound += 1;
-        if (isAbandonedCall(call)) {
-          counts.missedFromAgents += 1;
-        } else {
-          counts.answeredInbound += 1;
-          counts.inboundHandlingTime += call.durationSec || 0;
-        }
-      } else if (call.callType === 'CDS_OUT') {
-        counts.totalOutbound += 1;
-        counts.answeredOutbound += 1;
-        counts.outboundHandlingTime += call.durationSec || 0;
+    // Traitement des appels entrants (CDS_IN)
+    for (const call of allInboundCalls) {
+      counts.totalInbound += 1;
+      if (isAbandonedCall(call)) {
+        counts.missedInbound += 1;
+      } else {
+        counts.answeredInbound += 1;
+        counts.inboundHandlingTime += call.durationSec || 0;
       }
+    }
 
+    // Traitement des appels sortants avec agent
+    for (const call of outboundCallsWithAgent) {
+      counts.totalOutbound += 1;
+      counts.answeredOutbound += 1;
+      counts.outboundHandlingTime += call.durationSec || 0;
+    }
+
+    // Statistiques par agent (inchangées)
+    const agentsMap = {};
+    for (const call of recentCalls) {
       if (call.agentName) {
         if (!agentsMap[call.agentName]) {
           agentsMap[call.agentName] = {
@@ -148,7 +150,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     }
 
     const employees = Object.values(agentsMap);
-    const totalMissed = counts.missedFromAgents;
+    const totalMissed = counts.missedInbound;
     const totalInbound = counts.totalInbound;
 
     const avgInboundAHTSec = counts.answeredInbound > 0
