@@ -154,13 +154,6 @@ export const parseCDRLine = (line) => {
     const [h = 0, m = 0, s = 0] = durParts;
     const durationSec = h * 3600 + m * 60 + s;
 
-    // ✅ Indicateur pour exclusion du graphique "Call Volume"
-    const isShortAbandonedCall =
-      durationSec < 60 &&
-      (status === 'src_participant_terminated' || status === 'dst_participant_terminated');
-
-    const shouldExcludeFromCallVolume = isShortAbandonedCall;
-
     return {
       id,
       startTime,
@@ -172,7 +165,6 @@ export const parseCDRLine = (line) => {
       duration: durationStr,
       durationSec,
       callType,
-      shouldExcludeFromCallVolume, // 👈 utile si vous filtrez ailleurs
     };
   } catch (error) {
     console.error('[CDR] Erreur critique lors du parsing', { line, error: error.message });

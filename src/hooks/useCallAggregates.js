@@ -30,7 +30,7 @@ const getSlotIndex = (date, slots) => {
   return -1;
 };
 
-// ✅ Fonction générique pour détecter un appel abandonné (tous types)
+// Fonction pour détecter un appel abandonné (utilisée uniquement pour les appels SANS agent)
 const isAbandonedCall = (call) => {
   const status = (call.status || '').toLowerCase();
   return (
@@ -55,7 +55,9 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       (now - call.startTime) < SEVEN_DAYS
     );
 
-    // ✅ Call Volumes : exclure les appels abandonnés de < 60s (tous types)
+    // ✅ Call Volumes :
+    // - TOUS les appels avec agent (CDS_IN / CDS_OUT) sont inclus, même < 60s
+    // - Seuls les appels SANS agent (ABSYS/OTHER) abandonnés < 60s sont exclus
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -65,7 +67,19 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     }));
 
     recentCalls
-      .filter(call => !(call.durationSec < 60 && isAbandonedCall(call)))
+      .filter(call => {
+        // ✅ Toujours inclure les appels liés à un agent
+        if (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') {
+          return true;
+        }
+
+        // ❌ Exclure les appels orphelins (ABSYS/OTHER) abandonnés et < 60s
+        if (call.durationSec < 60 && isAbandonedCall(call)) {
+          return false;
+        }
+
+        return true;
+      })
       .forEach(call => {
         const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
         if (slotIndex >= 0 && slotIndex < callVolumes.length) {
