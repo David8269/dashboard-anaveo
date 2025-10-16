@@ -1,4 +1,3 @@
-// src/hooks/useCallAggregates.js
 import { useMemo } from 'react';
 
 // === Helpers internes ===
@@ -31,10 +30,12 @@ const getSlotIndex = (date, slots) => {
   return -1;
 };
 
-const isMissedCall = (call) => {
-  if (call.callType !== 'CDS_IN') return false;
-  const status = call.status || '';
+// ✅ Fonction générique pour détecter un appel abandonné (tous types)
+const isAbandonedCall = (call) => {
+  const status = (call.status || '').toLowerCase();
   return (
+    status === 'src_participant_terminated' ||
+    status === 'dst_participant_terminated' ||
     status.includes('missed') ||
     status.includes('abandoned') ||
     call.durationSec === 0
@@ -54,7 +55,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       (now - call.startTime) < SEVEN_DAYS
     );
 
-    // ✅ Call Volumes : exclure TOUS les appels de durée = 0
+    // ✅ Call Volumes : exclure les appels abandonnés de < 60s (tous types)
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -64,7 +65,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     }));
 
     recentCalls
-      .filter(call => call.durationSec > 0) // 🔥 EXCLUSION DES DURÉES = 0
+      .filter(call => !(call.durationSec < 60 && isAbandonedCall(call)))
       .forEach(call => {
         const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
         if (slotIndex >= 0 && slotIndex < callVolumes.length) {
@@ -74,7 +75,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         }
       });
 
-    // ✅ KPI et agents : SEULEMENT appels autorisés
+    // ✅ KPI et agents : SEULEMENT appels autorisés (CDS_IN / CDS_OUT avec agent)
     const authorizedCalls = recentCalls.filter(call => 
       (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') && call.agentName
     );
@@ -93,7 +94,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     for (const call of authorizedCalls) {
       if (call.callType === 'CDS_IN') {
         counts.totalInbound += 1;
-        if (isMissedCall(call)) {
+        if (isAbandonedCall(call)) {
           counts.missedFromAgents += 1;
         } else {
           counts.answeredInbound += 1;
@@ -119,7 +120,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         }
         const agent = agentsMap[call.agentName];
         if (call.callType === 'CDS_IN') {
-          if (isMissedCall(call)) {
+          if (isAbandonedCall(call)) {
             agent.missed += 1;
           } else {
             agent.inbound += 1;
