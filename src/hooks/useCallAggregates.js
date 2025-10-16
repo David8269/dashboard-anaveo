@@ -45,14 +45,11 @@ const isAbandonedCall = (call) => {
 // === Hook principal ===
 export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
   return useMemo(() => {
-    const now = new Date();
-    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-
+    // ✅ Suppression du filtre SEVEN_DAYS → inutile car allCalls est déjà filtré (daily/weekly)
     const recentCalls = allCalls.filter(call =>
       call &&
       call.startTime instanceof Date &&
-      !isNaN(call.startTime) &&
-      (now - call.startTime) < SEVEN_DAYS
+      !isNaN(call.startTime)
     );
 
     // ✅ Call Volumes :
