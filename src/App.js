@@ -11,54 +11,8 @@ import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 import { useCallAggregates } from './hooks/useCallAggregates';
+import { parseCDRLine } from './utils/cdrParser'; // ✅ Import correct
 import { AUTHORIZED_AGENTS } from './config/agents';
-
-// === CDR PARSER INTERNE (avec génération d'ID fiable) ===
-const parseCDRLine = (line) => {
-  if (!line || typeof line !== 'string') return null;
-
-  try {
-    const parts = line.trim().split('|');
-    if (parts.length < 10) return null;
-
-    const [
-      callId,
-      callType,
-      startTimeStr,
-      endTimeStr,
-      durationSecStr,
-      caller,
-      callee,
-      agentName,
-      status,
-      direction
-    ] = parts;
-
-    const startTime = startTimeStr ? new Date(startTimeStr) : null;
-    const endTime = endTimeStr ? new Date(endTimeStr) : null;
-    const durationSec = parseInt(durationSecStr, 10) || 0;
-
-    // 🔑 Génération d'un ID unique et stable
-    const id = callId || `${callType}_${startTime?.toISOString() || 'unknown'}_${caller || 'unknown'}_${durationSec}`;
-
-    return {
-      id,
-      callId,
-      callType,
-      startTime,
-      endTime,
-      durationSec,
-      caller,
-      callee,
-      agentName: agentName || '',
-      status: status || '',
-      direction: direction || '',
-    };
-  } catch (e) {
-    console.warn('[CDR Parser] ⚠️ Erreur parsing ligne:', line, e);
-    return null;
-  }
-};
 
 // === Helpers ===
 const isLunchBreak = (date) => {
@@ -326,8 +280,6 @@ const useWebSocketData = (url, onLostCall) => {
             if (!seen.has(call.id)) {
               seen.add(call.id);
               calls.push(call);
-            } else {
-              console.debug(`[Storage] 🔄 Appel ignoré (déjà chargé) : ${call.id}`);
             }
           }
         }
@@ -395,20 +347,39 @@ const useWebSocketData = (url, onLostCall) => {
       if (!isMountedRef.current) return;
       const msg = event.data;
       if (typeof msg === 'string') {
+        // 🔔 LOG TOUS LES MESSAGES BRUTS REÇUS
+        console.log(`[WS] 📥 Message brut reçu :`, msg);
+
         const cdr = parseCDRLine(msg);
-        if (!cdr || !cdr.startTime || !cdr.id) {
-          console.debug('[CDR] ❌ Appel ignoré (données invalides)', msg);
+        if (!cdr) {
+          console.debug('[CDR] ❌ Appel ignoré (parsing échoué)', msg);
+          return;
+        }
+
+        // 🔔 LOG APPEL PARSÉ (même s'il sera ignoré plus tard)
+        console.log(`[CDR] 📋 Appel parsé :`, {
+          id: cdr.id,
+          type: cdr.callType,
+          caller: cdr.caller,
+          agent: cdr.agentName,
+          duration: cdr.durationSec,
+          startTime: cdr.startTime?.toISOString(),
+          status: cdr.status,
+        });
+
+        if (!cdr.startTime || !cdr.id) {
+          console.debug('[CDR] ❌ Appel ignoré (données manquantes)', cdr);
           return;
         }
 
         if (isLunchBreak(cdr.startTime)) {
-          cdr.callType = 'ABSYS';
-          cdr.agentName = '';
+          // On ne modifie pas le type ici, car votre parser gère déjà ABSYS
+          // Mais on peut loguer
+          console.debug(`[Appel] 🥪 Pause déjeuner détectée pour : ${cdr.id}`);
         }
 
         const callWithSec = { ...cdr, receivedAt: new Date() };
 
-        // 🔊 Détection d'appel perdu
         let isLostCall = false;
         if (cdr.callType === 'CDS_IN') {
           isLostCall = 
@@ -419,7 +390,6 @@ const useWebSocketData = (url, onLostCall) => {
         }
 
         if (isInBusinessHours(cdr.startTime)) {
-          // 🔑 DÉDUPLICATION
           setAllCalls(prev => {
             const exists = prev.some(call => call.id === callWithSec.id);
             if (exists) {
@@ -428,13 +398,7 @@ const useWebSocketData = (url, onLostCall) => {
             }
             const updated = [...prev, callWithSec];
             saveCallsToStorage(updated);
-            console.log(`[Appel] 🆕 Nouvel appel ajouté : ${callWithSec.id}`, {
-              type: callWithSec.callType,
-              agent: callWithSec.agentName || '—',
-              caller: callWithSec.caller,
-              duration: callWithSec.durationSec,
-              startTime: callWithSec.startTime?.toISOString(),
-            });
+            console.log(`[Appel] 🆕 Ajouté à l'historique : ${callWithSec.id}`);
             return updated;
           });
 
@@ -449,10 +413,12 @@ const useWebSocketData = (url, onLostCall) => {
           });
 
           if (isLostCall && onLostCall) {
-            onLostCall(callWithSec.id); // Passer l'ID pour le log
+            onLostCall(callWithSec.id);
           }
 
           setLastUpdate(new Date());
+        } else {
+          console.debug(`[Appel] 🕒 Ignoré (hors heures d'ouverture) : ${callWithSec.id}`);
         }
       }
     };
@@ -536,13 +502,15 @@ const useWebSocketData = (url, onLostCall) => {
 const playSound = (filename, context = '') => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
+    const logContext = context ? `(${context})` : '';
+    console.log(`[Son] 🔊 Tentative de lecture : ${filename} ${logContext}`);
     audio.play().then(() => {
-      console.log(`[Son] 🔊 Joué : ${filename} ${context ? `(${context})` : ''}`);
+      console.log(`[Son] ✅ Lecture réussie : ${filename} ${logContext}`);
     }).catch(e => {
-      console.warn(`[Son] ⚠️ Échec lecture ${filename} :`, e);
+      console.warn(`[Son] ❌ Échec lecture ${filename} ${logContext}:`, e.message || e);
     });
   } catch (error) {
-    console.error('[Son] ❌ Erreur lecture son :', error);
+    console.error(`[Son] 💥 Erreur critique lecture ${filename}:`, error);
   }
 };
 
@@ -628,7 +596,7 @@ const App = () => {
     return () => timeouts.forEach(id => clearTimeout(id));
   }, [audioUnlocked]);
 
-  // 🔊 Son top agent
+  // 🔊 Son top agent + LOG NOUVEAU N°1
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -644,6 +612,8 @@ const App = () => {
     );
 
     if (currentTop && (!prevTop || prevTop.name !== currentTop.name)) {
+      console.log(`[Top Agent] 🥇 Nouveau n°1 : ${currentTop.name} (précédent : ${prevTop?.name || 'aucun'})`);
+
       const allowedFirstNames = new Set([
         'xavier', 'rana', 'mathys', 'romain',
         'nicolas', 'julien', 'benjamin', 'malik'
@@ -656,19 +626,17 @@ const App = () => {
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
 
-const unlockAudio = () => {
-  // silent.wav est requis pour déverrouiller l'API Audio
-  const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
-  audio.play()
-    .then(() => {
-      console.log('✅ Sons activés via silent.wav');
-      setAudioUnlocked(true);
-      // 🔊 Aucun autre son ici → pas de 404
-    })
-    .catch(err => {
-      console.warn('❌ Échec activation des sons (silent.wav) :', err);
-    });
-};
+  const unlockAudio = () => {
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
+    audio.play()
+      .then(() => {
+        console.log('✅ Sons activés via silent.wav');
+        setAudioUnlocked(true);
+      })
+      .catch(err => {
+        console.warn('❌ Échec activation sons (silent.wav) :', err);
+      });
+  };
 
   return (
     <Box
