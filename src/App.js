@@ -72,17 +72,6 @@ const isInBusinessHours = (date) => {
   return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
 };
 
-const isAbandonedCall = (call) => {
-  if (call.durationSec > 0) return false;
-  const status = (call.status || '').toLowerCase();
-  return (
-    status === 'src_participant_terminated' ||
-    status === 'dst_participant_terminated' ||
-    status.includes('missed') ||
-    status.includes('abandoned')
-  );
-};
-
 // === Clock ===
 function Clock() {
   const [time, setTime] = useState(new Date());
@@ -222,7 +211,7 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// === WebSocket Hook ===
+// === WebSocket Hook (CORRIGÉ + FATILITY POUR ABSYS) ===
 const useWebSocketData = (url, onLostCall) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
@@ -342,17 +331,6 @@ const useWebSocketData = (url, onLostCall) => {
       } catch (err) {
         console.warn('[WS] ⚠️ Souscription échouée:', err);
       }
-
-      const heartbeatInterval = setInterval(() => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          try {
-            wsRef.current.send('{"type":"ping"}');
-          } catch (e) {
-            console.warn('[WS] ⚠️ Heartbeat échoué');
-          }
-        }
-      }, 30000);
-      wsRef.current.heartbeatInterval = heartbeatInterval;
     };
     wsRef.current.onmessage = (event) => {
       if (!isMountedRef.current) return;
@@ -388,8 +366,8 @@ const useWebSocketData = (url, onLostCall) => {
         const callWithSec = { ...cdr, receivedAt: new Date() };
 
         let isLostCall = false;
-        if ((cdr.callType === 'ABSYS' || cdr.callType === 'OTHER') && !isLunchBreak(cdr.startTime)) {
-          isLostCall = cdr.durationSec >= 59 && isAbandonedCall(cdr);
+        if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime)) {
+          isLostCall = cdr.durationSec >= 59;
         }
 
         if (isInBusinessHours(cdr.startTime)) {
@@ -435,11 +413,6 @@ const useWebSocketData = (url, onLostCall) => {
       console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
       setIsConnected(false);
 
-      if (wsRef.current?.heartbeatInterval) {
-        clearInterval(wsRef.current.heartbeatInterval);
-        wsRef.current.heartbeatInterval = null;
-      }
-
       if (e.code !== 1000 && isMountedRef.current) {
         reconnectTimeoutRef.current = setTimeout(connect, 5000);
       }
@@ -474,7 +447,6 @@ const useWebSocketData = (url, onLostCall) => {
 
     return () => {
       isMountedRef.current = false;
-      if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
       if (wsRef.current) wsRef.current.close();
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       if (connectionTimeoutRef.current) clearTimeout(connectionTimeoutRef.current);

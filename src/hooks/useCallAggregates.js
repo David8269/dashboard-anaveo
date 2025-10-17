@@ -30,14 +30,11 @@ const getSlotIndex = (date, slots) => {
   return -1;
 };
 
-const isAbandonedCall = (call) => {
-  if (call.durationSec > 0) return false;
-  const status = (call.status || '').toLowerCase();
+const isMissedAbSysCall = (call) => {
   return (
-    status === 'src_participant_terminated' ||
-    status === 'dst_participant_terminated' ||
-    status.includes('missed') ||
-    status.includes('abandoned')
+    call.callType === 'ABSYS' &&
+    call.durationSec >= 59 &&
+    !isLunchBreak(call.startTime)
   );
 };
 
@@ -53,7 +50,6 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       (now - call.startTime) < SEVEN_DAYS
     );
 
-    // === Call Volumes (inclut ABSYS ≥59s ou non abandonnés) ===
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -63,7 +59,6 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     }));
 
     recentCalls.forEach(call => {
-      // Inclure CDS_IN / CDS_OUT toujours
       if (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') {
         const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
         if (slotIndex >= 0 && slotIndex < callVolumes.length) {
@@ -73,22 +68,12 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         return;
       }
 
-      // Pour ABSYS/OTHER : exclure seulement les orphelins <59s ET abandonnés
-      if (call.durationSec < 59 && isAbandonedCall(call)) {
-        return;
+      if (call.callType === 'ABSYS' || call.callType === 'OTHER') {
+        const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
+        if (slotIndex >= 0 && slotIndex < callVolumes.length) {
+          callVolumes[slotIndex].ABSYS += 1;
+        }
       }
-
-      const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
-      if (slotIndex >= 0 && slotIndex < callVolumes.length) {
-        callVolumes[slotIndex].ABSYS += 1;
-      }
-    });
-
-    // === KPI & Agents (seulement agents autorisés ou CDS_IN) ===
-    const authorizedCalls = recentCalls.filter(call => {
-      if (call.callType === 'CDS_IN') return true; // tous les entrants
-      if (call.callType === 'CDS_OUT') return !!call.agentName; // sortants avec agent
-      return false;
     });
 
     const agentsMap = {};
@@ -98,14 +83,15 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       answeredInbound: 0,
       answeredOutbound: 0,
       missedFromAgents: 0,
+      missedAbSys: 0,
       inboundHandlingTime: 0,
       outboundHandlingTime: 0,
     };
 
-    for (const call of authorizedCalls) {
+    for (const call of recentCalls) {
       if (call.callType === 'CDS_IN') {
         counts.totalInbound += 1;
-        if (isAbandonedCall(call)) {
+        if (call.durationSec === 0) {
           counts.missedFromAgents += 1;
         } else {
           counts.answeredInbound += 1;
@@ -115,6 +101,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         counts.totalOutbound += 1;
         counts.answeredOutbound += 1;
         counts.outboundHandlingTime += call.durationSec || 0;
+      } else if (isMissedAbSysCall(call)) {
+        counts.missedAbSys += 1;
       }
 
       if (call.agentName) {
@@ -131,7 +119,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         }
         const agent = agentsMap[call.agentName];
         if (call.callType === 'CDS_IN') {
-          if (isAbandonedCall(call)) {
+          if (call.durationSec === 0) {
             agent.missed += 1;
           } else {
             agent.inbound += 1;
@@ -145,7 +133,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     }
 
     const employees = Object.values(agentsMap);
-    const totalMissed = counts.missedFromAgents;
+    const totalMissed = counts.missedFromAgents + counts.missedAbSys;
     const totalInbound = counts.totalInbound;
 
     const avgInboundAHTSec = counts.answeredInbound > 0
@@ -157,8 +145,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     const globalAHTSec = (counts.answeredInbound + counts.answeredOutbound) > 0
       ? Math.floor((counts.inboundHandlingTime + counts.outboundHandlingTime) / (counts.answeredInbound + counts.answeredOutbound))
       : 0;
-    const abandonRate = totalInbound > 0
-      ? `${Math.round((totalMissed / totalInbound) * 100)}%`
+    const abandonRate = (totalInbound + counts.missedAbSys) > 0
+      ? `${Math.round((totalMissed / (totalInbound + counts.missedAbSys)) * 100)}%`
       : '0%';
 
     const kpi = {
@@ -173,7 +161,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       abandonRate,
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
-      totalCallsThisWeek: counts.totalInbound + counts.totalOutbound,
+      totalCallsThisWeek: counts.totalInbound + counts.totalOutbound + counts.missedAbSys,
     };
 
     return {
