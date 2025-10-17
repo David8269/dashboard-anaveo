@@ -211,7 +211,7 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// === WebSocket Hook (CORRIGÉ + FATILITY POUR ABSYS) ===
+// === WebSocket Hook (STABLE + CORRIGÉ ABSYS) ===
 const useWebSocketData = (url, onLostCall) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
@@ -223,7 +223,9 @@ const useWebSocketData = (url, onLostCall) => {
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const connectionTimeoutRef = useRef(null);
+  const pingIntervalRef = useRef(null);
   const isMountedRef = useRef(true);
+  const reconnectAttemptsRef = useRef(0);
 
   const getStorageKey = () => `callData_${getLocalDateStr(new Date())}`;
 
@@ -309,118 +311,162 @@ const useWebSocketData = (url, onLostCall) => {
     console.log('[Reset] 📅 Réinitialisation hebdomadaire complète');
   };
 
+  const stopPing = () => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+  };
+
+  const startPing = () => {
+    stopPing();
+    pingIntervalRef.current = setInterval(() => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        try {
+          // Envoi d'un ping personnalisé (le vrai ping n'est pas exposé en browser)
+          wsRef.current.send(JSON.stringify({ type: 'ping' }));
+        } catch (e) {
+          console.warn('[WS] ⚠️ Impossible d\'envoyer le ping', e);
+        }
+      }
+    }, 25000); // toutes les 25 secondes
+  };
+
   const connect = () => {
     if (!isMountedRef.current) return;
-    console.log(`[WS] 🔄 Connexion à ${url}`);
-    setError(null);
-    setIsConnected(false);
-    wsRef.current = new WebSocket(url);
-    connectionTimeoutRef.current = setTimeout(() => {
-      if (wsRef.current?.readyState === WebSocket.CONNECTING) {
-        wsRef.current?.close();
-      }
-    }, 10000);
-    wsRef.current.onopen = () => {
+
+    const baseDelay = 5000;
+    const maxDelay = 30000;
+    const delay = reconnectAttemptsRef.current === 0 ? 0 : Math.min(baseDelay * Math.pow(2, reconnectAttemptsRef.current - 1), maxDelay);
+
+    console.log(`[WS] 🔄 Tentative de connexion dans ${delay / 1000}s (essai #${reconnectAttemptsRef.current})`);
+    reconnectTimeoutRef.current = setTimeout(() => {
       if (!isMountedRef.current) return;
-      clearTimeout(connectionTimeoutRef.current);
-      console.log('[WS] ✅ Connecté');
-      setIsConnected(true);
+      console.log(`[WS] 🔄 Connexion à ${url}`);
       setError(null);
-      try {
-        wsRef.current.send(JSON.stringify({ type: "subscribe", topic: "cdr/live" }));
-      } catch (err) {
-        console.warn('[WS] ⚠️ Souscription échouée:', err);
-      }
-    };
-    wsRef.current.onmessage = (event) => {
-      if (!isMountedRef.current) return;
-      const msg = event.data;
-      if (typeof msg === 'string') {
-        console.log(`[WS] 📥 Message brut reçu :`, msg);
+      setIsConnected(false);
+      wsRef.current = new WebSocket(url);
 
-        const cdr = parseCDRLine(msg);
-        if (!cdr) {
-          console.debug('[CDR] ❌ Appel ignoré (parsing échoué)', msg);
-          return;
+      connectionTimeoutRef.current = setTimeout(() => {
+        if (wsRef.current?.readyState === WebSocket.CONNECTING) {
+          wsRef.current?.close();
         }
+      }, 10000);
 
-        console.log(`[CDR] 📋 Appel parsé :`, {
-          id: cdr.id,
-          type: cdr.callType,
-          caller: cdr.caller,
-          agent: cdr.agentName,
-          duration: cdr.durationSec,
-          startTime: cdr.startTime?.toISOString(),
-          status: cdr.status,
-        });
+      wsRef.current.onopen = () => {
+        if (!isMountedRef.current) return;
+        clearTimeout(connectionTimeoutRef.current);
+        console.log('[WS] ✅ Connecté');
+        setIsConnected(true);
+        setError(null);
+        reconnectAttemptsRef.current = 0;
+        startPing();
 
-        if (!cdr.startTime || !cdr.id) {
-          console.debug('[CDR] ❌ Appel ignoré (données manquantes)', cdr);
-          return;
+        try {
+          wsRef.current.send(JSON.stringify({ type: "subscribe", topic: "cdr/live" }));
+        } catch (err) {
+          console.warn('[WS] ⚠️ Souscription échouée:', err);
         }
+      };
 
-        if (isLunchBreak(cdr.startTime)) {
-          console.debug(`[Appel] 🥪 Pause déjeuner détectée pour : ${cdr.id}`);
-        }
+      wsRef.current.onmessage = (event) => {
+        if (!isMountedRef.current) return;
+        const msg = event.data;
+        if (typeof msg === 'string') {
+          // Ignorer les pongs
+          if (msg.includes('"type":"pong"') || msg === 'pong') return;
 
-        const callWithSec = { ...cdr, receivedAt: new Date() };
+          console.log(`[WS] 📥 Message brut reçu :`, msg);
 
-        let isLostCall = false;
-        if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime)) {
-          isLostCall = cdr.durationSec >= 59;
-        }
-
-        if (isInBusinessHours(cdr.startTime)) {
-          setAllCalls(prev => {
-            const exists = prev.some(call => call.id === callWithSec.id);
-            if (exists) {
-              console.debug(`[Appel] 🔄 Ignoré (déjà présent) : ${callWithSec.id}`);
-              return prev;
-            }
-            const updated = [...prev, callWithSec];
-            saveCallsToStorage(updated);
-            console.log(`[Appel] 🆕 Ajouté à l'historique : ${callWithSec.id}`);
-            return updated;
-          });
-
-          setDailyCalls(prev => {
-            if (prev.some(call => call.id === callWithSec.id)) return prev;
-            return [...prev, callWithSec];
-          });
-
-          setWeeklyCalls(prev => {
-            if (prev.some(call => call.id === callWithSec.id)) return prev;
-            return [...prev, callWithSec];
-          });
-
-          if (isLostCall && onLostCall) {
-            onLostCall(callWithSec.id);
+          const cdr = parseCDRLine(msg);
+          if (!cdr) {
+            console.debug('[CDR] ❌ Appel ignoré (parsing échoué)', msg);
+            return;
           }
 
-          setLastUpdate(new Date());
-        } else {
-          console.debug(`[Appel] 🕒 Ignoré (hors heures d'ouverture) : ${callWithSec.id}`);
-        }
-      }
-    };
-    wsRef.current.onerror = (err) => {
-      if (!isMountedRef.current) return;
-      console.error('[WS] ❌ Erreur:', err);
-      setIsConnected(false);
-    };
-    wsRef.current.onclose = (e) => {
-      if (!isMountedRef.current) return;
-      console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
-      setIsConnected(false);
+          console.log(`[CDR] 📋 Appel parsé :`, {
+            id: cdr.id,
+            type: cdr.callType,
+            caller: cdr.caller,
+            agent: cdr.agentName,
+            duration: cdr.durationSec,
+            startTime: cdr.startTime?.toISOString(),
+            status: cdr.status,
+          });
 
-      if (e.code !== 1000 && isMountedRef.current) {
-        reconnectTimeoutRef.current = setTimeout(connect, 5000);
-      }
-    };
+          if (!cdr.startTime || !cdr.id) {
+            console.debug('[CDR] ❌ Appel ignoré (données manquantes)', cdr);
+            return;
+          }
+
+          if (isLunchBreak(cdr.startTime)) {
+            console.debug(`[Appel] 🥪 Pause déjeuner détectée pour : ${cdr.id}`);
+          }
+
+          const callWithSec = { ...cdr, receivedAt: new Date() };
+
+          let isLostCall = false;
+          if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime)) {
+            isLostCall = cdr.durationSec >= 59;
+          }
+
+          if (isInBusinessHours(cdr.startTime)) {
+            setAllCalls(prev => {
+              const exists = prev.some(call => call.id === callWithSec.id);
+              if (exists) {
+                console.debug(`[Appel] 🔄 Ignoré (déjà présent) : ${callWithSec.id}`);
+                return prev;
+              }
+              const updated = [...prev, callWithSec];
+              saveCallsToStorage(updated);
+              console.log(`[Appel] 🆕 Ajouté à l'historique : ${callWithSec.id}`);
+              return updated;
+            });
+
+            setDailyCalls(prev => {
+              if (prev.some(call => call.id === callWithSec.id)) return prev;
+              return [...prev, callWithSec];
+            });
+
+            setWeeklyCalls(prev => {
+              if (prev.some(call => call.id === callWithSec.id)) return prev;
+              return [...prev, callWithSec];
+            });
+
+            if (isLostCall && onLostCall) {
+              onLostCall(callWithSec.id);
+            }
+
+            setLastUpdate(new Date());
+          } else {
+            console.debug(`[Appel] 🕒 Ignoré (hors heures d'ouverture) : ${callWithSec.id}`);
+          }
+        }
+      };
+
+      wsRef.current.onerror = (err) => {
+        if (!isMountedRef.current) return;
+        console.error('[WS] ❌ Erreur:', err);
+        setIsConnected(false);
+      };
+
+      wsRef.current.onclose = (e) => {
+        if (!isMountedRef.current) return;
+        console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
+        setIsConnected(false);
+        stopPing();
+
+        if (e.code !== 1000 && isMountedRef.current) {
+          reconnectAttemptsRef.current += 1;
+          connect(); // relance avec délai
+        }
+      };
+    }, delay);
   };
 
   useEffect(() => {
     isMountedRef.current = true;
+    reconnectAttemptsRef.current = 0;
     cleanupOldStorage();
     const storedCalls = loadCallsFromStorage();
     setAllCalls(storedCalls);
@@ -447,15 +493,18 @@ const useWebSocketData = (url, onLostCall) => {
 
     return () => {
       isMountedRef.current = false;
-      if (wsRef.current) wsRef.current.close();
+      if (wsRef.current) wsRef.current.close(1000, 'Unmount');
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       if (connectionTimeoutRef.current) clearTimeout(connectionTimeoutRef.current);
+      stopPing();
     };
   }, [url]);
 
   const reconnect = () => {
-    if (wsRef.current) wsRef.current.close();
+    reconnectAttemptsRef.current = 0;
+    if (wsRef.current) wsRef.current.close(1000, 'Manual reconnect');
     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+    stopPing();
     connect();
   };
 
@@ -636,6 +685,21 @@ const App = () => {
         <Box textAlign="center" mb={1}>
           <Clock />
         </Box>
+
+        {!isConnected && (
+          <Box textAlign="center" mb={2} sx={{ color: 'warning.main', fontWeight: 'bold' }}>
+            ⚠️ Connexion WebSocket perdue. Tentative de reconnexion...
+            <Button
+              size="small"
+              variant="outlined"
+              color="warning"
+              onClick={reconnect}
+              sx={{ ml: 1 }}
+            >
+              Reconnecter
+            </Button>
+          </Box>
+        )}
 
         <Grid container spacing={3} justifyContent="center" sx={{ mt: 4 }} aria-label="KPI Principaux">
           {[
