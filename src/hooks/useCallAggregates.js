@@ -1,4 +1,4 @@
-// useCallAggregates.js
+// src/hooks/useCallAggregates.js
 import { useMemo } from 'react';
 
 const isLunchBreak = (date) => {
@@ -31,8 +31,8 @@ const getSlotIndex = (date, slots) => {
 };
 
 const isAbandonedCall = (call) => {
-  const status = (call.status || '').toLowerCase();
   if (call.durationSec > 0) return false;
+  const status = (call.status || '').toLowerCase();
   return (
     status === 'src_participant_terminated' ||
     status === 'dst_participant_terminated' ||
@@ -53,7 +53,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       (now - call.startTime) < SEVEN_DAYS
     );
 
-    // === Call Volumes ===
+    // === Call Volumes (inclut ABSYS ≥59s ou non abandonnés) ===
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -62,36 +62,32 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       ABSYS: 0,
     }));
 
-    recentCalls
-      .filter(call => {
-        // ✅ Inclure TOUS les CDS_IN et CDS_OUT dans le volume (même non autorisés ou durée = 0)
-        if (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') {
-          return true;
-        }
-        // ❌ Exclure ABSYS/OTHER orphelins abandonnés < 59s
-        if (call.durationSec < 59 && isAbandonedCall(call)) {
-          return false;
-        }
-        return true;
-      })
-      .forEach(call => {
+    recentCalls.forEach(call => {
+      // Inclure CDS_IN / CDS_OUT toujours
+      if (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') {
         const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
         if (slotIndex >= 0 && slotIndex < callVolumes.length) {
           if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
           else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
-          else callVolumes[slotIndex].ABSYS += 1;
         }
-      });
-
-    // === KPI & Agents (seulement agents autorisés) ===
-    const authorizedCalls = recentCalls.filter(call => {
-      if (call.callType === 'CDS_OUT') {
-        // ✅ Seulement les CDS_OUT avec agentName (on suppose qu'il est autorisé si présent)
-        return !!call.agentName;
-      } else if (call.callType === 'CDS_IN') {
-        // ✅ Tous les CDS_IN sont inclus (même sans agent → mais ils seront marqués comme manqués)
-        return true;
+        return;
       }
+
+      // Pour ABSYS/OTHER : exclure seulement les orphelins <59s ET abandonnés
+      if (call.durationSec < 59 && isAbandonedCall(call)) {
+        return;
+      }
+
+      const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
+      if (slotIndex >= 0 && slotIndex < callVolumes.length) {
+        callVolumes[slotIndex].ABSYS += 1;
+      }
+    });
+
+    // === KPI & Agents (seulement agents autorisés ou CDS_IN) ===
+    const authorizedCalls = recentCalls.filter(call => {
+      if (call.callType === 'CDS_IN') return true; // tous les entrants
+      if (call.callType === 'CDS_OUT') return !!call.agentName; // sortants avec agent
       return false;
     });
 
@@ -117,10 +113,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         }
       } else if (call.callType === 'CDS_OUT') {
         counts.totalOutbound += 1;
-        if (call.agentName) {
-          counts.answeredOutbound += 1;
-          counts.outboundHandlingTime += call.durationSec || 0;
-        }
+        counts.answeredOutbound += 1;
+        counts.outboundHandlingTime += call.durationSec || 0;
       }
 
       if (call.agentName) {
@@ -161,10 +155,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       ? Math.floor(counts.outboundHandlingTime / counts.answeredOutbound)
       : 0;
     const globalAHTSec = (counts.answeredInbound + counts.answeredOutbound) > 0
-      ? Math.floor(
-          (counts.inboundHandlingTime + counts.outboundHandlingTime) /
-          (counts.answeredInbound + counts.answeredOutbound)
-        )
+      ? Math.floor((counts.inboundHandlingTime + counts.outboundHandlingTime) / (counts.answeredInbound + counts.answeredOutbound))
       : 0;
     const abandonRate = totalInbound > 0
       ? `${Math.round((totalMissed / totalInbound) * 100)}%`

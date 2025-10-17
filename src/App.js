@@ -72,15 +72,14 @@ const isInBusinessHours = (date) => {
   return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
 };
 
-// ✅ Fonction pour détecter un appel abandonné (utilisée pour fatality.mp3)
 const isAbandonedCall = (call) => {
+  if (call.durationSec > 0) return false;
   const status = (call.status || '').toLowerCase();
   return (
     status === 'src_participant_terminated' ||
     status === 'dst_participant_terminated' ||
     status.includes('missed') ||
-    status.includes('abandoned') ||
-    call.durationSec === 0
+    status.includes('abandoned')
   );
 };
 
@@ -359,7 +358,6 @@ const useWebSocketData = (url, onLostCall) => {
       if (!isMountedRef.current) return;
       const msg = event.data;
       if (typeof msg === 'string') {
-        // 🔔 LOG TOUS LES MESSAGES BRUTS REÇUS
         console.log(`[WS] 📥 Message brut reçu :`, msg);
 
         const cdr = parseCDRLine(msg);
@@ -368,7 +366,6 @@ const useWebSocketData = (url, onLostCall) => {
           return;
         }
 
-        // 🔔 LOG APPEL PARSÉ (même s'il sera ignoré plus tard)
         console.log(`[CDR] 📋 Appel parsé :`, {
           id: cdr.id,
           type: cdr.callType,
@@ -390,7 +387,6 @@ const useWebSocketData = (url, onLostCall) => {
 
         const callWithSec = { ...cdr, receivedAt: new Date() };
 
-        // ✅ NOUVELLE LOGIQUE : fatality.mp3 uniquement pour orphelins ≥59s ET abandonnés
         let isLostCall = false;
         if ((cdr.callType === 'ABSYS' || cdr.callType === 'OTHER') && !isLunchBreak(cdr.startTime)) {
           isLostCall = cdr.durationSec >= 59 && isAbandonedCall(cdr);
@@ -603,7 +599,7 @@ const App = () => {
     return () => timeouts.forEach(id => clearTimeout(id));
   }, [audioUnlocked]);
 
-  // 🔊 Son top agent + LOG NOUVEAU N°1
+  // 🔊 Son top agent
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 

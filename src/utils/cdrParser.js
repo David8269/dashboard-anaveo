@@ -1,4 +1,4 @@
-// cdrParser.js
+// src/utils/cdrParser.js
 import { AUTHORIZED_AGENTS } from '../config/agents';
 
 /**
@@ -111,6 +111,11 @@ export const parseCDRLine = (line) => {
       return null;
     }
 
+    // 🔧 CORRECTION : détection robuste de "Front Office" dans n'importe quel champ
+    const hasFrontOffice = rawFields.some(field => 
+      field.trim().toLowerCase() === 'front office'
+    );
+
     // Extraction du nom de l'agent (de la fin vers le début)
     let agentName = '';
     for (let i = rawFields.length - 1; i >= 0; i--) {
@@ -130,22 +135,19 @@ export const parseCDRLine = (line) => {
       agentName = '';
     }
 
-    const isAgentAuthorized = agentName && AUTHORIZED_AGENTS.has(agentName.toLowerCase());
-
-    const isFrontOffice = line.includes(',Front Office,');
+    // 🔧 CORRECTION : logique de callType robuste
     let callType = 'OTHER';
 
-    if (isFrontOffice) {
-      callType = isAgentAuthorized ? 'CDS_IN' : 'ABSYS';
-      if (!isAgentAuthorized) agentName = '';
-    } else if (caller.startsWith('Ext.')) {
-      // ✅ CORRECTION : même si non autorisé, on garde le type CDS_OUT si agentName est détecté
-      // Mais on ne le compte dans les KPI que s'il est autorisé → délégué au hook
-      if (agentName) {
-        callType = 'CDS_OUT';
+    if (hasFrontOffice) {
+      // Appel entrant via Front Office
+      if (agentName && AUTHORIZED_AGENTS.has(agentName.toLowerCase())) {
+        callType = 'CDS_IN';
       } else {
-        callType = 'OTHER';
+        callType = 'ABSYS'; // Orphelin ou non autorisé
       }
+    } else if (caller.startsWith('Ext.')) {
+      // Appel sortant : on garde CDS_OUT si un agent est détecté (même non autorisé ici)
+      callType = agentName ? 'CDS_OUT' : 'OTHER';
     }
 
     // Conversion durée en secondes
@@ -162,7 +164,7 @@ export const parseCDRLine = (line) => {
       endTime: parseCDRDate(endTimeStr),
       status,
       caller,
-      queue: isFrontOffice ? 'Front Office' : '',
+      queue: hasFrontOffice ? 'Front Office' : '',
       agentName,
       duration: durationStr,
       durationSec,
