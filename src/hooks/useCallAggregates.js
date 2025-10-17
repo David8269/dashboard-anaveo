@@ -1,4 +1,3 @@
-// src/hooks/useCallAggregates.js
 import { useMemo } from 'react';
 
 const isLunchBreak = (date) => {
@@ -30,9 +29,11 @@ const getSlotIndex = (date, slots) => {
   return -1;
 };
 
-const isMissedAbSysCall = (call) => {
+// 🔴 Fonction unique de filtrage — utilisée partout
+const isSignificantAbSysCall = (call) => {
   return (
     call.callType === 'ABSYS' &&
+    call.queue === 'Front Office' &&
     call.durationSec >= 59 &&
     !isLunchBreak(call.startTime)
   );
@@ -68,7 +69,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         return;
       }
 
-      if (call.callType === 'ABSYS' || call.callType === 'OTHER') {
+      // 🔴 Seulement les ABSYS significatifs sont affichés dans le graphique
+      if (isSignificantAbSysCall(call)) {
         const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
         if (slotIndex >= 0 && slotIndex < callVolumes.length) {
           callVolumes[slotIndex].ABSYS += 1;
@@ -101,7 +103,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         counts.totalOutbound += 1;
         counts.answeredOutbound += 1;
         counts.outboundHandlingTime += call.durationSec || 0;
-      } else if (isMissedAbSysCall(call)) {
+      } else if (isSignificantAbSysCall(call)) {
         counts.missedAbSys += 1;
       }
 
