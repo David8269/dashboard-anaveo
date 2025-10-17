@@ -29,7 +29,7 @@ const getSlotIndex = (date, slots) => {
   return -1;
 };
 
-// 🔴 Fonction unique de filtrage — utilisée partout
+// 🔴 Fonction unique : définit ce qu'est un appel perdu significatif
 const isSignificantAbSysCall = (call) => {
   return (
     call.callType === 'ABSYS' &&
@@ -69,7 +69,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         return;
       }
 
-      // 🔴 Seulement les ABSYS significatifs sont affichés dans le graphique
+      // 🔴 Seulement les ABSYS significatifs dans le graphique
       if (isSignificantAbSysCall(call)) {
         const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
         if (slotIndex >= 0 && slotIndex < callVolumes.length) {
@@ -80,19 +80,18 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
 
     const agentsMap = {};
     const counts = {
-      totalInbound: 0,
-      totalOutbound: 0,
+      // 🔴 On ne compte plus "totalInbound" brut ici
       answeredInbound: 0,
-      answeredOutbound: 0,
       missedFromAgents: 0,
       missedAbSys: 0,
+      totalOutbound: 0,
+      answeredOutbound: 0,
       inboundHandlingTime: 0,
       outboundHandlingTime: 0,
     };
 
     for (const call of recentCalls) {
       if (call.callType === 'CDS_IN') {
-        counts.totalInbound += 1;
         if (call.durationSec === 0) {
           counts.missedFromAgents += 1;
         } else {
@@ -135,8 +134,10 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     }
 
     const employees = Object.values(agentsMap);
+
+    // 🔴 CORRECTION CLÉ : Total Inbound = answered + missed (agents + absys)
+    const totalInbound = counts.answeredInbound + counts.missedFromAgents + counts.missedAbSys;
     const totalMissed = counts.missedFromAgents + counts.missedAbSys;
-    const totalInbound = counts.totalInbound;
 
     const avgInboundAHTSec = counts.answeredInbound > 0
       ? Math.floor(counts.inboundHandlingTime / counts.answeredInbound)
@@ -147,23 +148,23 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     const globalAHTSec = (counts.answeredInbound + counts.answeredOutbound) > 0
       ? Math.floor((counts.inboundHandlingTime + counts.outboundHandlingTime) / (counts.answeredInbound + counts.answeredOutbound))
       : 0;
-    const abandonRate = (totalInbound + counts.missedAbSys) > 0
-      ? `${Math.round((totalMissed / (totalInbound + counts.missedAbSys)) * 100)}%`
+    const abandonRate = totalInbound > 0
+      ? `${Math.round((totalMissed / totalInbound) * 100)}%`
       : '0%';
 
     const kpi = {
       totalAgents: employees.length,
       onlineAgents: employees.length,
-      totalInboundCalls: totalInbound,
+      totalInboundCalls: totalInbound,        // ✅ cohérent
       totalAnsweredCalls: counts.answeredInbound,
-      missedCallsTotal: totalMissed,
+      missedCallsTotal: totalMissed,          // ✅ = missedFromAgents + missedAbSys
       totalOutboundCalls: counts.totalOutbound,
       globalAHTSec,
       averageHandlingTime: formatSecondsToMMSS(globalAHTSec),
       abandonRate,
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
-      totalCallsThisWeek: counts.totalInbound + counts.totalOutbound + counts.missedAbSys,
+      totalCallsThisWeek: totalInbound + counts.totalOutbound,
     };
 
     return {
