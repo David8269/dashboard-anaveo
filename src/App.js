@@ -211,7 +211,7 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// === WebSocket Hook (STABLE + CORRIGÉ ABSYS + KEEPALIVE) ===
+// === WebSocket Hook ===
 const useWebSocketData = (url, onLostCall) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
@@ -320,7 +320,6 @@ const useWebSocketData = (url, onLostCall) => {
 
   const startPing = () => {
     stopPing();
-    // 🔴 Keepalive toutes les 10 secondes pour éviter les timeouts réseau
     pingIntervalRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         try {
@@ -373,7 +372,6 @@ const useWebSocketData = (url, onLostCall) => {
         if (!isMountedRef.current) return;
         const msg = event.data;
         if (typeof msg === 'string') {
-          // 🔴 Ignorer les messages de keepalive
           if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"')) {
             return;
           }
@@ -460,7 +458,7 @@ const useWebSocketData = (url, onLostCall) => {
 
         if (e.code !== 1000 && isMountedRef.current) {
           reconnectAttemptsRef.current += 1;
-          connect(); // relance avec délai exponentiel
+          connect();
         }
       };
     }, delay);
@@ -545,6 +543,37 @@ const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
   const prevEmployeesRef = useRef([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const scheduledTimeoutsRef = useRef([]);
+
+  const unlockAudio = () => {
+    if (audioUnlocked) return;
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
+    audio.play()
+      .then(() => {
+        console.log('✅ Audio déverrouillé avec succès (via silent.wav)');
+        setAudioUnlocked(true);
+      })
+      .catch(err => {
+        console.warn('❌ Échec du déverrouillage audio (silent.wav) :', err);
+      });
+  };
+
+  // 🔊 Déverrouillage automatique au premier clic/touche/touch
+  useEffect(() => {
+    const unlock = () => {
+      unlockAudio();
+    };
+
+    window.addEventListener('click', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
+    window.addEventListener('touchstart', unlock, { once: true });
+
+    return () => {
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('keydown', unlock);
+      window.removeEventListener('touchstart', unlock);
+    };
+  }, []);
 
   const handleLostCall = (callId) => {
     if (audioUnlocked) {
@@ -593,9 +622,13 @@ const App = () => {
     }, [...template]);
   }, [weeklyCalls]);
 
-  // 🔊 Sons horaires
+  // 🔊 Gestion robuste des sons horaires (avec protection onglet inactif)
   useEffect(() => {
     if (!audioUnlocked) return;
+
+    // Nettoyer les timeouts précédents
+    scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+    scheduledTimeoutsRef.current = [];
 
     const scheduleSoundAt = (targetHour, targetMinute, soundFile, label) => {
       const now = new Date();
@@ -607,8 +640,11 @@ const App = () => {
 
       const timeoutId = setTimeout(() => {
         playSound(soundFile, label);
-        scheduleSoundAt(targetHour, targetMinute, soundFile, label);
+        // Replanifier pour demain
+        const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
+        scheduledTimeoutsRef.current.push(nextId);
       }, delay);
+
       return timeoutId;
     };
 
@@ -619,7 +655,30 @@ const App = () => {
       scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
     ];
 
-    return () => timeouts.forEach(id => clearTimeout(id));
+    scheduledTimeoutsRef.current = timeouts;
+
+    // Gestion de la visibilité de l'onglet
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Onglet réactivé → reprogrammer les sons
+        scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+        scheduledTimeoutsRef.current = [];
+        const newTimeouts = [
+          scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée'),
+          scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner'),
+          scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause'),
+          scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
+        ];
+        scheduledTimeoutsRef.current = newTimeouts;
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+    };
   }, [audioUnlocked]);
 
   // 🔊 Son top agent
@@ -651,18 +710,6 @@ const App = () => {
 
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
-
-  const unlockAudio = () => {
-    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
-    audio.play()
-      .then(() => {
-        console.log('✅ Sons activés via silent.wav');
-        setAudioUnlocked(true);
-      })
-      .catch(err => {
-        console.warn('❌ Échec activation sons (silent.wav) :', err);
-      });
-  };
 
   return (
     <Box
