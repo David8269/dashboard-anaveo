@@ -29,13 +29,23 @@ const getSlotIndex = (date, slots) => {
   return -1;
 };
 
-// 🔴 Fonction unique : définit ce qu'est un appel perdu significatif
-const isSignificantAbSysCall = (call) => {
+// 🔵 Pour le GRAPHIQUE : inclut les appels en pause (vue brute du volume)
+const isAbSysForChart = (call) => {
+  return (
+    call.callType === 'ABSYS' &&
+    call.queue === 'Front Office' &&
+    call.durationSec >= 59
+    // ⚠️ Pas de vérification de pause ici → inclus même à midi !
+  );
+};
+
+// 🔴 Pour les KPI : exclut la pause (performance métier)
+const isAbSysForKpi = (call) => {
   return (
     call.callType === 'ABSYS' &&
     call.queue === 'Front Office' &&
     call.durationSec >= 59 &&
-    !isLunchBreak(call.startTime)
+    !isLunchBreak(call.startTime) // ✅ Exclu si pause
   );
 };
 
@@ -69,8 +79,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         return;
       }
 
-      // 🔴 Seulement les ABSYS significatifs dans le graphique
-      if (isSignificantAbSysCall(call)) {
+      // 🔵 GRAPHIQUE : inclut les ABSYS ≥59s, même en pause
+      if (isAbSysForChart(call)) {
         const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
         if (slotIndex >= 0 && slotIndex < callVolumes.length) {
           callVolumes[slotIndex].ABSYS += 1;
@@ -80,7 +90,6 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
 
     const agentsMap = {};
     const counts = {
-      // 🔴 On ne compte plus "totalInbound" brut ici
       answeredInbound: 0,
       missedFromAgents: 0,
       missedAbSys: 0,
@@ -102,7 +111,8 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         counts.totalOutbound += 1;
         counts.answeredOutbound += 1;
         counts.outboundHandlingTime += call.durationSec || 0;
-      } else if (isSignificantAbSysCall(call)) {
+      } else if (isAbSysForKpi(call)) {
+        // 🔴 KPI : exclut les appels en pause
         counts.missedAbSys += 1;
       }
 
@@ -135,7 +145,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
 
     const employees = Object.values(agentsMap);
 
-    // 🔴 CORRECTION CLÉ : Total Inbound = answered + missed (agents + absys)
+    // 🔴 KPI : Total Inbound = answered + missed (agents + ABSYS hors pause)
     const totalInbound = counts.answeredInbound + counts.missedFromAgents + counts.missedAbSys;
     const totalMissed = counts.missedFromAgents + counts.missedAbSys;
 
@@ -155,9 +165,9 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     const kpi = {
       totalAgents: employees.length,
       onlineAgents: employees.length,
-      totalInboundCalls: totalInbound,        // ✅ cohérent
+      totalInboundCalls: totalInbound,
       totalAnsweredCalls: counts.answeredInbound,
-      missedCallsTotal: totalMissed,          // ✅ = missedFromAgents + missedAbSys
+      missedCallsTotal: totalMissed,
       totalOutboundCalls: counts.totalOutbound,
       globalAHTSec,
       averageHandlingTime: formatSecondsToMMSS(globalAHTSec),
