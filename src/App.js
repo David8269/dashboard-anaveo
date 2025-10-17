@@ -211,7 +211,7 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// === WebSocket Hook (STABLE + CORRIGÉ ABSYS) ===
+// === WebSocket Hook (STABLE + CORRIGÉ ABSYS + KEEPALIVE) ===
 const useWebSocketData = (url, onLostCall) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
@@ -320,16 +320,16 @@ const useWebSocketData = (url, onLostCall) => {
 
   const startPing = () => {
     stopPing();
+    // 🔴 Keepalive toutes les 10 secondes pour éviter les timeouts réseau
     pingIntervalRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         try {
-          // Envoi d'un ping personnalisé (le vrai ping n'est pas exposé en browser)
-          wsRef.current.send(JSON.stringify({ type: 'ping' }));
+          wsRef.current.send(JSON.stringify({ type: 'keepalive', ts: Date.now() }));
         } catch (e) {
-          console.warn('[WS] ⚠️ Impossible d\'envoyer le ping', e);
+          console.warn('[WS] ⚠️ Keepalive échoué', e);
         }
       }
-    }, 25000); // toutes les 25 secondes
+    }, 10000);
   };
 
   const connect = () => {
@@ -373,8 +373,10 @@ const useWebSocketData = (url, onLostCall) => {
         if (!isMountedRef.current) return;
         const msg = event.data;
         if (typeof msg === 'string') {
-          // Ignorer les pongs
-          if (msg.includes('"type":"pong"') || msg === 'pong') return;
+          // 🔴 Ignorer les messages de keepalive
+          if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"')) {
+            return;
+          }
 
           console.log(`[WS] 📥 Message brut reçu :`, msg);
 
@@ -458,7 +460,7 @@ const useWebSocketData = (url, onLostCall) => {
 
         if (e.code !== 1000 && isMountedRef.current) {
           reconnectAttemptsRef.current += 1;
-          connect(); // relance avec délai
+          connect(); // relance avec délai exponentiel
         }
       };
     }, delay);
