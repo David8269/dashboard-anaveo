@@ -22,10 +22,13 @@ const isLikelyName = (str) => {
   
   if (TECHNICAL_KEYWORDS.has(clean.toLowerCase())) return false;
   
-  if (/^\d+$/.test(clean.replace(/\s+/g, ''))) return false;
+  // Rejeter les chaînes purement numériques (même avec des espaces)
+  if (/^\s*\d+\s*$/.test(clean)) return false;
   
+  // Rejeter si aucune lettre alphabétique (y compris accentuée)
   if (!/[a-zA-ZÀ-ÿ]/.test(clean)) return false;
   
+  // Rejeter les chaînes trop longues
   if (clean.length > 50) return false;
   
   return true;
@@ -130,9 +133,14 @@ export const parseCDRLine = (line) => {
       }
     }
 
-    // Nettoyage des faux noms
-    if (agentName && (/^\d+$/i.test(agentName) || agentName.toLowerCase().startsWith('chain'))) {
+    // 🔒 CORRECTION CRUCIALE : rejeter les "noms" purement numériques
+    if (agentName && /^\d+$/.test(agentName.replace(/\s+/g, ''))) {
       agentName = '';
+    }
+
+    // 🔒 CORRECTION SUPPLÉMENTAIRE : ne conserver que les agents autorisés
+    if (agentName && !AUTHORIZED_AGENTS.has(agentName.toLowerCase())) {
+      agentName = ''; // Ignore les noms non présents dans la liste officielle
     }
 
     // 🔧 CORRECTION : logique de callType robuste
@@ -140,13 +148,13 @@ export const parseCDRLine = (line) => {
 
     if (hasFrontOffice) {
       // Appel entrant via Front Office
-      if (agentName && AUTHORIZED_AGENTS.has(agentName.toLowerCase())) {
+      if (agentName) {
         callType = 'CDS_IN';
       } else {
         callType = 'ABSYS'; // Orphelin ou non autorisé
       }
     } else if (caller.startsWith('Ext.')) {
-      // Appel sortant : on garde CDS_OUT si un agent est détecté (même non autorisé ici)
+      // Appel sortant : on garde CDS_OUT uniquement si agent autorisé
       callType = agentName ? 'CDS_OUT' : 'OTHER';
     }
 
