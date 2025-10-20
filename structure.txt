@@ -3,28 +3,31 @@ anaveo-project/
 ├── package-lock.json
 ├── public/
 │   ├── index.html
-│   ├── sounds/
-│   │   ├── silent.wav
-│   │   ├── fatality.mp3
-│   │   ├── debut.mp3
-│   │   ├── pause.mp3
-│   │   ├── reprise.mp3
-│   │   ├── fin.mp3
-│   │   ├── passage.mp3
-│   │   ├── xavier.mp3
-│   │   ├── mathys.mp3
-│   │   └── ... (autres sons personnalisés)
-│   └── images/
-│       └── background-dashboard.jpg
+│   ├── images/
+│   │   ├── background-dashboard.jpg   ← Image de fond originale
+│   │   └── halloween-bg.jpg           ← Nouvelle image de fond Halloween
+│   └── sounds/
+│       ├── silent.wav                 ← Fichier silencieux (déblocage audio)
+│       ├── scream.mp3                 ← Remplace fatality.mp3 (appel perdu)
+│       ├── witch-laugh.mp3            ← Remplace debut.mp3 (début journée)
+│       ├── haunted-wind.mp3           ← Remplace pause.mp3 (pause déjeuner)
+│       ├── spooky-chime.mp3           ← Remplace reprise.mp3 (reprise après pause)
+│       ├── ghost-moan.mp3             ← Remplace fin.mp3 (fin de journée)
+│       ├── passage.mp3                ← Son générique top agent
+│       ├── xavier.mp3                 ← Optionnel : son personnalisé (à remplacer par xavier-haunted.mp3 si souhaité)
+│       ├── mathys.mp3                 ← Optionnel : idem
+│       └── ...                        ← Autres sons personnalisés (rana.mp3, julien.mp3, etc.)
 └── src/
-    ├── index.js
-    ├── App.js                         
-    ├── utils/
-    │   └── cdrParser.js               
+    ├── index.js                       ← Point d'entrée (thème Halloween global)
+    ├── App.js                         ← Composant racine (dashboard principal)
+    ├── config/
+    │   └── agents.js                  ← Liste des agents autorisés (inchangé)
     ├── hooks/
-    │   └── useCallAggregates.js      
+    │   └── useCallAggregates.js       ← Logique de calcul des KPI (inchangé)
+    ├── utils/
+    │   └── cdrParser.js               ← Parsing des logs CDR (inchangé)
     └── components/
-        ├── KPICard.js
-        ├── SLABarchart.js
-        ├── AgentTable.js
-        └── CallVolumeChart.js
+        ├── KPICard.js                 ← Cartes KPI stylées Halloween
+        ├── AgentTable.js              ← Tableau des agents avec médailles et flammes
+        ├── CallVolumeChart.js         ← Graphique des volumes d'appels (flammes)
+        └── SLABarchart.js             ← Graphique SLA (barres animées)

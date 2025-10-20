@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Box,
   Grid,
-  Container,
   Typography,
   Button,
 } from '@mui/material';
@@ -11,60 +10,14 @@ import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 import { useCallAggregates } from './hooks/useCallAggregates';
+import { parseCDRLine } from './utils/cdrParser';
 import { AUTHORIZED_AGENTS } from './config/agents';
 
-// === CDR PARSER INTERNE (avec génération d'ID fiable) ===
-const parseCDRLine = (line) => {
-  if (!line || typeof line !== 'string') return null;
-
-  try {
-    const parts = line.trim().split('|');
-    if (parts.length < 10) return null;
-
-    const [
-      callId,
-      callType,
-      startTimeStr,
-      endTimeStr,
-      durationSecStr,
-      caller,
-      callee,
-      agentName,
-      status,
-      direction
-    ] = parts;
-
-    const startTime = startTimeStr ? new Date(startTimeStr) : null;
-    const endTime = endTimeStr ? new Date(endTimeStr) : null;
-    const durationSec = parseInt(durationSecStr, 10) || 0;
-
-    // 🔑 Génération d'un ID unique et stable
-    const id = callId || `${callType}_${startTime?.toISOString() || 'unknown'}_${caller || 'unknown'}_${durationSec}`;
-
-    return {
-      id,
-      callId,
-      callType,
-      startTime,
-      endTime,
-      durationSec,
-      caller,
-      callee,
-      agentName: agentName || '',
-      status: status || '',
-      direction: direction || '',
-    };
-  } catch (e) {
-    console.warn('[CDR Parser] ⚠️ Erreur parsing ligne:', line, e);
-    return null;
-  }
-};
-
-// === Helpers ===
+// === Helpers (inchangés) ===
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
-  return totalMinutes >= 750 && totalMinutes < 840; // 12:30 à 14:00
+  return totalMinutes >= 750 && totalMinutes < 840;
 };
 
 const formatSecondsToMMSS = (totalSeconds) => {
@@ -94,6 +47,11 @@ const getAbandonColor = (rateStr) => {
   return rate <= 15 ? 'success' : 'error';
 };
 
+const isAbandonCritical = (rateStr) => {
+  const rate = parseInt(rateStr, 10);
+  return !isNaN(rate) && rate > 15;
+};
+
 const getLocalDateStr = (date) => {
   const offset = date.getTimezoneOffset();
   const localDate = new Date(date.getTime() - offset * 60 * 1000);
@@ -118,7 +76,13 @@ const isInBusinessHours = (date) => {
   return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
 };
 
-// === Clock ===
+const mmssToSeconds = (mmss) => {
+  if (!mmss || mmss === '-') return null;
+  const [m, s] = mmss.split(':').map(Number);
+  return m * 60 + s;
+};
+
+// === Clock (Halloweenisé) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -159,9 +123,9 @@ function Clock() {
             text-align: center;
             text-transform: uppercase;
             text-shadow: 
-              0 0 8px rgba(255,255,255,0.7),
-              0 0 12px rgba(255,255,255,0.5),
-              0 0 16px rgba(255,255,255,0.3);
+              0 0 8px rgba(255,107,0,0.9),
+              0 0 12px rgba(255,69,0,0.7),
+              0 0 16px rgba(139,0,0,0.5);
             padding: 0.5rem 1rem;
             border-radius: 4px;
             background: transparent;
@@ -209,7 +173,7 @@ function Clock() {
   );
 }
 
-// === Schedulers ===
+// === Schedulers (inchangés) ===
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -257,7 +221,7 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// === WebSocket Hook ===
+// === WebSocket Hook (inchangé) ===
 const useWebSocketData = (url, onLostCall) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
@@ -269,7 +233,9 @@ const useWebSocketData = (url, onLostCall) => {
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const connectionTimeoutRef = useRef(null);
+  const pingIntervalRef = useRef(null);
   const isMountedRef = useRef(true);
+  const reconnectAttemptsRef = useRef(0);
 
   const getStorageKey = () => `callData_${getLocalDateStr(new Date())}`;
 
@@ -326,8 +292,6 @@ const useWebSocketData = (url, onLostCall) => {
             if (!seen.has(call.id)) {
               seen.add(call.id);
               calls.push(call);
-            } else {
-              console.debug(`[Storage] 🔄 Appel ignoré (déjà chargé) : ${call.id}`);
             }
           }
         }
@@ -357,128 +321,162 @@ const useWebSocketData = (url, onLostCall) => {
     console.log('[Reset] 📅 Réinitialisation hebdomadaire complète');
   };
 
-  const connect = () => {
-    if (!isMountedRef.current) return;
-    console.log(`[WS] 🔄 Connexion à ${url}`);
-    setError(null);
-    setIsConnected(false);
-    wsRef.current = new WebSocket(url);
-    connectionTimeoutRef.current = setTimeout(() => {
-      if (wsRef.current?.readyState === WebSocket.CONNECTING) {
-        wsRef.current?.close();
+  const stopPing = () => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+  };
+
+  const startPing = () => {
+    stopPing();
+    pingIntervalRef.current = setInterval(() => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        try {
+          wsRef.current.send(JSON.stringify({ type: 'keepalive', ts: Date.now() }));
+        } catch (e) {
+          console.warn('[WS] ⚠️ Keepalive échoué', e);
+        }
       }
     }, 10000);
-    wsRef.current.onopen = () => {
+  };
+
+  const connect = () => {
+    if (!isMountedRef.current) return;
+
+    const baseDelay = 5000;
+    const maxDelay = 30000;
+    const delay = reconnectAttemptsRef.current === 0 ? 0 : Math.min(baseDelay * Math.pow(2, reconnectAttemptsRef.current - 1), maxDelay);
+
+    console.log(`[WS] 🔄 Tentative de connexion dans ${delay / 1000}s (essai #${reconnectAttemptsRef.current})`);
+    reconnectTimeoutRef.current = setTimeout(() => {
       if (!isMountedRef.current) return;
-      clearTimeout(connectionTimeoutRef.current);
-      console.log('[WS] ✅ Connecté');
-      setIsConnected(true);
+      console.log(`[WS] 🔄 Connexion à ${url}`);
       setError(null);
-      try {
-        wsRef.current.send(JSON.stringify({ type: "subscribe", topic: "cdr/live" }));
-      } catch (err) {
-        console.warn('[WS] ⚠️ Souscription échouée:', err);
-      }
+      setIsConnected(false);
+      wsRef.current = new WebSocket(url);
 
-      const heartbeatInterval = setInterval(() => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          try {
-            wsRef.current.send('{"type":"ping"}');
-          } catch (e) {
-            console.warn('[WS] ⚠️ Heartbeat échoué');
+      connectionTimeoutRef.current = setTimeout(() => {
+        if (wsRef.current?.readyState === WebSocket.CONNECTING) {
+          wsRef.current?.close();
+        }
+      }, 10000);
+
+      wsRef.current.onopen = () => {
+        if (!isMountedRef.current) return;
+        clearTimeout(connectionTimeoutRef.current);
+        console.log('[WS] ✅ Connecté');
+        setIsConnected(true);
+        setError(null);
+        reconnectAttemptsRef.current = 0;
+        startPing();
+
+        try {
+          wsRef.current.send(JSON.stringify({ type: "subscribe", topic: "cdr/live" }));
+        } catch (err) {
+          console.warn('[WS] ⚠️ Souscription échouée:', err);
+        }
+      };
+
+      wsRef.current.onmessage = (event) => {
+        if (!isMountedRef.current) return;
+        const msg = event.data;
+        if (typeof msg === 'string') {
+          if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"')) {
+            return;
           }
-        }
-      }, 30000);
-      wsRef.current.heartbeatInterval = heartbeatInterval;
-    };
-    wsRef.current.onmessage = (event) => {
-      if (!isMountedRef.current) return;
-      const msg = event.data;
-      if (typeof msg === 'string') {
-        const cdr = parseCDRLine(msg);
-        if (!cdr || !cdr.startTime || !cdr.id) {
-          console.debug('[CDR] ❌ Appel ignoré (données invalides)', msg);
-          return;
-        }
 
-        if (isLunchBreak(cdr.startTime)) {
-          cdr.callType = 'ABSYS';
-          cdr.agentName = '';
-        }
+          console.log(`[WS] 📥 Message brut reçu :`, msg);
 
-        const callWithSec = { ...cdr, receivedAt: new Date() };
+          const cdr = parseCDRLine(msg);
+          if (!cdr) {
+            console.debug('[CDR] ❌ Appel ignoré (parsing échoué)', msg);
+            return;
+          }
 
-        // 🔊 Détection d'appel perdu
-        let isLostCall = false;
-        if (cdr.callType === 'CDS_IN') {
-          isLostCall = 
-            cdr.durationSec > 0 && 
-            (cdr.status.includes('missed') || cdr.status.includes('abandoned'));
-        } else if (cdr.callType === 'ABSYS' || cdr.callType === 'OTHER') {
-          isLostCall = cdr.durationSec >= 60 && !isLunchBreak(cdr.startTime);
-        }
+          console.log(`[CDR] 📋 Appel parsé :`, {
+            id: cdr.id,
+            type: cdr.callType,
+            caller: cdr.caller,
+            agent: cdr.agentName,
+            duration: cdr.durationSec,
+            startTime: cdr.startTime?.toISOString(),
+            status: cdr.status,
+          });
 
-        if (isInBusinessHours(cdr.startTime)) {
-          // 🔑 DÉDUPLICATION
-          setAllCalls(prev => {
-            const exists = prev.some(call => call.id === callWithSec.id);
-            if (exists) {
-              console.debug(`[Appel] 🔄 Ignoré (déjà présent) : ${callWithSec.id}`);
-              return prev;
-            }
-            const updated = [...prev, callWithSec];
-            saveCallsToStorage(updated);
-            console.log(`[Appel] 🆕 Nouvel appel ajouté : ${callWithSec.id}`, {
-              type: callWithSec.callType,
-              agent: callWithSec.agentName || '—',
-              caller: callWithSec.caller,
-              duration: callWithSec.durationSec,
-              startTime: callWithSec.startTime?.toISOString(),
+          if (!cdr.startTime || !cdr.id) {
+            console.debug('[CDR] ❌ Appel ignoré (données manquantes)', cdr);
+            return;
+          }
+
+          if (isLunchBreak(cdr.startTime)) {
+            console.debug(`[Appel] 🥪 Pause déjeuner détectée pour : ${cdr.id}`);
+          }
+
+          const callWithSec = { ...cdr, receivedAt: new Date() };
+
+          let isLostCall = false;
+          if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime)) {
+            isLostCall = cdr.durationSec >= 59;
+          }
+
+          if (isInBusinessHours(cdr.startTime)) {
+            setAllCalls(prev => {
+              const exists = prev.some(call => call.id === callWithSec.id);
+              if (exists) {
+                console.debug(`[Appel] 🔄 Ignoré (déjà présent) : ${callWithSec.id}`);
+                return prev;
+              }
+              const updated = [...prev, callWithSec];
+              saveCallsToStorage(updated);
+              console.log(`[Appel] 🆕 Ajouté à l'historique : ${callWithSec.id}`);
+              return updated;
             });
-            return updated;
-          });
 
-          setDailyCalls(prev => {
-            if (prev.some(call => call.id === callWithSec.id)) return prev;
-            return [...prev, callWithSec];
-          });
+            setDailyCalls(prev => {
+              if (prev.some(call => call.id === callWithSec.id)) return prev;
+              return [...prev, callWithSec];
+            });
 
-          setWeeklyCalls(prev => {
-            if (prev.some(call => call.id === callWithSec.id)) return prev;
-            return [...prev, callWithSec];
-          });
+            setWeeklyCalls(prev => {
+              if (prev.some(call => call.id === callWithSec.id)) return prev;
+              return [...prev, callWithSec];
+            });
 
-          if (isLostCall && onLostCall) {
-            onLostCall(callWithSec.id); // Passer l'ID pour le log
+            if (isLostCall && onLostCall) {
+              onLostCall(callWithSec.id);
+            }
+
+            setLastUpdate(new Date());
+          } else {
+            console.debug(`[Appel] 🕒 Ignoré (hors heures d'ouverture) : ${callWithSec.id}`);
           }
-
-          setLastUpdate(new Date());
         }
-      }
-    };
-    wsRef.current.onerror = (err) => {
-      if (!isMountedRef.current) return;
-      console.error('[WS] ❌ Erreur:', err);
-      setIsConnected(false);
-    };
-    wsRef.current.onclose = (e) => {
-      if (!isMountedRef.current) return;
-      console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
-      setIsConnected(false);
+      };
 
-      if (wsRef.current?.heartbeatInterval) {
-        clearInterval(wsRef.current.heartbeatInterval);
-        wsRef.current.heartbeatInterval = null;
-      }
+      wsRef.current.onerror = (err) => {
+        if (!isMountedRef.current) return;
+        console.error('[WS] ❌ Erreur:', err);
+        setIsConnected(false);
+      };
 
-      if (e.code !== 1000 && isMountedRef.current) {
-        reconnectTimeoutRef.current = setTimeout(connect, 5000);
-      }
-    };
+      wsRef.current.onclose = (e) => {
+        if (!isMountedRef.current) return;
+        console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
+        setIsConnected(false);
+        stopPing();
+
+        if (e.code !== 1000 && isMountedRef.current) {
+          reconnectAttemptsRef.current += 1;
+          connect();
+        }
+      };
+    }, delay);
   };
 
   useEffect(() => {
     isMountedRef.current = true;
+    reconnectAttemptsRef.current = 0;
     cleanupOldStorage();
     const storedCalls = loadCallsFromStorage();
     setAllCalls(storedCalls);
@@ -505,16 +503,18 @@ const useWebSocketData = (url, onLostCall) => {
 
     return () => {
       isMountedRef.current = false;
-      if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
-      if (wsRef.current) wsRef.current.close();
+      if (wsRef.current) wsRef.current.close(1000, 'Unmount');
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       if (connectionTimeoutRef.current) clearTimeout(connectionTimeoutRef.current);
+      stopPing();
     };
   }, [url]);
 
   const reconnect = () => {
-    if (wsRef.current) wsRef.current.close();
+    reconnectAttemptsRef.current = 0;
+    if (wsRef.current) wsRef.current.close(1000, 'Manual reconnect');
     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+    stopPing();
     connect();
   };
 
@@ -532,25 +532,85 @@ const useWebSocketData = (url, onLostCall) => {
   };
 };
 
-// === Sons ===
-const playSound = (filename, context = '') => {
+// === Sons (NOMS IDENTIQUES) ===
+const playSound = (filename, context = '', volume = 1) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
-    audio.play().then(() => {
-      console.log(`[Son] 🔊 Joué : ${filename} ${context ? `(${context})` : ''}`);
-    }).catch(e => {
-      console.warn(`[Son] ⚠️ Échec lecture ${filename} :`, e);
-    });
+    audio.volume = volume;
+    console.log(`[Son] 🔊 Lecture : ${filename} ${context ? `(${context})` : ''}`);
+    audio.play().catch(e => console.warn(`[Son] ❌ Échec :`, e));
   } catch (error) {
-    console.error('[Son] ❌ Erreur lecture son :', error);
+    console.error(`[Son] 💥 Erreur :`, error);
   }
 };
+
+// === Citrouille flottante ===
+const FloatingPumpkin = ({ delay, size = '3rem' }) => (
+  <Box
+    sx={{
+      position: 'fixed',
+      bottom: '-60px',
+      left: `${Math.random() * 80 + 10}%`,
+      fontSize: size,
+      zIndex: 0,
+      animation: `float-pumpkin 15s ${delay}s infinite ease-in-out`,
+      opacity: 0.85,
+      pointerEvents: 'none',
+    }}
+  >
+    🎃
+  </Box>
+);
+
+// === Chauve-souris volante ===
+const FlyingBat = ({ top, delay }) => (
+  <Box
+    sx={{
+      position: 'fixed',
+      top: `${top}%`,
+      left: '-100px',
+      fontSize: `${2 + Math.random() * 1}rem`,
+      opacity: 0,
+      zIndex: 0,
+      pointerEvents: 'none',
+      animation: `bats-fly 10s ${delay}s linear forwards`,
+    }}
+  >
+    🦇
+  </Box>
+);
 
 // === App ===
 const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
   const prevEmployeesRef = useRef([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const scheduledTimeoutsRef = useRef([]);
+
+  const unlockAudio = () => {
+    if (audioUnlocked) return;
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
+    audio.play()
+      .then(() => {
+        console.log('✅ Audio déverrouillé avec succès (via silent.wav)');
+        setAudioUnlocked(true);
+      })
+      .catch(err => {
+        console.warn('❌ Échec du déverrouillage audio (silent.wav) :', err);
+      });
+  };
+
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    window.addEventListener('click', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
+    window.addEventListener('touchstart', unlock, { once: true });
+    return () => {
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('keydown', unlock);
+      window.removeEventListener('touchstart', unlock);
+    };
+  }, []);
 
   const handleLostCall = (callId) => {
     if (audioUnlocked) {
@@ -599,9 +659,11 @@ const App = () => {
     }, [...template]);
   }, [weeklyCalls]);
 
-  // 🔊 Sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
+
+    scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+    scheduledTimeoutsRef.current = [];
 
     const scheduleSoundAt = (targetHour, targetMinute, soundFile, label) => {
       const now = new Date();
@@ -613,8 +675,10 @@ const App = () => {
 
       const timeoutId = setTimeout(() => {
         playSound(soundFile, label);
-        scheduleSoundAt(targetHour, targetMinute, soundFile, label);
+        const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
+        scheduledTimeoutsRef.current.push(nextId);
       }, delay);
+
       return timeoutId;
     };
 
@@ -625,10 +689,30 @@ const App = () => {
       scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
     ];
 
-    return () => timeouts.forEach(id => clearTimeout(id));
+    scheduledTimeoutsRef.current = timeouts;
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+        scheduledTimeoutsRef.current = [];
+        const newTimeouts = [
+          scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée'),
+          scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner'),
+          scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause'),
+          scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
+        ];
+        scheduledTimeoutsRef.current = newTimeouts;
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+    };
   }, [audioUnlocked]);
 
-  // 🔊 Son top agent
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
@@ -644,6 +728,8 @@ const App = () => {
     );
 
     if (currentTop && (!prevTop || prevTop.name !== currentTop.name)) {
+      console.log(`[Top Agent] 🥇 Nouveau n°1 : ${currentTop.name} (précédent : ${prevTop?.name || 'aucun'})`);
+
       const allowedFirstNames = new Set([
         'xavier', 'rana', 'mathys', 'romain',
         'nicolas', 'julien', 'benjamin', 'malik'
@@ -656,140 +742,267 @@ const App = () => {
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
 
-  const unlockAudio = () => {
-    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
-    audio.play()
-      .then(() => {
-        console.log('✅ Sons activés via silent.wav');
-        setAudioUnlocked(true);
-        playSound('unlock.mp3', 'Activation des sons'); // Optionnel : son de confirmation
-      })
-      .catch(err => {
-        console.warn('❌ Échec activation sons :', err);
-      });
-  };
+  const isInboundAHTCritical = useMemo(() => {
+    const seconds = mmssToSeconds(kpi.avgInboundAHT);
+    return getInboundAHTColor(seconds) === 'error';
+  }, [kpi.avgInboundAHT]);
+
+  const isOutboundAHTCritical = useMemo(() => {
+    const seconds = mmssToSeconds(kpi.avgOutboundAHT);
+    return getOutboundAHTColor(seconds) === 'error';
+  }, [kpi.avgOutboundAHT]);
+
+  const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundImage: `url('${process.env.PUBLIC_URL}/images/background-dashboard.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        py: 4,
-        position: 'relative',
-        '& > *': { position: 'relative', zIndex: 1 },
-      }}
-      aria-label="Tableau de bord en temps réel du centre d'appels"
-    >
-      <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 0 }} />
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, color: '#fff' }}>
-        <Typography variant="h1" align="center" sx={{ fontWeight: 'bold', fontSize: { xs: '2rem', md: '3rem' }, textShadow: '0 0 10px rgba(0,0,0,0.9)', mb: 2 }}>
-          ANAVEO - Service Center
-        </Typography>
+    <>
+      <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
 
-        <Box textAlign="center" mb={1}>
-          <Clock />
-        </Box>
+      <style>
+        {`
+          @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+          }
+          @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+              opacity: 1;
+            }
+            20%, 24%, 55% {
+              opacity: 0.4;
+            }
+          }
+          @keyframes bats-fly {
+            0% { transform: translateX(0) translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(-50px) rotate(360deg); opacity: 0; }
+          }
+          @keyframes drip-fall {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+          }
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+          }
+          @keyframes float-pumpkin {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-120px) rotate(8deg); }
+          }
+          .halloween-title {
+            font-family: 'Creepster', cursive;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            text-shadow: 
+              0 0 10px #ff6b00,
+              0 0 20px #ff4500,
+              0 0 30px #8a0000;
+            letter-spacing: 0.1em;
+            animation: flicker 3s infinite;
+          }
+          .floating {
+            animation: floating 3s ease-in-out infinite;
+          }
+        `}
+      </style>
 
-        <Grid container spacing={3} justifyContent="center" sx={{ mt: 4 }} aria-label="KPI Principaux">
-          {[
-            { title: "Total Agents", value: kpi.totalAgents, color: "info" },
-            { title: "Number of Calls", value: kpi.totalCallsThisWeek.toString(), color: "primary" },
-            { 
-              title: "Avg Inbound AHT", 
-              value: kpi.avgInboundAHT, 
-              color: getInboundAHTColor(
-                parseInt(kpi.avgInboundAHT.split(':')[0]) * 60 + 
-                parseInt(kpi.avgInboundAHT.split(':')[1])
-              ) 
-            },
-            { 
-              title: "Avg Outbound AHT", 
-              value: kpi.avgOutboundAHT, 
-              color: getOutboundAHTColor(
-                parseInt(kpi.avgOutboundAHT.split(':')[0]) * 60 + 
-                parseInt(kpi.avgOutboundAHT.split(':')[1])
-              ) 
-            },
-          ].map((item, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
-              <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} />
-            </Grid>
-          ))}
-        </Grid>
+      {/* 🦇 Chauves-souris PERMANENTES */}
+      {[...Array(4)].map((_, i) => (
+        <FlyingBat key={`bat-${i}`} top={15 + i * 20} delay={i * 2} />
+      ))}
 
-        <Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }} aria-label="KPI Détail Appels">
-          {[
-            { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default" },
-            { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error" },
-            { title: "Total Inbound Calls", value: kpi.totalInboundCalls, color: "info" },
-            { title: "Total Outbound Calls", value: kpi.totalOutboundCalls, color: "success" },
-            { title: "Abandon Rate", value: kpi.abandonRate, color: getAbandonColor(kpi.abandonRate) },
-          ].map((item, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
-              <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} />
-            </Grid>
-          ))}
-        </Grid>
+      {/* 🎃 Citrouilles flottantes */}
+      <FloatingPumpkin delay={0} size="2.8rem" />
+      <FloatingPumpkin delay={4} size="3.4rem" />
+      <FloatingPumpkin delay={7} size="2.6rem" />
 
-        <Box mt={6}>
-          <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
-        </Box>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/halloween-bg.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+          py: 4,
+          position: 'relative',
+        }}
+        aria-label="Tableau de bord Halloween en temps réel"
+      >
+        {/* ✅ SUPPRESSION DU FOG OVERLAY — plus d'effet de flou sur les côtés */}
+        {/* <Box className="fog-overlay" /> */}
 
-        <Box mt={{ xs: 8, md: 10 }}>
-          <Grid container spacing={4} direction="column">
-            <Grid size={{ xs: 12 }}>
-              <AgentTable
-                employees={employees.map(emp => ({
-                  ...emp,
-                  avgInboundAHT: formatSecondsToMMSS(emp.inbound > 0 ? Math.floor(emp.inboundHandlingTimeSec / emp.inbound) : 0),
-                  avgOutboundAHT: formatSecondsToMMSS(emp.outbound > 0 ? Math.floor(emp.outboundHandlingTimeSec / emp.outbound) : 0),
-                }))}
-                isLoading={!isConnected && employees.length === 0}
-                isConnected={isConnected}
-                lastUpdate={lastUpdate}
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <Box position="relative">
-                <SLABarchart 
-                  slaData={slaDataForChart} 
-                  wsConnected={isConnected}
+        {/* ✅ CONTENU OCCUPANT 100% DE LA LARGEUR — PAS DE MARGES LATÉRALES */}
+        <Box
+          sx={{
+            position: 'relative',
+            zIndex: 2,
+            color: '#fff',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            px: 0,   // ✅ Pas de padding horizontal
+            mx: 0,   // ✅ Pas de marge horizontale
+            width: '100%', // ✅ Largeur maximale
+            // Si besoin, ajoutez un padding interne aux composants enfants pour respirer
+          }}
+        >
+          <Typography 
+            variant="h1" 
+            align="center" 
+            className="halloween-title"
+            sx={{ mb: 2 }}
+          >
+            ANAVEO - Nightmare Center
+          </Typography>
+
+          <Box textAlign="center" mb={1} className="floating">
+            <Clock />
+          </Box>
+
+          {!isConnected && (
+            <Box textAlign="center" mb={2} sx={{ color: '#ff6b00', fontWeight: 'bold', textShadow: '0 0 8px rgba(255,107,0,0.7)' }}>
+              ⚠️ Connexion WebSocket perdue. Tentative de reconnexion...
+              <Button
+                size="small"
+                variant="outlined"
+                sx={{
+                  ml: 1,
+                  borderColor: '#ff6b00',
+                  color: '#ff6b00',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,107,0,0.1)',
+                    borderColor: '#ff6b00',
+                  }
+                }}
+                onClick={reconnect}
+              >
+                Reconnecter
+              </Button>
+            </Box>
+          )}
+
+          {/* ✅ Ajout d'un padding interne aux Grid pour éviter que les KPI soient collés aux bords */}
+          <Grid container spacing={3} justifyContent="center" sx={{ mt: 4, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Principaux">
+            {[
+              { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
+              { title: "Number of Calls", value: kpi.totalCallsThisWeek.toString(), color: "primary", critical: false },
+              { 
+                title: "Avg Inbound AHT", 
+                value: kpi.avgInboundAHT, 
+                color: getInboundAHTColor(mmssToSeconds(kpi.avgInboundAHT)),
+                critical: isInboundAHTCritical
+              },
+              { 
+                title: "Avg Outbound AHT", 
+                value: kpi.avgOutboundAHT, 
+                color: getOutboundAHTColor(mmssToSeconds(kpi.avgOutboundAHT)),
+                critical: isOutboundAHTCritical
+              },
+            ].map((item, i) => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
+                <KPICard 
+                  title={item.title} 
+                  value={item.value.toString()} 
+                  valueColor={item.color}
+                  isCritical={item.critical}
                 />
-                {!audioUnlocked && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 16,
-                      right: 16,
-                      zIndex: 2,
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      color="success"
-                      size="small"
-                      onClick={unlockAudio}
+              </Grid>
+            ))}
+          </Grid>
+
+          <Grid container spacing={3} justifyContent="center" sx={{ mt: 3, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Détail Appels">
+            {[
+              { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default", critical: false },
+              { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error", critical: false },
+              { title: "Total Inbound Calls", value: kpi.totalInboundCalls, color: "info", critical: false },
+              { title: "Total Outbound Calls", value: kpi.totalOutboundCalls, color: "success", critical: false },
+              { 
+                title: "Abandon Rate", 
+                value: kpi.abandonRate, 
+                color: getAbandonColor(kpi.abandonRate),
+                critical: isAbandonRateCritical
+              },
+            ].map((item, i) => (
+              <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
+                <KPICard 
+                  title={item.title} 
+                  value={item.value.toString()} 
+                  valueColor={item.color}
+                  isCritical={item.critical}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Box mt={6} px={{ xs: 2, sm: 3, md: 4 }}>
+            <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
+          </Box>
+
+          <Box mt={{ xs: 8, md: 10 }} pb={8} px={{ xs: 2, sm: 3, md: 4 }}>
+            <Grid container spacing={4} direction="column">
+              <Grid size={{ xs: 12 }}>
+                <AgentTable
+                  employees={employees.map(emp => ({
+                    ...emp,
+                    avgInboundAHT: formatSecondsToMMSS(emp.inbound > 0 ? Math.floor(emp.inboundHandlingTimeSec / emp.inbound) : 0),
+                    avgOutboundAHT: formatSecondsToMMSS(emp.outbound > 0 ? Math.floor(emp.outboundHandlingTimeSec / emp.outbound) : 0),
+                  }))}
+                  isLoading={!isConnected && employees.length === 0}
+                  isConnected={isConnected}
+                  lastUpdate={lastUpdate}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Box position="relative">
+                  <SLABarchart 
+                    slaData={slaDataForChart} 
+                    wsConnected={isConnected}
+                  />
+                  {!audioUnlocked && (
+                    <Box
                       sx={{
-                        fontWeight: 'bold',
-                        textTransform: 'none',
-                        padding: '6px 12px',
-                        fontSize: '0.875rem',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                        position: 'absolute',
+                        bottom: 16,
+                        right: 16,
+                        zIndex: 2,
                       }}
                     >
-                      🔊 Activer les sons
-                    </Button>
-                  </Box>
-                )}
-              </Box>
+                      <Button
+                        variant="contained"
+                        onClick={unlockAudio}
+                        sx={{
+                          background: 'linear-gradient(135deg, #ff8c00, #ff4500)',
+                          color: '#fff',
+                          fontWeight: 'bold',
+                          textTransform: 'none',
+                          padding: '8px 16px',
+                          fontSize: '0.95rem',
+                          borderRadius: '50px',
+                          border: '2px solid #ffd700',
+                          boxShadow: '0 0 12px rgba(255, 69, 0, 0.7)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #ff6b00, #ff2a00)',
+                            boxShadow: '0 0 20px rgba(255, 107, 0, 0.9)',
+                            transform: 'scale(1.05)',
+                          },
+                          fontFamily: '"Nosifer", cursive',
+                        }}
+                      >
+                        🎃 Activer les cris !
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
+          </Box>
         </Box>
-      </Container>
-    </Box>
+      </Box>
+    </>
   );
 };
 

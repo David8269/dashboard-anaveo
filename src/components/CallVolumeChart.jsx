@@ -3,7 +3,6 @@ import {
   Card,
   CardContent,
   Typography,
-  useTheme,
   Box,
   Skeleton,
   Chip,
@@ -20,59 +19,69 @@ import {
   ReferenceLine,
 } from 'recharts';
 
-const lunchStartIndex = 8;
-const lunchEndIndex = 11;
+const lunchStartIndex = 8;  // Correspond à 12:30
+const lunchEndIndex = 11;   // Correspond à 14:00
 
 function CustomLabel({ fill }) {
   return (
-    <text x="50%" y={25} fill={fill} fontSize={12} textAnchor="middle" fontWeight="bold">
-      Lunch break
+    <text x="50%" y={25} fill={fill} fontSize={14} textAnchor="middle" fontWeight="bold" fontFamily='"Nosifer", cursive'>
+     LUNCH BREAK
     </text>
   );
 }
 
-// ✅ Légende séparée, placée en dessous du graphique
 function LegendComponent() {
   const itemStyle = { 
     display: 'flex', 
     alignItems: 'center', 
     gap: 6, 
     fontWeight: 'bold', 
-    fontSize: 12, // ← réduit de 14 à 12
-    color: '#fff' 
+    fontSize: 12,
+    color: '#ffd700',
+    textShadow: '0 0 6px rgba(255,215,0,0.6)',
   };
   const squareStyle = (color) => ({ 
-    width: 14,  // ← réduit de 16 à 14
+    width: 14,
     height: 14, 
     backgroundColor: color, 
-    borderRadius: 2 
+    borderRadius: 2,
+    boxShadow: `0 0 6px ${color}`,
   });
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, py: 0.5 }}>
       <div style={itemStyle}>
-        <span style={squareStyle('#42A5F5')}></span> CDS In
+        <span style={squareStyle('#ff6b00')}></span> 📞 CDS In
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#66BB6A')}></span> CDS Out
+        <span style={squareStyle('#01b68a')}></span> 🎃 CDS Out
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#EF5350')}></span> Absys
+        <span style={squareStyle('#ff0a0a')}></span> 👻 Absys
       </div>
     </Box>
   );
 }
 
 const renderCustomLabel = (props) => {
-  const { y, value } = props;
-  if (value === 0) return null;
+  const { x, y, width, value, dataKey } = props;
+  if (!value || value <= 0) return null;
+
+  const isAbsysCritical = dataKey === 'ABSYS' && value > 5;
+  const labelColor = isAbsysCritical ? '#ff6b00' : '#fff';
+
   return (
     <text
-      x={props.x + props.width / 2}
+      x={x + width / 2}
       y={y - 6}
-      fill="#fff"
+      fill={labelColor}
       textAnchor="middle"
-      fontSize={10} // ← réduit de 12 à 10
+      fontSize={10}
       fontWeight="bold"
+      className={isAbsysCritical ? 'flame-text' : ''}
+      style={{ 
+        fontFamily: isAbsysCritical ? '"Orbitron", sans-serif' : 'inherit',
+        filter: isAbsysCritical ? 'drop-shadow(0 0 4px #ff6b00)' : 'none',
+      }}
     >
       {value}
     </text>
@@ -80,8 +89,6 @@ const renderCustomLabel = (props) => {
 };
 
 function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots = [] }) {
-  const theme = useTheme();
-
   const data = useMemo(() => 
     callVolumes.map((item, index) => ({ ...item, index })), 
     [callVolumes]
@@ -89,26 +96,47 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
   if (callVolumes.length === 0) {
     return (
-      <Card sx={{ backgroundColor: 'background.paper', borderRadius: 3 }}>
-        <CardContent sx={{ p: 1 }}> {/* ← réduit le padding */}
-          <Typography variant="overline" color="text.secondary" gutterBottom>
-            Call Volume
+      <Card
+        sx={{
+          backgroundColor: 'var(--halloween-paper, #1a0a2e)',
+          borderRadius: 3,
+          border: '1px solid var(--halloween-primary, #ff6b00)',
+          boxShadow: '0 0 15px rgba(255, 107, 0, 0.3)',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        <CardContent sx={{ p: 1 }}>
+          <Typography
+            variant="overline"
+            sx={{
+              fontFamily: '"Nosifer", cursive',
+              color: '#ff6b00',
+              textShadow: '0 0 8px rgba(255,107,0,0.7)',
+              fontSize: '1.1rem',
+            }}
+          >
+            📞 Call Volume
           </Typography>
-          <Box sx={{ textAlign: 'center', py: 1 }}>
+          <Box sx={{ textAlign: 'center', py: 1, mt: 2 }}>
             <Chip
-              label={wsConnected ? 'No data received' : 'Connecting...'}
-              color={wsConnected ? 'warning' : 'info'}
+              label={wsConnected ? '🕸️ No data in the cauldron' : '🔮 Connecting to spirits...'}
               size="small"
-              sx={{ mb: 1 }}
+              sx={{
+                mb: 1,
+                background: wsConnected 
+                  ? 'linear-gradient(135deg, #d32f2f, #b71c1c)' 
+                  : 'linear-gradient(135deg, #ff8c00, #ff4500)',
+                color: 'white',
+                fontFamily: '"Nosifer", cursive',
+              }}
             />
-            <Skeleton variant="rectangular" width="100%" height={200} /> {/* ← réduit */}
+            <Skeleton variant="rectangular" width="100%" height={200} />
           </Box>
         </CardContent>
       </Card>
     );
   }
 
-  // ✅ Sécuriser le calcul de maxY
   const maxY = data.reduce((max, d) => {
     const currentMax = Math.max(d.CDS_IN || 0, d.CDS_OUT || 0, d.ABSYS || 0);
     return currentMax > max ? currentMax : max;
@@ -119,36 +147,68 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
   const tickCount = Math.min(6, domainMax + 1);
 
   return (
-    <Card sx={{ backgroundColor: 'background.paper', borderRadius: 3 }}>
-      <CardContent sx={{ p: 1 }}> {/* ← padding réduit pour gagner de la hauteur */}
-
-        {/* Titre + état Live */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-          <Typography variant="overline" color="text.secondary" fontSize={12}>
-            Call Volume
+    <Card
+      sx={{
+        backgroundColor: 'var(--halloween-paper, #1a0a2e)',
+        borderRadius: 3,
+        border: '1px solid var(--halloween-primary, #ff6b00)',
+        boxShadow: '0 0 15px rgba(255, 107, 0, 0.3)',
+        backdropFilter: 'blur(4px)',
+      }}
+    >
+      <CardContent sx={{ p: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography
+            variant="overline"
+            sx={{
+              fontFamily: '"Nosifer", cursive',
+              color: '#ff6b00',
+              textShadow: '0 0 8px rgba(255,107,0,0.7)',
+              fontSize: '1.1rem',
+            }}
+          >
+            📞 Call Volume
           </Typography>
           <Chip
             label={wsConnected ? '🟢 Live' : '🔴 Disconnected'}
             size="small"
-            color={wsConnected ? 'success' : 'error'}
-            sx={{ fontSize: 12 }}
+            sx={{
+              fontSize: 12,
+              background: wsConnected 
+                ? 'linear-gradient(135deg, #01b68a, #00897b)' 
+                : 'linear-gradient(135deg, #d32f2f, #b71c1c)',
+              color: 'white',
+              fontWeight: 'bold',
+            }}
           />
         </Box>
 
-        {/* Graphique */}
-        <div style={{ width: '100%', height: 250 }} aria-label="Graphique des volumes d'appels">
+        {/* ✅ Graphique descendu légèrement avec mt: 1.5 */}
+        <Box
+          sx={{
+            width: '100%',
+            height: 250,
+            mt: 1.5, // ← descendre un peu plus
+          }}
+          aria-label="Graphique des volumes d'appels"
+        >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
-              margin={{ top: 5, right: 15, left: 15, bottom: 5 }} // ← marges réduites
-              barSize={18} // ← légèrement réduit pour compacité
+              margin={{ top: 5, right: 15, left: 15, bottom: 40 }}
+              barSize={18}
               stackOffset="none"
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2f3a49" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#4a148c" opacity={0.4} />
 
               <XAxis
                 dataKey="index"
-                tick={{ fill: '#fff', fontSize: 11 }} // ← police réduite
+                tick={{ 
+                  fill: '#ffd700', 
+                  fontSize: 11, 
+                  textShadow: '0 0 4px rgba(255,215,0,0.5)',
+                  fontFamily: '"Orbitron", sans-serif',
+                }}
                 tickFormatter={(index) => {
                   const time = halfHourSlots[index] || '';
                   if (time.endsWith(':30')) return time.replace(':30', 'h30');
@@ -158,13 +218,17 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 interval={0}
                 angle={-45}
                 textAnchor="end"
-                height={30} // ← réduit de 40 à 30
-                tickMargin={3}
+                height={30}
+                tickMargin={10}
               />
 
               <YAxis
-                stroke="#8884d8"
-                tick={{ fill: '#fff', fontSize: 11 }}
+                stroke="#8a2be2"
+                tick={{ 
+                  fill: '#ffd700', 
+                  fontSize: 11,
+                  fontFamily: '"Orbitron", sans-serif',
+                }}
                 domain={[0, domainMax]}
                 tickCount={tickCount}
                 allowDecimals={false}
@@ -172,16 +236,22 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
               <Tooltip
                 formatter={(value, name) => {
-                  const labels = { CDS_IN: 'CDS In', CDS_OUT: 'CDS Out', ABSYS: 'Absys' };
+                  const labels = { 
+                    CDS_IN: '📞 CDS In', 
+                    CDS_OUT: '🎃 CDS Out', 
+                    ABSYS: '👻 Absys' 
+                  };
                   return [value, labels[name] || name];
                 }}
                 labelFormatter={(index) => `Time: ${halfHourSlots[index] || index}`}
                 contentStyle={{
-                  backgroundColor: '#2c3e50',
-                  border: 'none',
-                  borderRadius: 4,
-                  color: '#fff',
+                  backgroundColor: '#1a0a2e',
+                  border: '1px solid #ff6b00',
+                  borderRadius: 6,
+                  color: '#ffd700',
                   fontSize: 12,
+                  fontFamily: '"Orbitron", sans-serif',
+                  boxShadow: '0 0 12px rgba(255, 107, 0, 0.5)',
                 }}
               />
 
@@ -190,25 +260,61 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 x2={lunchEndIndex}
                 y1={0}
                 y2="dataMax"
-                fill="#FF0000"
-                fillOpacity={0.15}
-                stroke="#b30000"
-                strokeOpacity={0.6}
+                fill="#8a2be2"
+                fillOpacity={0.2}
+                stroke="#ffd700"
+                strokeOpacity={0.8}
+                strokeDasharray="4 4"
               />
-              <ReferenceLine x={lunchStartIndex} stroke="#b30000" strokeWidth={1} />
-              <ReferenceLine x={lunchEndIndex} stroke="#b30000" strokeWidth={1} />
-              <CustomLabel fill={theme.palette.text.secondary} />
+              <ReferenceLine 
+                x={lunchStartIndex} 
+                stroke="#ffd700"
+                strokeWidth={2}
+                strokeDasharray="6 4"
+              />
+              <ReferenceLine 
+                x={lunchEndIndex} 
+                stroke="#ffd700"
+                strokeWidth={2}
+                strokeDasharray="6 4"
+              />
+              <CustomLabel fill="#ffd700" />
 
-              <Bar dataKey="CDS_IN" name="CDS In" fill="#42A5F5" label={renderCustomLabel} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="CDS_OUT" name="CDS Out" fill="#66BB6A" label={renderCustomLabel} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="ABSYS" name="Absys" fill="#EF5350" label={renderCustomLabel} radius={[4, 4, 0, 0]} />
+              <Bar 
+                dataKey="CDS_IN" 
+                name="CDS In" 
+                fill="#ff6b00" 
+                label={renderCustomLabel} 
+                radius={[4, 4, 0, 0]}
+                style={{
+                  animation: 'bar-flame-rise 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards',
+                }}
+              />
+              <Bar 
+                dataKey="CDS_OUT" 
+                name="CDS Out" 
+                fill="#01b68a" 
+                label={renderCustomLabel} 
+                radius={[4, 4, 0, 0]}
+                style={{
+                  animation: 'bar-flame-rise 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards',
+                }}
+              />
+              <Bar 
+                dataKey="ABSYS" 
+                name="Absys" 
+                fill="#ff0a0a" 
+                label={renderCustomLabel} 
+                radius={[4, 4, 0, 0]}
+                style={{
+                  animation: 'bar-flame-rise 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards',
+                }}
+              />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </Box>
 
-        {/* ✅ Légende placée EN DEHORS du graphique */}
         <LegendComponent />
-
       </CardContent>
     </Card>
   );

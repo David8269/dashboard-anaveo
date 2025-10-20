@@ -1,7 +1,5 @@
-// src/hooks/useCallAggregates.js
 import { useMemo } from 'react';
 
-// === Helpers internes ===
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -31,17 +29,26 @@ const getSlotIndex = (date, slots) => {
   return -1;
 };
 
-const isMissedCall = (call) => {
-  if (call.callType !== 'CDS_IN') return false;
-  const status = call.status || '';
+// 🔵 Pour le GRAPHIQUE : inclut les appels en pause (vue brute du volume)
+const isAbSysForChart = (call) => {
   return (
-    status.includes('missed') ||
-    status.includes('abandoned') ||
-    call.durationSec === 0
+    call.callType === 'ABSYS' &&
+    call.queue === 'Front Office' &&
+    call.durationSec >= 59
+    // ⚠️ Pas de vérification de pause ici → inclus même à midi !
   );
 };
 
-// === Hook principal ===
+// 🔴 Pour les KPI : exclut la pause (performance métier)
+const isAbSysForKpi = (call) => {
+  return (
+    call.callType === 'ABSYS' &&
+    call.queue === 'Front Office' &&
+    call.durationSec >= 59 &&
+    !isLunchBreak(call.startTime) // ✅ Exclu si pause
+  );
+};
+
 export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
   return useMemo(() => {
     const now = new Date();
@@ -54,7 +61,6 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       (now - call.startTime) < SEVEN_DAYS
     );
 
-    // ✅ Call Volumes : exclure TOUS les appels de durée = 0
     const callVolumes = halfHourSlots.map((time, index) => ({
       index,
       time,
@@ -63,37 +69,39 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       ABSYS: 0,
     }));
 
-    recentCalls
-      .filter(call => call.durationSec > 0) // 🔥 EXCLUSION DES DURÉES = 0
-      .forEach(call => {
+    recentCalls.forEach(call => {
+      if (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') {
         const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
         if (slotIndex >= 0 && slotIndex < callVolumes.length) {
           if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
           else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
-          else callVolumes[slotIndex].ABSYS += 1;
         }
-      });
+        return;
+      }
 
-    // ✅ KPI et agents : SEULEMENT appels autorisés
-    const authorizedCalls = recentCalls.filter(call => 
-      (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT') && call.agentName
-    );
+      // 🔵 GRAPHIQUE : inclut les ABSYS ≥59s, même en pause
+      if (isAbSysForChart(call)) {
+        const slotIndex = getSlotIndex(call.startTime, halfHourSlots);
+        if (slotIndex >= 0 && slotIndex < callVolumes.length) {
+          callVolumes[slotIndex].ABSYS += 1;
+        }
+      }
+    });
 
     const agentsMap = {};
     const counts = {
-      totalInbound: 0,
-      totalOutbound: 0,
       answeredInbound: 0,
-      answeredOutbound: 0,
       missedFromAgents: 0,
+      missedAbSys: 0,
+      totalOutbound: 0,
+      answeredOutbound: 0,
       inboundHandlingTime: 0,
       outboundHandlingTime: 0,
     };
 
-    for (const call of authorizedCalls) {
+    for (const call of recentCalls) {
       if (call.callType === 'CDS_IN') {
-        counts.totalInbound += 1;
-        if (isMissedCall(call)) {
+        if (call.durationSec === 0) {
           counts.missedFromAgents += 1;
         } else {
           counts.answeredInbound += 1;
@@ -103,6 +111,9 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         counts.totalOutbound += 1;
         counts.answeredOutbound += 1;
         counts.outboundHandlingTime += call.durationSec || 0;
+      } else if (isAbSysForKpi(call)) {
+        // 🔴 KPI : exclut les appels en pause
+        counts.missedAbSys += 1;
       }
 
       if (call.agentName) {
@@ -119,7 +130,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
         }
         const agent = agentsMap[call.agentName];
         if (call.callType === 'CDS_IN') {
-          if (isMissedCall(call)) {
+          if (call.durationSec === 0) {
             agent.missed += 1;
           } else {
             agent.inbound += 1;
@@ -133,8 +144,10 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
     }
 
     const employees = Object.values(agentsMap);
-    const totalMissed = counts.missedFromAgents;
-    const totalInbound = counts.totalInbound;
+
+    // 🔴 KPI : Total Inbound = answered + missed (agents + ABSYS hors pause)
+    const totalInbound = counts.answeredInbound + counts.missedFromAgents + counts.missedAbSys;
+    const totalMissed = counts.missedFromAgents + counts.missedAbSys;
 
     const avgInboundAHTSec = counts.answeredInbound > 0
       ? Math.floor(counts.inboundHandlingTime / counts.answeredInbound)
@@ -143,10 +156,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       ? Math.floor(counts.outboundHandlingTime / counts.answeredOutbound)
       : 0;
     const globalAHTSec = (counts.answeredInbound + counts.answeredOutbound) > 0
-      ? Math.floor(
-          (counts.inboundHandlingTime + counts.outboundHandlingTime) /
-          (counts.answeredInbound + counts.answeredOutbound)
-        )
+      ? Math.floor((counts.inboundHandlingTime + counts.outboundHandlingTime) / (counts.answeredInbound + counts.answeredOutbound))
       : 0;
     const abandonRate = totalInbound > 0
       ? `${Math.round((totalMissed / totalInbound) * 100)}%`
@@ -164,7 +174,7 @@ export const useCallAggregates = (allCalls = [], halfHourSlots = []) => {
       abandonRate,
       avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
       avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
-      totalCallsThisWeek: counts.totalInbound + counts.totalOutbound,
+      totalCallsThisWeek: totalInbound + counts.totalOutbound,
     };
 
     return {

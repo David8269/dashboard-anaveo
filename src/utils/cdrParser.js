@@ -6,7 +6,7 @@ import { AUTHORIZED_AGENTS } from '../config/agents';
  */
 const TECHNICAL_KEYWORDS = new Set([
   'provider', 'queue', 'extension', 'external_line', 'default',
-  'ReplacedDst', 'Chain:', 'Front Office', 'Sortante', 'outbound_rule',
+  'replaceddst', 'chain:', 'front office', 'sortante', 'entrante', 'outbound_rule',
   'anonymous', 'unknown', 'caller', 'callee', 'system',
   '', 'null', 'undefined'
 ]);
@@ -22,10 +22,13 @@ const isLikelyName = (str) => {
   
   if (TECHNICAL_KEYWORDS.has(clean.toLowerCase())) return false;
   
-  if (/^\d+$/.test(clean.replace(/\s+/g, ''))) return false;
+  // Rejeter les chaînes purement numériques (même avec des espaces)
+  if (/^\s*\d+\s*$/.test(clean)) return false;
   
+  // Rejeter si aucune lettre alphabétique (y compris accentuée)
   if (!/[a-zA-ZÀ-ÿ]/.test(clean)) return false;
   
+  // Rejeter les chaînes trop longues
   if (clean.length > 50) return false;
   
   return true;
@@ -111,40 +114,48 @@ export const parseCDRLine = (line) => {
       return null;
     }
 
+    // 🔧 CORRECTION : détection robuste de "Front Office" dans n'importe quel champ
+    const hasFrontOffice = rawFields.some(field => 
+      field.trim().toLowerCase() === 'front office'
+    );
+
     // Extraction du nom de l'agent (de la fin vers le début)
     let agentName = '';
     for (let i = rawFields.length - 1; i >= 0; i--) {
       const field = (rawFields[i] || '').trim();
       if (isLikelyName(field)) {
         agentName = field
-          .replace(/\s*\(.*?\)\s*/g, '') // Supprime (Ext.1001)
-          .replace(/\s*\..*$/, '')       // Supprime .suffixe
-          .replace(/\s+/g, ' ')          // Normalise espaces
+          .replace(/\s*\(.*?\)\s*/g, '')
+          .replace(/\s*\..*$/, '')
+          .replace(/\s+/g, ' ')
           .trim();
         break;
       }
     }
 
-    // ✅ Vérification agent autorisé
-    const isAgentAuthorized = agentName && AUTHORIZED_AGENTS.has(agentName.toLowerCase());
-
-    // Nettoyage des noms techniques
-    if (agentName && (/^\d+$/i.test(agentName) || agentName.toLowerCase().startsWith('chain'))) {
+    // 🔒 CORRECTION CRUCIALE : rejeter les "noms" purement numériques
+    if (agentName && /^\d+$/.test(agentName.replace(/\s+/g, ''))) {
       agentName = '';
     }
 
-    // Détection du type d'appel avec restriction agents
-    const isFrontOffice = line.includes(',Front Office,');
+    // 🔒 CORRECTION SUPPLÉMENTAIRE : ne conserver que les agents autorisés
+    if (agentName && !AUTHORIZED_AGENTS.has(agentName.toLowerCase())) {
+      agentName = ''; // Ignore les noms non présents dans la liste officielle
+    }
+
+    // 🔧 CORRECTION : logique de callType robuste
     let callType = 'OTHER';
 
-    if (isFrontOffice) {
-      // Appel entrant : seulement si agent autorisé
-      callType = isAgentAuthorized ? 'CDS_IN' : 'ABSYS';
-      if (!isAgentAuthorized) agentName = ''; // masquer le nom
+    if (hasFrontOffice) {
+      // Appel entrant via Front Office
+      if (agentName) {
+        callType = 'CDS_IN';
+      } else {
+        callType = 'ABSYS'; // Orphelin ou non autorisé
+      }
     } else if (caller.startsWith('Ext.')) {
-      // Appel sortant : seulement si agent autorisé
-      callType = isAgentAuthorized ? 'CDS_OUT' : 'OTHER';
-      if (!isAgentAuthorized) agentName = '';
+      // Appel sortant : on garde CDS_OUT uniquement si agent autorisé
+      callType = agentName ? 'CDS_OUT' : 'OTHER';
     }
 
     // Conversion durée en secondes
@@ -161,7 +172,7 @@ export const parseCDRLine = (line) => {
       endTime: parseCDRDate(endTimeStr),
       status,
       caller,
-      queue: isFrontOffice ? 'Front Office' : '',
+      queue: hasFrontOffice ? 'Front Office' : '',
       agentName,
       duration: durationStr,
       durationSec,
