@@ -13,7 +13,7 @@ import { useCallAggregates } from './hooks/useCallAggregates';
 import { parseCDRLine } from './utils/cdrParser';
 import { AUTHORIZED_AGENTS } from './config/agents';
 
-// === Helpers (inchangés) ===
+// === Helpers ===
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -173,7 +173,7 @@ function Clock() {
   );
 }
 
-// === Schedulers (inchangés) ===
+// === Schedulers ===
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -221,7 +221,7 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// === WebSocket Hook (inchangé) ===
+// === WebSocket Hook ===
 const useWebSocketData = (url, onLostCall) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
@@ -532,53 +532,21 @@ const useWebSocketData = (url, onLostCall) => {
   };
 };
 
-// === Sons (NOMS IDENTIQUES) ===
+// === Sons ===
 const playSound = (filename, context = '', volume = 1) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
-    audio.volume = volume;
-    console.log(`[Son] 🔊 Lecture : ${filename} ${context ? `(${context})` : ''}`);
-    audio.play().catch(e => console.warn(`[Son] ❌ Échec :`, e));
+    const logContext = context ? `(${context})` : '';
+    console.log(`[Son] 🔊 Tentative de lecture : ${filename} ${logContext}`);
+    audio.play().then(() => {
+      console.log(`[Son] ✅ Lecture réussie : ${filename} ${logContext}`);
+    }).catch(e => {
+      console.warn(`[Son] ❌ Échec lecture ${filename} ${logContext}:`, e.message || e);
+    });
   } catch (error) {
-    console.error(`[Son] 💥 Erreur :`, error);
+    console.error(`[Son] 💥 Erreur critique lecture ${filename}:`, error);
   }
 };
-
-// === Citrouille flottante ===
-const FloatingPumpkin = ({ delay, size = '3rem' }) => (
-  <Box
-    sx={{
-      position: 'fixed',
-      bottom: '-60px',
-      left: `${Math.random() * 80 + 10}%`,
-      fontSize: size,
-      zIndex: 0,
-      animation: `float-pumpkin 15s ${delay}s infinite ease-in-out`,
-      opacity: 0.85,
-      pointerEvents: 'none',
-    }}
-  >
-    🎃
-  </Box>
-);
-
-// === Chauve-souris volante ===
-const FlyingBat = ({ top, delay }) => (
-  <Box
-    sx={{
-      position: 'fixed',
-      top: `${top}%`,
-      left: '-100px',
-      fontSize: `${2 + Math.random() * 1}rem`,
-      opacity: 0,
-      zIndex: 0,
-      pointerEvents: 'none',
-      animation: `bats-fly 10s ${delay}s linear forwards`,
-    }}
-  >
-    🦇
-  </Box>
-);
 
 // === App ===
 const App = () => {
@@ -600,11 +568,16 @@ const App = () => {
       });
   };
 
+  // 🔊 Déverrouillage automatique au premier clic/touche/touch
   useEffect(() => {
-    const unlock = () => unlockAudio();
+    const unlock = () => {
+      unlockAudio();
+    };
+
     window.addEventListener('click', unlock, { once: true });
     window.addEventListener('keydown', unlock, { once: true });
     window.addEventListener('touchstart', unlock, { once: true });
+
     return () => {
       window.removeEventListener('click', unlock);
       window.removeEventListener('keydown', unlock);
@@ -659,9 +632,23 @@ const App = () => {
     }, [...template]);
   }, [weeklyCalls]);
 
+  const isInboundAHTCritical = useMemo(() => {
+    const seconds = mmssToSeconds(kpi.avgInboundAHT);
+    return getInboundAHTColor(seconds) === 'error';
+  }, [kpi.avgInboundAHT]);
+
+  const isOutboundAHTCritical = useMemo(() => {
+    const seconds = mmssToSeconds(kpi.avgOutboundAHT);
+    return getOutboundAHTColor(seconds) === 'error';
+  }, [kpi.avgOutboundAHT]);
+
+  const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
+
+  // 🔊 Gestion robuste des sons horaires (avec protection onglet inactif)
   useEffect(() => {
     if (!audioUnlocked) return;
 
+    // Nettoyer les timeouts précédents
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
     scheduledTimeoutsRef.current = [];
 
@@ -675,6 +662,7 @@ const App = () => {
 
       const timeoutId = setTimeout(() => {
         playSound(soundFile, label);
+        // Replanifier pour demain
         const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
         scheduledTimeoutsRef.current.push(nextId);
       }, delay);
@@ -691,8 +679,10 @@ const App = () => {
 
     scheduledTimeoutsRef.current = timeouts;
 
+    // Gestion de la visibilité de l'onglet
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        // Onglet réactivé → reprogrammer les sons
         scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
         scheduledTimeoutsRef.current = [];
         const newTimeouts = [
@@ -742,18 +732,6 @@ const App = () => {
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
 
-  const isInboundAHTCritical = useMemo(() => {
-    const seconds = mmssToSeconds(kpi.avgInboundAHT);
-    return getInboundAHTColor(seconds) === 'error';
-  }, [kpi.avgInboundAHT]);
-
-  const isOutboundAHTCritical = useMemo(() => {
-    const seconds = mmssToSeconds(kpi.avgOutboundAHT);
-    return getOutboundAHTColor(seconds) === 'error';
-  }, [kpi.avgOutboundAHT]);
-
-  const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
-
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
@@ -772,12 +750,6 @@ const App = () => {
               opacity: 0.4;
             }
           }
-          @keyframes bats-fly {
-            0% { transform: translateX(0) translateY(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.8; }
-            100% { transform: translateX(calc(100vw + 100px)) translateY(-50px) rotate(360deg); opacity: 0; }
-          }
           @keyframes drip-fall {
             0% { transform: translateY(0); opacity: 0; }
             10% { opacity: 1; }
@@ -788,10 +760,6 @@ const App = () => {
             0%, 100% { transform: translateX(0); }
             10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
             20%, 40%, 60%, 80% { transform: translateX(5px); }
-          }
-          @keyframes float-pumpkin {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-120px) rotate(8deg); }
           }
           .halloween-title {
             font-family: 'Creepster', cursive;
@@ -809,16 +777,6 @@ const App = () => {
         `}
       </style>
 
-      {/* 🦇 Chauves-souris PERMANENTES */}
-      {[...Array(4)].map((_, i) => (
-        <FlyingBat key={`bat-${i}`} top={15 + i * 20} delay={i * 2} />
-      ))}
-
-      {/* 🎃 Citrouilles flottantes */}
-      <FloatingPumpkin delay={0} size="2.8rem" />
-      <FloatingPumpkin delay={4} size="3.4rem" />
-      <FloatingPumpkin delay={7} size="2.6rem" />
-
       <Box
         sx={{
           minHeight: '100vh',
@@ -832,10 +790,6 @@ const App = () => {
         }}
         aria-label="Tableau de bord Halloween en temps réel"
       >
-        {/* ✅ SUPPRESSION DU FOG OVERLAY — plus d'effet de flou sur les côtés */}
-        {/* <Box className="fog-overlay" /> */}
-
-        {/* ✅ CONTENU OCCUPANT 100% DE LA LARGEUR — PAS DE MARGES LATÉRALES */}
         <Box
           sx={{
             position: 'relative',
@@ -844,10 +798,9 @@ const App = () => {
             minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',
-            px: 0,   // ✅ Pas de padding horizontal
-            mx: 0,   // ✅ Pas de marge horizontale
-            width: '100%', // ✅ Largeur maximale
-            // Si besoin, ajoutez un padding interne aux composants enfants pour respirer
+            px: 0,
+            mx: 0,
+            width: '100%',
           }}
         >
           <Typography 
@@ -885,8 +838,8 @@ const App = () => {
             </Box>
           )}
 
-          {/* ✅ Ajout d'un padding interne aux Grid pour éviter que les KPI soient collés aux bords */}
-          <Grid container spacing={3} justifyContent="center" sx={{ mt: 4, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Principaux">
+          {/* Première grille de KPI - remontée */}
+          <Grid container spacing={3} justifyContent="center" sx={{ mt: 2, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Principaux">
             {[
               { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
               { title: "Number of Calls", value: kpi.totalCallsThisWeek.toString(), color: "primary", critical: false },
@@ -914,7 +867,8 @@ const App = () => {
             ))}
           </Grid>
 
-          <Grid container spacing={3} justifyContent="center" sx={{ mt: 3, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Détail Appels">
+          {/* Deuxième grille de KPI - remontée */}
+          <Grid container spacing={3} justifyContent="center" sx={{ mt: 2, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Détail Appels">
             {[
               { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default", critical: false },
               { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error", critical: false },
@@ -938,10 +892,12 @@ const App = () => {
             ))}
           </Grid>
 
-          <Box mt={6} px={{ xs: 2, sm: 3, md: 4 }}>
+          {/* Graphique Call Volume - remonté */}
+          <Box mt={3} px={{ xs: 2, sm: 3, md: 4 }}>
             <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
           </Box>
 
+          {/* Performances des agents et SLABarchart - non modifiés */}
           <Box mt={{ xs: 8, md: 10 }} pb={8} px={{ xs: 2, sm: 3, md: 4 }}>
             <Grid container spacing={4} direction="column">
               <Grid size={{ xs: 12 }}>
@@ -950,7 +906,7 @@ const App = () => {
                     ...emp,
                     avgInboundAHT: formatSecondsToMMSS(emp.inbound > 0 ? Math.floor(emp.inboundHandlingTimeSec / emp.inbound) : 0),
                     avgOutboundAHT: formatSecondsToMMSS(emp.outbound > 0 ? Math.floor(emp.outboundHandlingTimeSec / emp.outbound) : 0),
-                  }))}
+                  }))} 
                   isLoading={!isConnected && employees.length === 0}
                   isConnected={isConnected}
                   lastUpdate={lastUpdate}

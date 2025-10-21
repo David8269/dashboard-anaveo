@@ -3,28 +3,6 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import CssBaseline from '@mui/material/CssBaseline';
 
-// === Fonction utilitaire pour créer des chauves-souris dynamiques ===
-const createBats = () => {
-  const bats = [];
-  const count = 4; // Nombre de chauves-souris
-  for (let i = 0; i < count; i++) {
-    bats.push(
-      <div
-        key={`bat-${i}`}
-        className="bat"
-        style={{
-          top: `${10 + i * 20}%`,
-          animationDelay: `${i * 2 + Math.random() * 3}s`,
-          left: '-100px',
-        }}
-      >
-        🦇
-      </div>
-    );
-  }
-  return bats;
-};
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
@@ -80,22 +58,6 @@ root.render(
           font-family: 'Orbitron', sans-serif !important;
         }
 
-        /* 🦇 Chauves-souris volantes */
-        @keyframes bats-fly {
-          0% { transform: translateX(-100px) translateY(0) rotate(0deg); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateX(calc(100vw + 100px)) translateY(-50px) rotate(360deg); opacity: 0; }
-        }
-        .bat {
-          position: fixed;
-          font-size: 2rem;
-          opacity: 0;
-          z-index: 0;
-          pointer-events: none;
-          animation: bats-fly 8s linear forwards;
-        }
-
         /* 📺 Effet glitch numérique (réutilisable) */
         @keyframes glitch-digital {
           0% { clip-path: inset(0 0 0 0); transform: translate(0); }
@@ -130,12 +92,6 @@ root.render(
         }
       `}
     </style>
-
-    {/* 🌫️ SUPPRESSION DU FOG OVERLAY — plus de brume sombre */}
-    {/* <div className="fog-overlay" aria-hidden="true" /> */}
-
-    {/* 🦇 Chauves-souris volantes (au niveau racine pour couvrir tout) */}
-    {createBats()}
 
     {/* 🧱 Réinitialisation MUI + App */}
     <CssBaseline />

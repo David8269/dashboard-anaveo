@@ -85,25 +85,6 @@
       }
     }
 
-    .bat {
-      position: fixed;
-      font-size: 24px;
-      opacity: 0;
-      z-index: 1;
-      animation: bats-fly 12s linear forwards;
-      pointer-events: none;
-    }
-    .bat:nth-child(1) { top: 15%; left: -100px; animation-delay: 0s; }
-    .bat:nth-child(2) { top: 35%; left: -100px; animation-delay: 2s; font-size: 20px; }
-    .bat:nth-child(3) { top: 60%; left: -100px; animation-delay: 4s; font-size: 28px; }
-
-    @keyframes bats-fly {
-      0% { transform: translateX(0) translateY(0) rotate(0deg); opacity: 0; }
-      10% { opacity: 0.8; }
-      90% { opacity: 0.8; }
-      100% { transform: translateX(calc(100vw + 100px)) translateY(-50px) rotate(360deg); opacity: 0; }
-    }
-
     .pumpkin {
       font-size: 3rem;
       animation: blink 3s infinite;
@@ -117,11 +98,6 @@
   </style>
 </head>
 <body>
-  <!-- 🦇 Chauves-souris -->
-  <div class="bat">🦇</div>
-  <div class="bat">🦇</div>
-  <div class="bat">🦇</div>
-
   <div id="root" aria-live="polite" aria-busy="true">
     <div class="loading-halloween">
       <span class="pumpkin">🎃</span>
