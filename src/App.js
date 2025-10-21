@@ -657,9 +657,11 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
+  // 🔊 Gestion robuste des sons horaires (avec protection onglet inactif)
   useEffect(() => {
     if (!audioUnlocked) return;
 
+    // Nettoyer les timeouts précédents
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
     scheduledTimeoutsRef.current = [];
 
@@ -673,6 +675,7 @@ const App = () => {
 
       const timeoutId = setTimeout(() => {
         playSound(soundFile, label);
+        // Replanifier pour demain
         const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
         scheduledTimeoutsRef.current.push(nextId);
       }, delay);
@@ -689,8 +692,10 @@ const App = () => {
 
     scheduledTimeoutsRef.current = timeouts;
 
+    // Gestion de la visibilité de l'onglet
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        // Onglet réactivé → reprogrammer les sons
         scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
         scheduledTimeoutsRef.current = [];
         const newTimeouts = [
@@ -708,6 +713,69 @@ const App = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+    };
+  }, [audioUnlocked]);
+
+  // 🔊 Sons aléatoires parquets/toc toutes les 30 min de 8h45 à 17h45
+  useEffect(() => {
+    if (!audioUnlocked) return;
+
+    const scheduledTimeouts = [];
+
+    const playRandomCreakSound = () => {
+      const sounds = ['parquets.mp3', 'toc.mp3'];
+      const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+      playSound(randomSound, 'Ambiance : bruit aléatoire');
+    };
+
+    const scheduleNextCreak = () => {
+      const now = new Date();
+      let nextTime = new Date(now);
+
+      const minutes = now.getMinutes();
+      const isPast45 = minutes >= 45;
+      const isPast15 = minutes >= 15;
+
+      if (isPast45) {
+        nextTime.setHours(now.getHours() + 1, 15, 0, 0);
+      } else if (isPast15) {
+        nextTime.setMinutes(45, 0, 0);
+      } else {
+        nextTime.setMinutes(15, 0, 0);
+      }
+
+      const hour = nextTime.getHours();
+      const minute = nextTime.getMinutes();
+      const isWithinRange = (hour > 8) || (hour === 8 && minute >= 45);
+      const isBeforeEnd = (hour < 17) || (hour === 17 && minute <= 45);
+
+      if (isWithinRange && isBeforeEnd) {
+        const delay = nextTime.getTime() - now.getTime();
+        if (delay > 0) {
+          const timeoutId = setTimeout(() => {
+            playRandomCreakSound();
+            scheduleNextCreak();
+          }, delay);
+          scheduledTimeouts.push(timeoutId);
+        }
+      }
+    };
+
+    scheduleNextCreak();
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        scheduledTimeouts.forEach(id => clearTimeout(id));
+        scheduledTimeouts.length = 0;
+        scheduleNextCreak();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      scheduledTimeouts.forEach(id => clearTimeout(id));
     };
   }, [audioUnlocked]);
 
