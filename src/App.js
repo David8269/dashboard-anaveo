@@ -555,21 +555,21 @@ const App = () => {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const scheduledTimeoutsRef = useRef([]);
 
-  // Gestion de la classe "scrolling" sur body
+  // 🔁 Gestion de la visibilité de la scrollbar
   useEffect(() => {
-    let timeoutId;
+    let hideScrollTimeout;
     const handleScroll = () => {
-      document.body.classList.add('scrolling');
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        document.body.classList.remove('scrolling');
+      document.body.classList.add('show-scrollbar');
+      clearTimeout(hideScrollTimeout);
+      hideScrollTimeout = setTimeout(() => {
+        document.body.classList.remove('show-scrollbar');
       }, 1000);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      clearTimeout(timeoutId);
+      clearTimeout(hideScrollTimeout);
     };
   }, []);
 
@@ -749,23 +749,29 @@ const App = () => {
           /* === Scrollbar discrète === */
           ::-webkit-scrollbar {
             width: 8px;
+          }
+          ::-webkit-scrollbar-track {
             background: transparent;
           }
           ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            background: transparent;
+            border-radius: 4px;
             transition: background 0.3s ease;
           }
-          body.scrolling ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.4);
+          body.show-scrollbar ::-webkit-scrollbar-thumb {
+            background: rgba(255, 107, 0, 0.6);
           }
+          body.show-scrollbar ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+          }
+
           /* Firefox */
           * {
             scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+            scrollbar-color: transparent transparent;
           }
-          body.scrolling {
-            scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+          body.show-scrollbar {
+            scrollbar-color: rgba(255, 107, 0, 0.6) rgba(0, 0, 0, 0.2);
           }
 
           /* === Animations existantes === */
