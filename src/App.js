@@ -555,6 +555,24 @@ const App = () => {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const scheduledTimeoutsRef = useRef([]);
 
+  // Gestion de la classe "scrolling" sur body
+  useEffect(() => {
+    let timeoutId;
+    const handleScroll = () => {
+      document.body.classList.add('scrolling');
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        document.body.classList.remove('scrolling');
+      }, 1000);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   const unlockAudio = () => {
     if (audioUnlocked) return;
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
@@ -568,16 +586,11 @@ const App = () => {
       });
   };
 
-  // 🔊 Déverrouillage automatique au premier clic/touche/touch
   useEffect(() => {
-    const unlock = () => {
-      unlockAudio();
-    };
-
+    const unlock = () => unlockAudio();
     window.addEventListener('click', unlock, { once: true });
     window.addEventListener('keydown', unlock, { once: true });
     window.addEventListener('touchstart', unlock, { once: true });
-
     return () => {
       window.removeEventListener('click', unlock);
       window.removeEventListener('keydown', unlock);
@@ -644,11 +657,9 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
-  // 🔊 Gestion robuste des sons horaires (avec protection onglet inactif)
   useEffect(() => {
     if (!audioUnlocked) return;
 
-    // Nettoyer les timeouts précédents
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
     scheduledTimeoutsRef.current = [];
 
@@ -662,7 +673,6 @@ const App = () => {
 
       const timeoutId = setTimeout(() => {
         playSound(soundFile, label);
-        // Replanifier pour demain
         const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
         scheduledTimeoutsRef.current.push(nextId);
       }, delay);
@@ -679,10 +689,8 @@ const App = () => {
 
     scheduledTimeoutsRef.current = timeouts;
 
-    // Gestion de la visibilité de l'onglet
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        // Onglet réactivé → reprogrammer les sons
         scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
         scheduledTimeoutsRef.current = [];
         const newTimeouts = [
@@ -738,6 +746,29 @@ const App = () => {
 
       <style>
         {`
+          /* === Scrollbar discrète === */
+          ::-webkit-scrollbar {
+            width: 8px;
+            background: transparent;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+          }
+          body.scrolling ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+          }
+          /* Firefox */
+          * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+          }
+          body.scrolling {
+            scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+          }
+
+          /* === Animations existantes === */
           @keyframes floating {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
@@ -838,7 +869,6 @@ const App = () => {
             </Box>
           )}
 
-          {/* Première grille de KPI - remontée */}
           <Grid container spacing={3} justifyContent="center" sx={{ mt: 2, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Principaux">
             {[
               { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
@@ -867,7 +897,6 @@ const App = () => {
             ))}
           </Grid>
 
-          {/* Deuxième grille de KPI - remontée */}
           <Grid container spacing={3} justifyContent="center" sx={{ mt: 2, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Détail Appels">
             {[
               { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default", critical: false },
@@ -892,12 +921,10 @@ const App = () => {
             ))}
           </Grid>
 
-          {/* Graphique Call Volume - remonté */}
           <Box mt={3} px={{ xs: 2, sm: 3, md: 4 }}>
             <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
           </Box>
 
-          {/* Performances des agents et SLABarchart - non modifiés */}
           <Box mt={{ xs: 8, md: 10 }} pb={8} px={{ xs: 2, sm: 3, md: 4 }}>
             <Grid container spacing={4} direction="column">
               <Grid size={{ xs: 12 }}>
