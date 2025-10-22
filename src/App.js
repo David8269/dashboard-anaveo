@@ -222,7 +222,7 @@ const useWeeklyResetScheduler = (resetFn) => {
 };
 
 // === WebSocket Hook ===
-const useWebSocketData = (url, onLostCall) => {
+const useWebSocketData = (url) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
   const [weeklyCalls, setWeeklyCalls] = useState([]);
@@ -415,10 +415,7 @@ const useWebSocketData = (url, onLostCall) => {
 
           const callWithSec = { ...cdr, receivedAt: new Date() };
 
-          let isLostCall = false;
-          if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime)) {
-            isLostCall = cdr.durationSec >= 59;
-          }
+          // ⚠️ Plus de gestion de onLostCall ici
 
           if (isInBusinessHours(cdr.startTime)) {
             setAllCalls(prev => {
@@ -442,10 +439,6 @@ const useWebSocketData = (url, onLostCall) => {
               if (prev.some(call => call.id === callWithSec.id)) return prev;
               return [...prev, callWithSec];
             });
-
-            if (isLostCall && onLostCall) {
-              onLostCall(callWithSec.id);
-            }
 
             setLastUpdate(new Date());
           } else {
@@ -598,13 +591,28 @@ const App = () => {
     };
   }, []);
 
-  const handleLostCall = (callId) => {
-    if (audioUnlocked) {
-      playSound('fatality.mp3', `Appel perdu : ${callId}`);
-    } else {
-      console.log(`[Son] 🔇 Fatality ignoré (sons désactivés) - Appel : ${callId}`);
+  // === Gestion des sons pour appels perdus ===
+  const playedLostCallIdsRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!audioUnlocked) {
+      return;
     }
-  };
+
+    const lostCalls = dailyCalls.filter(call =>
+      call.callType === 'ABSYS' &&
+      call.durationSec >= 59 &&
+      !isLunchBreak(call.startTime) &&
+      isInBusinessHours(call.startTime)
+    );
+
+    for (const call of lostCalls) {
+      if (!playedLostCallIdsRef.current.has(call.id)) {
+        playSound('fatality.mp3', `Appel perdu : ${call.id}`);
+        playedLostCallIdsRef.current.add(call.id);
+      }
+    }
+  }, [dailyCalls, audioUnlocked]);
 
   const {
     dailyCalls,
@@ -616,7 +624,7 @@ const App = () => {
     halfHourSlots,
     resetDailyData,
     resetWeeklyData,
-  } = useWebSocketData(WS_URL, handleLostCall);
+  } = useWebSocketData(WS_URL);
 
   useDailyResetScheduler(resetDailyData);
   useWeeklyResetScheduler(resetWeeklyData);
