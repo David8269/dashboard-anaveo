@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="/dashboard-anaveo/favicon-halloween.ico" />
+  <link rel="icon" href="./favicon-halloween.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Tableau de bord hanté du Service Center ANAVEO – Attention aux appels perdus !" />
   <title>ANAVEO - 🎃 Service Center Hanté 🎃</title>
@@ -17,11 +17,10 @@
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      background: #0a0310 url('/dashboard-anaveo/images/halloween-bg.jpg') center/cover no-repeat fixed;
+      background: #0a0310 url('./images/halloween-bg.jpg') center/cover no-repeat fixed;
       color: white;
       min-height: 100vh;
       position: relative;
-      /* ✅ CORRIGÉ : permet le scroll vertical si nécessaire */
       overflow-x: hidden;
       overflow-y: auto;
     }
@@ -139,7 +138,6 @@
       50% { transform: translateY(-8px); }
     }
 
-    /* Accessibilité : masquer visuellement mais garder pour lecteurs d'écran */
     .visually-hidden {
       position: absolute !important;
       width: 1px !important;
@@ -167,6 +165,6 @@
     <span class="visually-hidden">Chargement en cours, veuillez patienter.</span>
   </div>
 
-  <script defer src="/dashboard-anaveo/static/js/main.516dee1b.js"></script>
+  <script defer src="./static/js/main.516dee1b.js"></script>
 </body>
 </html>
