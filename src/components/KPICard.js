@@ -17,7 +17,7 @@ export default function KPICard({
   subtitle, 
   value, 
   valueColor, 
-  height = 130, // ✅ Hauteur par défaut : 130px
+  height = 130,
   unit, 
   tooltip,
   isCritical = false
@@ -61,21 +61,36 @@ export default function KPICard({
             box-shadow: 0 0 0 rgba(255, 107, 0, 0); 
           }
         }
+
         @keyframes pulse-critical {
           0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.7); }
           50% { box-shadow: 0 0 0 10px rgba(255, 107, 0, 0); }
         }
+
         @keyframes shake-critical {
           0%, 100% { transform: translateX(0); }
           10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
           20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+
+        @keyframes flame-flicker {
+          0%, 100% { opacity: 1; filter: hue-rotate(0deg); }
+          25% { opacity: 0.9; filter: hue-rotate(5deg); }
+          50% { opacity: 1; filter: hue-rotate(-5deg); }
+          75% { opacity: 0.95; filter: hue-rotate(3deg); }
+        }
+
+        @keyframes smoke-drift-kpi {
+          0% { transform: translateX(0) translateY(0); opacity: 0.6; }
+          50% { transform: translateX(-5%) translateY(-3%); opacity: 0.8; }
+          100% { transform: translateX(0) translateY(0); opacity: 0.6; }
         }
       `}</style>
 
       <Card
         sx={{
           backgroundColor: 'var(--halloween-paper, #1a0a2e)',
-          height: `${height}px`, // ✅ Applique la hauteur fixe
+          height: `${height}px`,
           borderRadius: 3,
           border: `1px solid ${isValueCritical ? '#ff0a0a' : 'var(--halloween-primary, #ff6b00)'}`,
           boxShadow: isValueCritical 
@@ -112,6 +127,22 @@ export default function KPICard({
               ? 'radial-gradient(circle at 50% 0%, rgba(255,10,10,0.2) 0%, transparent 70%)'
               : 'radial-gradient(circle at 50% 0%, rgba(255,107,0,0.1) 0%, transparent 70%)',
             pointerEvents: 'none',
+            zIndex: 0,
+          },
+          // Couche de brume flottante
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: '10%',
+            left: '-40%',
+            width: '180%',
+            height: '80%',
+            background: isValueCritical
+              ? 'radial-gradient(circle at 60% 40%, rgba(255,107,0,0.12), transparent 75%)'
+              : 'radial-gradient(circle at 40% 60%, rgba(138,43,226,0.08), transparent 80%)',
+            pointerEvents: 'none',
+            zIndex: 0,
+            animation: 'smoke-drift-kpi 18s linear infinite',
           },
         }}
       >
@@ -120,7 +151,7 @@ export default function KPICard({
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center', // ✅ Centre verticalement le contenu
+            justifyContent: 'center',
             alignItems: 'center',
             cursor: tooltip ? 'help' : 'default',
             position: 'relative',
@@ -141,6 +172,9 @@ export default function KPICard({
               gap: 0.5,
               textAlign: 'center',
               lineHeight: 1.3,
+              ...(isValueCritical && {
+                animation: 'flame-flicker 3s infinite alternate',
+              }),
             }}
           >
             {icon} {title}
@@ -183,10 +217,10 @@ export default function KPICard({
               ...(isValueCritical && {
                 fontFamily: '"Orbitron", sans-serif',
                 textShadow: '0 0 8px rgba(255,107,0,0.9), 0 0 16px rgba(255,10,10,0.7)',
+                animation: 'flame-flicker 2.5s infinite alternate',
               }),
             }}
             aria-live="polite"
-            className={isValueCritical ? 'flame-text' : ''}
           >
             {value != null ? value : '-'}
             {unit && (

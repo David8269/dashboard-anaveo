@@ -716,58 +716,67 @@ const App = () => {
     };
   }, [audioUnlocked]);
 
-  // 🔊 Sons aléatoires parquets/toc toutes les 30 min de 8h45 à 17h45
+  // 🔊 Sons aléatoires (parquets, toc, cat, gnome, ghost) toutes les 20 min de 8h35 à 17h55
   useEffect(() => {
     if (!audioUnlocked) return;
 
     const scheduledTimeouts = [];
 
-    const playRandomCreakSound = () => {
-      const sounds = ['parquets.mp3', 'toc.mp3'];
+    const playRandomAmbientSound = () => {
+      const sounds = ['parquets.mp3', 'toc.mp3', 'cat.mp3', 'gnome.mp3', 'ghost.mp3'];
       const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
       playSound(randomSound, 'Ambiance : bruit aléatoire');
     };
 
-    const scheduleNextCreak = () => {
+    const scheduleNextRandomSound = () => {
       const now = new Date();
+      const startHour = 8;
+      const startMinute = 35;
+      const endHour = 17;
+      const endMinute = 55;
+      const intervalMinutes = 20;
+
+      // Calculer le prochain horaire valide
       let nextTime = new Date(now);
+      nextTime.setMilliseconds(0);
+      nextTime.setSeconds(0);
 
-      const minutes = now.getMinutes();
-      const isPast45 = minutes >= 45;
-      const isPast15 = minutes >= 15;
-
-      if (isPast45) {
-        nextTime.setHours(now.getHours() + 1, 15, 0, 0);
-      } else if (isPast15) {
-        nextTime.setMinutes(45, 0, 0);
+      // Arrondir à la prochaine tranche de 20 min à partir de 8h35
+      const minutesSinceStart = (now.getHours() - startHour) * 60 + (now.getMinutes() - startMinute);
+      if (minutesSinceStart < 0) {
+        // Avant 8h35 → planifier à 8h35
+        nextTime.setHours(startHour, startMinute, 0, 0);
       } else {
-        nextTime.setMinutes(15, 0, 0);
+        // Sinon, aller à la prochaine tranche de 20 min
+        const elapsedIntervals = Math.floor(minutesSinceStart / intervalMinutes) + 1;
+        const totalMinutes = startMinute + elapsedIntervals * intervalMinutes;
+        const hoursToAdd = Math.floor(totalMinutes / 60);
+        const minutesToAdd = totalMinutes % 60;
+        nextTime.setHours(startHour + hoursToAdd, minutesToAdd, 0, 0);
       }
 
-      const hour = nextTime.getHours();
-      const minute = nextTime.getMinutes();
-      const isWithinRange = (hour > 8) || (hour === 8 && minute >= 45);
-      const isBeforeEnd = (hour < 17) || (hour === 17 && minute <= 45);
-
-      if (isWithinRange && isBeforeEnd) {
+      // Vérifier si on est encore dans la plage autorisée
+      const endLimit = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHour, endMinute, 0, 0);
+      if (nextTime <= endLimit) {
         const delay = nextTime.getTime() - now.getTime();
         if (delay > 0) {
           const timeoutId = setTimeout(() => {
-            playRandomCreakSound();
-            scheduleNextCreak();
+            playRandomAmbientSound();
+            scheduleNextRandomSound();
           }, delay);
           scheduledTimeouts.push(timeoutId);
         }
       }
     };
 
-    scheduleNextCreak();
+    scheduleNextRandomSound();
 
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        // Onglet réactivé → reprogrammer
         scheduledTimeouts.forEach(id => clearTimeout(id));
         scheduledTimeouts.length = 0;
-        scheduleNextCreak();
+        scheduleNextRandomSound();
       }
     };
 
@@ -882,24 +891,35 @@ const App = () => {
         `}
       </style>
 
+      {/* 🎃 Fond d'écran sans fixed → scroll OK */}
       <Box
         sx={{
-          minHeight: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
           backgroundImage: `url('${process.env.PUBLIC_URL}/images/halloween-bg.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed',
+          zIndex: 0,
+        }}
+      />
+
+      <Box
+        sx={{
+          minHeight: '100vh',
           py: 4,
           position: 'relative',
+          zIndex: 2,
+          color: 'var(--halloween-text, #ffd700)',
         }}
         aria-label="Tableau de bord Halloween en temps réel"
       >
         <Box
           sx={{
             position: 'relative',
-            zIndex: 2,
-            color: '#fff',
             minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',

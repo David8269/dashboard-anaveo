@@ -7,8 +7,10 @@
   <meta name="description" content="Tableau de bord hanté du Service Center ANAVEO – Attention aux appels perdus !" />
   <title>ANAVEO - 🎃 Service Center Hanté 🎃</title>
 
-  <!-- 🎃 Polices Halloween -->
-  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" rel="stylesheet">
+  <!-- 🎃 Polices Halloween (préchargement pour performance) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
   <!-- 👻 Styles de chargement Halloween -->
   <style>
@@ -19,6 +21,25 @@
       color: white;
       min-height: 100vh;
       position: relative;
+      /* ✅ CORRIGÉ : permet le scroll vertical si nécessaire */
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    /* 🌫️ Brume flottante en arrière-plan */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: -50%;
+      width: 200%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 30% 20%, rgba(255,107,0,0.06) 0%, transparent 60%),
+        radial-gradient(circle at 80% 70%, rgba(138,43,226,0.05) 0%, transparent 70%);
+      pointerEvents: none;
+      z-index: 1;
+      animation: smoke-drift-body 30s linear infinite;
     }
 
     #root {
@@ -27,10 +48,10 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      z-index: 2;
+      z-index: 3;
     }
 
-    /* 🕸️ Toile d'araignée (optionnel) */
+    /* 🕸️ Toile d'araignée animée */
     #root::before {
       content: "";
       position: absolute;
@@ -44,6 +65,7 @@
       opacity: 0.4;
       pointer-events: none;
       z-index: -1;
+      animation: web-float 8s ease-in-out infinite;
     }
 
     .loading-halloween {
@@ -57,13 +79,16 @@
         0 0 30px #8a0000;
       animation: flame-flicker 2s infinite alternate;
       position: relative;
-      z-index: 3;
-      padding: 1rem 2rem;
-      background: rgba(26, 10, 46, 0.6);
-      border-radius: 12px;
+      z-index: 4;
+      padding: 1.5rem 2rem;
+      background: rgba(26, 10, 46, 0.65);
+      border-radius: 16px;
       border: 1px solid #ff6b00;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
+      backdrop-filter: blur(6px);
+      box-shadow: 
+        0 0 20px rgba(255, 107, 0, 0.5),
+        inset 0 0 10px rgba(255, 107, 0, 0.2);
+      max-width: 90vw;
     }
 
     @keyframes flame-flicker {
@@ -85,27 +110,62 @@
       }
     }
 
+    @keyframes smoke-drift-body {
+      0% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(-5%) translateY(-2%); }
+      100% { transform: translateX(0) translateY(0); }
+    }
+
+    @keyframes web-float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(2deg); }
+    }
+
     .pumpkin {
-      font-size: 3rem;
-      animation: blink 3s infinite;
+      font-size: 3.5rem;
+      animation: blink 3s infinite, float-pumpkin 4s ease-in-out infinite;
       display: block;
       margin: 0.5rem auto;
+      filter: drop-shadow(0 0 10px #ff6b00);
     }
+
     @keyframes blink {
       0%, 49%, 51%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
     }
+
+    @keyframes float-pumpkin {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Accessibilité : masquer visuellement mais garder pour lecteurs d'écran */
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
   </style>
 </head>
 <body>
-  <div id="root" aria-live="polite" aria-busy="true">
+  <div 
+    id="root" 
+    role="status"
+    aria-busy="true"
+    aria-label="Chargement du tableau de bord hanté"
+  >
     <div class="loading-halloween">
       <span class="pumpkin">🎃</span>
       🔮 Invocation en cours…
     </div>
+    <span class="visually-hidden">Chargement en cours, veuillez patienter.</span>
   </div>
-
-  <!-- ✅ Aucun son d’ambiance ici -->
 
   <script defer src="/dashboard-anaveo/static/js/main.516dee1b.js"></script>
 </body>
