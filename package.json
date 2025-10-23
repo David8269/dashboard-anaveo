@@ -1,7 +1,8 @@
 {
   "name": "anaveo-project",
   "version": "1.0.0",
-  "homepage": "https://david8269.github.io/dashboard-anaveo",
+  "private": false,
+  "homepage": "https://david8269.github.io/dashboard-anaveo/",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -21,6 +22,9 @@
     "recharts": "^3.1.0",
     "ws": "^8.18.3"
   },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -32,8 +36,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "gh-pages": "^6.3.0"
   }
 }
