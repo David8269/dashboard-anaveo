@@ -536,6 +536,7 @@ const useWebSocketData = (url, onLostCall) => {
 const playSound = (filename, context = '', volume = 1) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
+    audio.volume = volume;
     const logContext = context ? `(${context})` : '';
     console.log(`[Son] 🔊 Tentative de lecture : ${filename} ${logContext}`);
     audio.play().then(() => {
@@ -598,11 +599,35 @@ const App = () => {
     };
   }, []);
 
+  // 🔊 FATILITY : joue TOUJOURS, même sans interaction utilisateur
   const handleLostCall = (callId) => {
-    if (audioUnlocked) {
-      playSound('fatality.mp3', `Appel perdu : ${callId}`);
-    } else {
-      console.log(`[Son] 🔇 Fatality ignoré (sons désactivés) - Appel : ${callId}`);
+    // Crée une nouvelle instance audio dédiée à fatality.mp3
+    const fatalityAudio = new Audio(`${process.env.PUBLIC_URL}/sounds/fatality.mp3`);
+    fatalityAudio.volume = 1;
+    
+    // Tente de jouer immédiatement
+    const playPromise = fatalityAudio.play();
+    
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          console.log(`[Son] ✅ Fatality joué : ${callId}`);
+        })
+        .catch((error) => {
+          console.warn(`[Son] ⚠️ Fatality bloqué, tentative de déverrouillage implicite :`, error);
+          // Si bloqué, tente de déverrouiller avec silent.wav puis rejoue
+          const unlockAudio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
+          unlockAudio.play()
+            .then(() => {
+              // Relance fatality après déverrouillage
+              new Audio(`${process.env.PUBLIC_URL}/sounds/fatality.mp3`).play()
+                .then(() => console.log(`[Son] ✅ Fatality joué après déverrouillage implicite : ${callId}`))
+                .catch(() => console.warn(`[Son] ❌ Fatality échoué même après déverrouillage : ${callId}`));
+            })
+            .catch(() => {
+              console.warn(`[Son] ❌ Impossible de déverrouiller l'audio pour fatality : ${callId}`);
+            });
+        });
     }
   };
 
@@ -716,14 +741,14 @@ const App = () => {
     };
   }, [audioUnlocked]);
 
-  // 🔊 Sons aléatoires (parquets, toc, cat, gnome, ghost) toutes les 20 min de 8h35 à 17h55
+  // 🔊 Sons aléatoires (parquets, creepy, toc, cat, gnome, ghost) toutes les 20 min de 8h35 à 17h55
   useEffect(() => {
     if (!audioUnlocked) return;
 
     const scheduledTimeouts = [];
 
     const playRandomAmbientSound = () => {
-      const sounds = ['parquets.mp3', 'toc.mp3', 'cat.mp3', 'gnome.mp3', 'ghost.mp3'];
+      const sounds = ['parquets.mp3', 'toc.mp3', 'cat.mp3', 'gnome.mp3', 'creepy.mp3', 'ghost.mp3'];
       const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
       playSound(randomSound, 'Ambiance : bruit aléatoire');
     };
