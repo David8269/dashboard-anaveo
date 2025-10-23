@@ -105,60 +105,7 @@
     </div>
   </div>
 
-  <!-- 🔊 Préchargement des sons -->
-  <audio id="ambiance-sound" preload="auto">
-    <source src="/dashboard-anaveo/sounds/halloween-ambiance.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="scream-sound" preload="auto">
-    <source src="/dashboard-anaveo/sounds/scream.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="witch-laugh-sound" preload="auto">
-    <source src="/dashboard-anaveo/sounds/witch-laugh.mp3" type="audio/mpeg">
-  </audio>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const ambianceAudio = document.getElementById('ambiance-sound');
-      const screamAudio = document.getElementById('scream-sound');
-      const witchAudio = document.getElementById('witch-laugh-sound');
-
-      window.playHalloweenSound = (soundId) => {
-        const audio = document.getElementById(soundId);
-        if (audio) {
-          audio.currentTime = 0;
-          audio.volume = 0.6;
-          audio.play().catch(e => console.log('Son non joué'));
-        }
-      };
-
-      const playAmbiance = () => {
-        // Ambiance douce en fond
-        ambianceAudio.volume = 0.15;
-        ambianceAudio.loop = true;
-        ambianceAudio.play().catch(() => {});
-
-        // Cri après 1s
-        setTimeout(() => {
-          screamAudio.volume = 0.5;
-          screamAudio.play().catch(() => {});
-        }, 1000);
-
-        // Rire de sorcière après 3s
-        setTimeout(() => {
-          witchAudio.volume = 0.6;
-          witchAudio.play().catch(() => {});
-        }, 3000);
-
-        // Retirer les écouteurs après activation
-        document.removeEventListener('click', playAmbiance);
-        document.removeEventListener('touchstart', playAmbiance);
-      };
-
-      // Déclenche les sons au premier clic/touch
-      document.addEventListener('click', playAmbiance, { once: true });
-      document.addEventListener('touchstart', playAmbiance, { once: true });
-    });
-  </script>
+  <!-- ✅ Aucun son d’ambiance ici -->
 
   <script defer src="/dashboard-anaveo/static/js/main.516dee1b.js"></script>
 </body>
