@@ -2,7 +2,7 @@
   "name": "anaveo-project",
   "version": "1.0.0",
   "private": false,
-  "homepage": "https://david8269.github.io/dashboard-anaveo/",
+  "homepage": "https://david8269.github.io/dashboard-anaveo",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
