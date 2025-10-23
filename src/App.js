@@ -11,7 +11,6 @@ import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 import { useCallAggregates } from './hooks/useCallAggregates';
 import { parseCDRLine } from './utils/cdrParser';
-import { AUTHORIZED_AGENTS } from './config/agents';
 
 // === Helpers ===
 const isLunchBreak = (date) => {
@@ -221,8 +220,8 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// === WebSocket Hook ===
-const useWebSocketData = (url, onLostCall) => {
+// === WebSocket Hook (sans onLostCall) ===
+const useWebSocketData = (url) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
   const [weeklyCalls, setWeeklyCalls] = useState([]);
@@ -415,11 +414,6 @@ const useWebSocketData = (url, onLostCall) => {
 
           const callWithSec = { ...cdr, receivedAt: new Date() };
 
-          let isLostCall = false;
-          if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime)) {
-            isLostCall = cdr.durationSec >= 59;
-          }
-
           if (isInBusinessHours(cdr.startTime)) {
             setAllCalls(prev => {
               const exists = prev.some(call => call.id === callWithSec.id);
@@ -442,10 +436,6 @@ const useWebSocketData = (url, onLostCall) => {
               if (prev.some(call => call.id === callWithSec.id)) return prev;
               return [...prev, callWithSec];
             });
-
-            if (isLostCall && onLostCall) {
-              onLostCall(callWithSec.id);
-            }
 
             setLastUpdate(new Date());
           } else {
@@ -554,6 +544,7 @@ const App = () => {
   const prevEmployeesRef = useRef([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const scheduledTimeoutsRef = useRef([]);
+  const playedLostCallIdsRef = useRef(new Set());
 
   // 🔁 Gestion de la visibilité de la scrollbar
   useEffect(() => {
@@ -573,6 +564,7 @@ const App = () => {
     };
   }, []);
 
+  // 🔒 Déverrouillage audio UNIQUEMENT via le bouton
   const unlockAudio = () => {
     if (audioUnlocked) return;
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
@@ -586,25 +578,24 @@ const App = () => {
       });
   };
 
+  // === Gestion des appels perdus (ABSYS) ===
   useEffect(() => {
-    const unlock = () => unlockAudio();
-    window.addEventListener('click', unlock, { once: true });
-    window.addEventListener('keydown', unlock, { once: true });
-    window.addEventListener('touchstart', unlock, { once: true });
-    return () => {
-      window.removeEventListener('click', unlock);
-      window.removeEventListener('keydown', unlock);
-      window.removeEventListener('touchstart', unlock);
-    };
-  }, []);
+    if (!audioUnlocked) return;
 
-  const handleLostCall = (callId) => {
-    if (audioUnlocked) {
-      playSound('fatality.mp3', `Appel perdu : ${callId}`);
-    } else {
-      console.log(`[Son] 🔇 Fatality ignoré (sons désactivés) - Appel : ${callId}`);
+    const lostCalls = dailyCalls.filter(call =>
+      call.callType === 'ABSYS' &&
+      call.durationSec >= 59 &&
+      !isLunchBreak(call.startTime) &&
+      isInBusinessHours(call.startTime)
+    );
+
+    for (const call of lostCalls) {
+      if (!playedLostCallIdsRef.current.has(call.id)) {
+        playSound('fatality.mp3', `Appel perdu : ${call.id}`);
+        playedLostCallIdsRef.current.add(call.id);
+      }
     }
-  };
+  }, [dailyCalls, audioUnlocked]);
 
   const {
     dailyCalls,
@@ -616,7 +607,7 @@ const App = () => {
     halfHourSlots,
     resetDailyData,
     resetWeeklyData,
-  } = useWebSocketData(WS_URL, handleLostCall);
+  } = useWebSocketData(WS_URL);
 
   useDailyResetScheduler(resetDailyData);
   useWeeklyResetScheduler(resetWeeklyData);
@@ -657,11 +648,10 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
-  // 🔊 Gestion robuste des sons horaires (avec protection onglet inactif)
+  // 🔊 Sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
 
-    // Nettoyer les timeouts précédents
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
     scheduledTimeoutsRef.current = [];
 
@@ -675,7 +665,6 @@ const App = () => {
 
       const timeoutId = setTimeout(() => {
         playSound(soundFile, label);
-        // Replanifier pour demain
         const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
         scheduledTimeoutsRef.current.push(nextId);
       }, delay);
@@ -692,10 +681,8 @@ const App = () => {
 
     scheduledTimeoutsRef.current = timeouts;
 
-    // Gestion de la visibilité de l'onglet
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        // Onglet réactivé → reprogrammer les sons
         scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
         scheduledTimeoutsRef.current = [];
         const newTimeouts = [
@@ -716,7 +703,7 @@ const App = () => {
     };
   }, [audioUnlocked]);
 
-  // 🔊 Sons aléatoires parquets/toc toutes les 30 min de 8h45 à 17h45
+  // 🔊 Sons aléatoires
   useEffect(() => {
     if (!audioUnlocked) return;
 
@@ -779,6 +766,7 @@ const App = () => {
     };
   }, [audioUnlocked]);
 
+  // 🔊 Top agent
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
 
