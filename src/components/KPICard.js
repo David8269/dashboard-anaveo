@@ -12,6 +12,16 @@ const getIconForTitle = (title) => {
   return '🔮';
 };
 
+// Utilitaire : convertit une valeur en nombre si possible, sinon null
+const toNumberOrNull = (val) => {
+  if (typeof val === 'number' && !isNaN(val)) return val;
+  if (typeof val === 'string') {
+    const num = Number(val);
+    return isNaN(num) ? null : num;
+  }
+  return null;
+};
+
 export default function KPICard({ 
   title, 
   subtitle, 
@@ -25,19 +35,48 @@ export default function KPICard({
   const [animate, setAnimate] = useState(false);
   const prevValueRef = useRef(value);
 
+  // 🔁 Animation : ne PAS animer si c'est un missed call qui devient 0
   useEffect(() => {
     if (prevValueRef.current !== value) {
-      setAnimate(true);
-      const timer = setTimeout(() => setAnimate(false), 800);
-      return () => clearTimeout(timer);
+      const isMissedCallKPI = title?.toLowerCase().includes('missed');
+      const numericValue = toNumberOrNull(value);
+      const shouldSkipAnimation = isMissedCallKPI && numericValue === 0;
+
+      if (!shouldSkipAnimation) {
+        setAnimate(true);
+        const timer = setTimeout(() => setAnimate(false), 800);
+        return () => clearTimeout(timer);
+      }
     }
     prevValueRef.current = value;
-  }, [value]);
+  }, [value, title]);
 
-  const isValueCritical = isCritical || valueColor === 'error';
+  // 🔤 Logique d'affichage dynamique (sécurisée)
+  const isMissedCallKPI = title?.toLowerCase().includes('missed');
+  const numericValue = toNumberOrNull(value);
+
+  let displayTitle = title || 'KPI';
+  let computedValueColor = valueColor;
+
+  if (isMissedCallKPI && numericValue !== null) {
+    if (numericValue === 0) {
+      displayTitle = 'missed call';
+      computedValueColor = 'success';
+    } else if (numericValue === 1) {
+      displayTitle = 'missed call';
+      computedValueColor = 'error';
+    } else if (numericValue >= 2) {
+      displayTitle = 'missed calls';
+      computedValueColor = 'error';
+    }
+    // Si numericValue est négatif ou NaN → on garde le titre et la couleur d'origine
+  }
+
+  const isValueCritical = isCritical || computedValueColor === 'error';
+
   const getValueColor = () => {
     if (isValueCritical) return '#ff6b00';
-    switch (valueColor) {
+    switch (computedValueColor) {
       case 'success': return '#01b68a';
       case 'warning': return '#ffaa00';
       case 'error':   return '#ff0a0a';
@@ -46,7 +85,10 @@ export default function KPICard({
     }
   };
 
-  const icon = getIconForTitle(title);
+  const icon = getIconForTitle(title || '');
+
+  // Affichage sûr de la valeur (éviter d'afficher "null" ou "undefined")
+  const displayValue = value != null ? String(value) : '-';
 
   return (
     <>
@@ -129,7 +171,6 @@ export default function KPICard({
             pointerEvents: 'none',
             zIndex: 0,
           },
-          // Couche de brume flottante
           '&::after': {
             content: '""',
             position: 'absolute',
@@ -177,7 +218,7 @@ export default function KPICard({
               }),
             }}
           >
-            {icon} {title}
+            {icon} {displayTitle}
           </Typography>
 
           {subtitle && (
@@ -222,7 +263,7 @@ export default function KPICard({
             }}
             aria-live="polite"
           >
-            {value != null ? value : '-'}
+            {displayValue}
             {unit && (
               <Typography
                 component="span"
