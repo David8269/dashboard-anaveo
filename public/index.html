@@ -2,169 +2,202 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="./favicon-halloween.ico" />
+  <link rel="icon" href="./favicon-autumn.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Tableau de bord hanté du Service Center ANAVEO – Attention aux appels perdus !" />
-  <title>ANAVEO - 🎃 Service Center Hanté 🎃</title>
+  <meta name="description" content="Tableau de bord automnal du Service Center ANAVEO." />
+  <title>ANAVEO - 🍂 Centre d’Appels Automnal</title>
 
-  <!-- 🎃 Polices Halloween (préchargement pour performance) -->
+  <!-- 🍂 Polices automnales -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- 👻 Styles de chargement Halloween -->
+  <!-- 🍁 Styles globaux + feuilles tombantes -->
   <style>
+    /* === Variables et styles de base === */
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      background: #0a0310 url('./images/halloween-bg.jpg') center/cover no-repeat fixed;
-      color: white;
+      background-color: #f5f0e6;
+      color: #5D4037;
+      font-family: 'Roboto', sans-serif;
       min-height: 100vh;
-      position: relative;
       overflow-x: hidden;
-      overflow-y: auto;
+      position: relative;
     }
 
-    /* 🌫️ Brume flottante en arrière-plan */
-    body::after {
+    body::before {
       content: '';
       position: fixed;
       top: 0;
-      left: -50%;
-      width: 200%;
+      left: 0;
+      width: 100%;
       height: 100%;
       background: 
-        radial-gradient(circle at 30% 20%, rgba(255,107,0,0.06) 0%, transparent 60%),
-        radial-gradient(circle at 80% 70%, rgba(138,43,226,0.05) 0%, transparent 70%);
-      pointerEvents: none;
-      z-index: 1;
-      animation: smoke-drift-body 30s linear infinite;
-    }
-
-    #root {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      z-index: 3;
-    }
-
-    /* 🕸️ Toile d'araignée animée */
-    #root::before {
-      content: "";
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 150px;
-      height: 150px;
-      background: 
-        radial-gradient(circle at 30% 30%, transparent 45%, rgba(139,69,19,0.3) 46%),
-        radial-gradient(circle at 70% 70%, transparent 45%, rgba(139,69,19,0.3) 46%);
-      opacity: 0.4;
+        radial-gradient(circle at 20% 30%, rgba(139, 92, 41, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(93, 64, 55, 0.02) 0%, transparent 60%);
       pointer-events: none;
-      z-index: -1;
-      animation: web-float 8s ease-in-out infinite;
+      z-index: 0;
     }
 
-    .loading-halloween {
+    :root {
+      --autumn-bg: #f5f0e6;
+      --autumn-paper: #ffffff;
+      --autumn-primary: #8D6E63;
+      --autumn-secondary: #A1887F;
+      --autumn-error: #D32F2F;
+      --autumn-success: #388E3C;
+      --autumn-warning: #F57C00;
+      --autumn-text: #5D4037;
+      --autumn-gold: #D4AF37;
+    }
+
+    /* === Scrollbar automnale === */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #8D6E63 #f5f0e6;
+    }
+    *::-webkit-scrollbar {
+      width: 8px;
+    }
+    *::-webkit-scrollbar-track {
+      background: #f5f0e6;
+    }
+    *::-webkit-scrollbar-thumb {
+      background-color: #8D6E63;
+      border-radius: 4px;
+    }
+
+    /* === Écran de chargement === */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #f5f0e6;
+      z-index: 1000;
+      transition: opacity 0.5s;
+    }
+
+    .loading-content {
       text-align: center;
-      font-family: 'Creepster', cursive;
-      font-size: clamp(2rem, 8vw, 3rem);
-      color: #ff6b00;
-      text-shadow: 
-        0 0 10px #ff4500,
-        0 0 20px #ff0000,
-        0 0 30px #8a0000;
-      animation: flame-flicker 2s infinite alternate;
-      position: relative;
-      z-index: 4;
-      padding: 1.5rem 2rem;
-      background: rgba(26, 10, 46, 0.65);
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.92);
       border-radius: 16px;
-      border: 1px solid #ff6b00;
-      backdrop-filter: blur(6px);
-      box-shadow: 
-        0 0 20px rgba(255, 107, 0, 0.5),
-        inset 0 0 10px rgba(255, 107, 0, 0.2);
+      box-shadow: 0 6px 20px rgba(141, 110, 99, 0.25);
       max-width: 90vw;
     }
 
-    @keyframes flame-flicker {
-      0%, 100% { 
-        text-shadow: 0 0 10px #ff4500, 0 0 20px #ff0000, 0 0 30px #8a0000;
-        transform: scale(1);
-      }
-      25% { 
-        text-shadow: 0 0 15px #ff8c00, 0 0 25px #ff4500, 0 0 35px #ff0000;
-        transform: scale(1.02);
-      }
-      50% { 
-        text-shadow: 0 0 12px #ff0000, 0 0 22px #cc0000, 0 0 32px #8a0000;
-        transform: scale(0.98);
-      }
-      75% { 
-        text-shadow: 0 0 18px #ff6b00, 0 0 28px #ff2a00, 0 0 38px #cc0000;
-        transform: scale(1.01);
-      }
+    .leaf-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #8D6E63;
+      animation: float-gentle 6s ease-in-out infinite;
     }
 
-    @keyframes smoke-drift-body {
-      0% { transform: translateX(0) translateY(0); }
-      50% { transform: translateX(-5%) translateY(-2%); }
-      100% { transform: translateX(0) translateY(0); }
-    }
-
-    @keyframes web-float {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(2deg); }
-    }
-
-    .pumpkin {
-      font-size: 3.5rem;
-      animation: blink 3s infinite, float-pumpkin 4s ease-in-out infinite;
-      display: block;
-      margin: 0.5rem auto;
-      filter: drop-shadow(0 0 10px #ff6b00);
-    }
-
-    @keyframes blink {
-      0%, 49%, 51%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    @keyframes float-pumpkin {
+    @keyframes float-gentle {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
     }
 
-    .visually-hidden {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      padding: 0 !important;
-      margin: -1px !important;
-      overflow: hidden !important;
-      clip: rect(0, 0, 0, 0) !important;
-      white-space: nowrap !important;
-      border: 0 !important;
+    /* === Feuilles tombantes – OPAQUES (pas de transparence) === */
+    .falling-leaf {
+      position: fixed;
+      top: -50px;
+      font-size: 50px;
+      opacity: 1; /* ✅ Aucune transparence */
+      pointer-events: none;
+      z-index: 1;
+      animation: fall linear infinite;
     }
+
+    @keyframes fall {
+      to {
+        transform: translateY(105vh) rotate(720deg);
+        opacity: 1; /* Garde l’opacité jusqu’à la fin (disparaît hors écran) */
+      }
+    }
+
+    /* 24 feuilles avec variations de position, vitesse et couleur */
+    .falling-leaf:nth-child(1)  { left: 5%;  animation-duration: 12s;  animation-delay: 0s;   color: #8D6E63; }
+    .falling-leaf:nth-child(2)  { left: 15%; animation-duration: 15s;  animation-delay: 1s;   color: #D2691E; }
+    .falling-leaf:nth-child(3)  { left: 25%; animation-duration: 10s;  animation-delay: 0.5s; color: #A1887F; }
+    .falling-leaf:nth-child(4)  { left: 35%; animation-duration: 18s;  animation-delay: 2s;   color: #5D4037; }
+    .falling-leaf:nth-child(5)  { left: 45%; animation-duration: 13s;  animation-delay: 1.2s; color: #8D6E63; }
+    .falling-leaf:nth-child(6)  { left: 55%; animation-duration: 16s;  animation-delay: 0.8s; color: #D2691E; }
+    .falling-leaf:nth-child(7)  { left: 65%; animation-duration: 11s;  animation-delay: 1.5s; color: #A1887F; }
+    .falling-leaf:nth-child(8)  { left: 75%; animation-duration: 14s;  animation-delay: 0.3s; color: #5D4037; }
+    .falling-leaf:nth-child(9)  { left: 85%; animation-duration: 17s;  animation-delay: 1.8s; color: #8D6E63; }
+    .falling-leaf:nth-child(10) { left: 10%; animation-duration: 12.5s; animation-delay: 0.7s; color: #D2691E; }
+    .falling-leaf:nth-child(11) { left: 20%; animation-duration: 15.5s; animation-delay: 1.1s; color: #A1887F; }
+    .falling-leaf:nth-child(12) { left: 30%; animation-duration: 10.5s; animation-delay: 0.9s; color: #5D4037; }
+    .falling-leaf:nth-child(13) { left: 40%; animation-duration: 13.5s; animation-delay: 0.4s; color: #8D6E63; }
+    .falling-leaf:nth-child(14) { left: 50%; animation-duration: 16.5s; animation-delay: 1.3s; color: #D2691E; }
+    .falling-leaf:nth-child(15) { left: 60%; animation-duration: 11.5s; animation-delay: 0.6s; color: #A1887F; }
+    .falling-leaf:nth-child(16) { left: 70%; animation-duration: 14.5s; animation-delay: 1.7s; color: #5D4037; }
+    .falling-leaf:nth-child(17) { left: 80%; animation-duration: 12.2s; animation-delay: 0.2s; color: #8D6E63; }
+    .falling-leaf:nth-child(18) { left: 90%; animation-duration: 15.2s; animation-delay: 1.4s; color: #D2691E; }
+    .falling-leaf:nth-child(19) { left: 5%;  animation-duration: 10.8s; animation-delay: 0.1s; color: #A1887F; }
+    .falling-leaf:nth-child(20) { left: 12%; animation-duration: 17.5s; animation-delay: 1.9s; color: #5D4037; }
+    .falling-leaf:nth-child(21) { left: 18%; animation-duration: 13.2s; animation-delay: 0.5s; color: #8D6E63; }
+    .falling-leaf:nth-child(22) { left: 28%; animation-duration: 16.2s; animation-delay: 1.0s; color: #D2691E; }
+    .falling-leaf:nth-child(23) { left: 38%; animation-duration: 11.8s; animation-delay: 0.7s; color: #A1887F; }
+    .falling-leaf:nth-child(24) { left: 48%; animation-duration: 14.8s; animation-delay: 1.6s; color: #5D4037; }
   </style>
 </head>
 <body>
-  <div 
-    id="root" 
-    role="status"
-    aria-busy="true"
-    aria-label="Chargement du tableau de bord hanté"
-  >
-    <div class="loading-halloween">
-      <span class="pumpkin">🎃</span>
-      🔮 Invocation en cours…
+  <!-- 🍂 24 feuilles tombantes – opaques -->
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+  <div class="falling-leaf">🍁</div>
+  <div class="falling-leaf">🍂</div>
+
+  <!-- 🍁 Écran de chargement -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <div class="leaf-icon">🍂</div>
+      Chargement du tableau de bord…
     </div>
-    <span class="visually-hidden">Chargement en cours, veuillez patienter.</span>
   </div>
 
-  <script defer src="./static/js/main.516dee1b.js"></script>
+  <!-- ✅ Conteneur React -->
+  <div id="root"></div>
+
+  <!-- Masquer l'écran de chargement après le chargement initial -->
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+          loader.style.opacity = '0';
+          setTimeout(() => loader.remove(), 500);
+        }
+      }, 800);
+    });
+  </script>
 </body>
 </html>

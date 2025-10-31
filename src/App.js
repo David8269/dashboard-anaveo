@@ -13,7 +13,7 @@ import { useCallAggregates } from './hooks/useCallAggregates';
 import { parseCDRLine } from './utils/cdrParser';
 import { AUTHORIZED_AGENTS } from './config/agents';
 
-// === Helpers ===
+// === Helpers (inchangés) ===
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -82,7 +82,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === Clock (Halloweenisé) ===
+// === Clock (version automne, harmonisée avec fond orange pastel) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -96,84 +96,31 @@ function Clock() {
   const seconds = time.getSeconds().toString().padStart(2, '0');
 
   return (
-    <>
-      <style>
-        {`
-          @keyframes glitch-digital {
-            0% { clip-path: inset(0 0 0 0); transform: translate(0); }
-            10% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-            20% { clip-path: inset(15% 0 75% 0); transform: translate(2px, 2px); }
-            30% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-            40% { clip-path: inset(35% 0 55% 0); transform: translate(2px, -2px); }
-            50% { clip-path: inset(45% 0 45% 0); transform: translate(-2px, -2px); }
-            60% { clip-path: inset(35% 0 55% 0); transform: translate(2px, 2px); }
-            70% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-            80% { clip-path: inset(15% 0 75% 0); transform: translate(2px, -2px); }
-            90% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-            100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-          }
-          .clock-glitch {
-            position: relative;
-            font-family: 'Orbitron', 'Roboto', sans-serif;
-            font-weight: 900;
-            font-size: clamp(2rem, 8vw, 3.5rem);
-            letter-spacing: 0.1em;
-            color: #fff;
-            user-select: none;
-            text-align: center;
-            text-transform: uppercase;
-            text-shadow: 
-              0 0 8px rgba(255,107,0,0.9),
-              0 0 12px rgba(255,69,0,0.7),
-              0 0 16px rgba(139,0,0,0.5);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            background: transparent;
-            display: inline-block;
-          }
-          .clock-glitch::before,
-          .clock-glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            left: 0;
-            width: 100%;
-            opacity: 0.8;
-          }
-          .clock-glitch::before {
-            animation: glitch-digital 2.5s infinite linear alternate-reverse;
-            color: #ff0;
-            left: -1px;
-            mix-blend-mode: screen;
-          }
-          .clock-glitch::after {
-            animation: glitch-digital 2s infinite linear alternate;
-            color: #ffa500;
-            left: 1px;
-            mix-blend-mode: screen;
-            opacity: 0.6;
-          }
-        `}
-      </style>
-      <Box
-        className="clock-glitch"
-        data-text={`${hours}:${minutes}:${seconds}`}
-        role="status"
-        aria-live="polite"
-        sx={{
-          display: 'inline-block',
-          margin: '0 auto',
-          '&::before, &::after': {
-            pointerEvents: 'none'
-          }
-        }}
-      >
-        {hours}:{minutes}:{seconds}
-      </Box>
-    </>
+    <Box
+      sx={{
+        fontFamily: '"Orbitron", "Roboto", sans-serif',
+        fontWeight: 700,
+        fontSize: { xs: '2rem', md: '3rem' },
+        color: '#5D4037',
+        textShadow: '0 2px 4px rgba(255,255,255,0.7)',
+        letterSpacing: '0.05em',
+        backgroundColor: 'rgba(255, 235, 220, 0.8)', // ✅ fond orange pastel
+        padding: '0.5rem 1rem',
+        borderRadius: '8px',
+        display: 'inline-block',
+        margin: '0 auto',
+        border: '1px solid #8D6E63',
+        boxShadow: '0 2px 6px rgba(141, 110, 99, 0.2)',
+      }}
+      role="status"
+      aria-live="polite"
+    >
+      {hours}:{minutes}:{seconds}
+    </Box>
   );
 }
 
-// === Schedulers ===
+// === Schedulers & WebSocket ===
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -221,7 +168,6 @@ const useWeeklyResetScheduler = (resetFn) => {
   }, [resetFn]);
 };
 
-// === WebSocket Hook ===
 const useWebSocketData = (url, onLostCall) => {
   const [allCalls, setAllCalls] = useState([]);
   const [dailyCalls, setDailyCalls] = useState([]);
@@ -532,20 +478,18 @@ const useWebSocketData = (url, onLostCall) => {
   };
 };
 
-// === Sons ===
-const playSound = (filename, context = '', volume = 1) => {
+// === Sons (inchangés) ===
+const playSound = (filename, context = '', volume = 0.8) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
     audio.volume = volume;
     const logContext = context ? `(${context})` : '';
-    console.log(`[Son] 🔊 Tentative de lecture : ${filename} ${logContext}`);
-    audio.play().then(() => {
-      console.log(`[Son] ✅ Lecture réussie : ${filename} ${logContext}`);
-    }).catch(e => {
-      console.warn(`[Son] ❌ Échec lecture ${filename} ${logContext}:`, e.message || e);
+    console.log(`[Son] 🔊 Lecture : ${filename} ${logContext}`);
+    audio.play().catch(e => {
+      console.warn(`[Son] ❌ Échec lecture ${filename}:`, e.message);
     });
   } catch (error) {
-    console.error(`[Son] 💥 Erreur critique lecture ${filename}:`, error);
+    console.error(`[Son] 💥 Erreur :`, error);
   }
 };
 
@@ -556,7 +500,7 @@ const App = () => {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const scheduledTimeoutsRef = useRef([]);
 
-  // 🔁 Gestion de la visibilité de la scrollbar
+  // Gestion scrollbar
   useEffect(() => {
     let hideScrollTimeout;
     const handleScroll = () => {
@@ -566,7 +510,6 @@ const App = () => {
         document.body.classList.remove('show-scrollbar');
       }, 1000);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -577,58 +520,21 @@ const App = () => {
   const unlockAudio = () => {
     if (audioUnlocked) return;
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
-    audio.play()
-      .then(() => {
-        console.log('✅ Audio déverrouillé avec succès (via silent.wav)');
-        setAudioUnlocked(true);
-      })
-      .catch(err => {
-        console.warn('❌ Échec du déverrouillage audio (silent.wav) :', err);
-      });
+    audio.play().then(() => setAudioUnlocked(true)).catch(() => {});
   };
 
   useEffect(() => {
     const unlock = () => unlockAudio();
-    window.addEventListener('click', unlock, { once: true });
-    window.addEventListener('keydown', unlock, { once: true });
-    window.addEventListener('touchstart', unlock, { once: true });
+    ['click', 'keydown', 'touchstart'].forEach(e => window.addEventListener(e, unlock, { once: true }));
     return () => {
-      window.removeEventListener('click', unlock);
-      window.removeEventListener('keydown', unlock);
-      window.removeEventListener('touchstart', unlock);
+      ['click', 'keydown', 'touchstart'].forEach(e => window.removeEventListener(e, unlock));
     };
   }, []);
 
-  // 🔊 FATILITY : joue TOUJOURS, même sans interaction utilisateur
   const handleLostCall = (callId) => {
-    // Crée une nouvelle instance audio dédiée à fatality.mp3
-    const fatalityAudio = new Audio(`${process.env.PUBLIC_URL}/sounds/fatality.mp3`);
-    fatalityAudio.volume = 1;
-    
-    // Tente de jouer immédiatement
-    const playPromise = fatalityAudio.play();
-    
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          console.log(`[Son] ✅ Fatality joué : ${callId}`);
-        })
-        .catch((error) => {
-          console.warn(`[Son] ⚠️ Fatality bloqué, tentative de déverrouillage implicite :`, error);
-          // Si bloqué, tente de déverrouiller avec silent.wav puis rejoue
-          const unlockAudio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
-          unlockAudio.play()
-            .then(() => {
-              // Relance fatality après déverrouillage
-              new Audio(`${process.env.PUBLIC_URL}/sounds/fatality.mp3`).play()
-                .then(() => console.log(`[Son] ✅ Fatality joué après déverrouillage implicite : ${callId}`))
-                .catch(() => console.warn(`[Son] ❌ Fatality échoué même après déverrouillage : ${callId}`));
-            })
-            .catch(() => {
-              console.warn(`[Son] ❌ Impossible de déverrouiller l'audio pour fatality : ${callId}`);
-            });
-        });
-    }
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/fatality.mp3`);
+    audio.volume = 0.9;
+    audio.play().catch(() => {});
   };
 
   const {
@@ -657,7 +563,6 @@ const App = () => {
       { dayLabel: 'Ven', inbound: 0, outbound: 0 },
     ];
     const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-    
     return weeklyCalls.reduce((acc, call) => {
       if (!call.startTime || !['CDS_IN', 'CDS_OUT'].includes(call.callType)) return acc;
       const dayLabel = dayNames[call.startTime.getDay()];
@@ -682,14 +587,11 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
-  // 🔊 Gestion robuste des sons horaires (avec protection onglet inactif)
+  // 🔊 Sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
-
-    // Nettoyer les timeouts précédents
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
     scheduledTimeoutsRef.current = [];
-
     const scheduleSoundAt = (targetHour, targetMinute, soundFile, label) => {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), targetHour, targetMinute, 0, 0);
@@ -697,30 +599,22 @@ const App = () => {
       tomorrow.setDate(tomorrow.getDate() + 1);
       const scheduledTime = today > now ? today : tomorrow;
       const delay = scheduledTime.getTime() - now.getTime();
-
       const timeoutId = setTimeout(() => {
         playSound(soundFile, label);
-        // Replanifier pour demain
         const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
         scheduledTimeoutsRef.current.push(nextId);
       }, delay);
-
       return timeoutId;
     };
-
     const timeouts = [
       scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée'),
       scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner'),
       scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause'),
       scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
     ];
-
     scheduledTimeoutsRef.current = timeouts;
-
-    // Gestion de la visibilité de l'onglet
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        // Onglet réactivé → reprogrammer les sons
         scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
         scheduledTimeoutsRef.current = [];
         const newTimeouts = [
@@ -732,93 +626,18 @@ const App = () => {
         scheduledTimeoutsRef.current = newTimeouts;
       }
     };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
     };
   }, [audioUnlocked]);
 
-  // 🔊 Sons aléatoires (parquets, creepy, toc, cat, gnome, ghost) toutes les 20 min de 8h35 à 17h55
-  useEffect(() => {
-    if (!audioUnlocked) return;
-
-    const scheduledTimeouts = [];
-
-    const playRandomAmbientSound = () => {
-      const sounds = ['parquets.mp3', 'toc.mp3', 'cat.mp3', 'gnome.mp3', 'creepy.mp3', 'ghost.mp3'];
-      const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
-      playSound(randomSound, 'Ambiance : bruit aléatoire');
-    };
-
-    const scheduleNextRandomSound = () => {
-      const now = new Date();
-      const startHour = 8;
-      const startMinute = 35;
-      const endHour = 17;
-      const endMinute = 55;
-      const intervalMinutes = 20;
-
-      // Calculer le prochain horaire valide
-      let nextTime = new Date(now);
-      nextTime.setMilliseconds(0);
-      nextTime.setSeconds(0);
-
-      // Arrondir à la prochaine tranche de 20 min à partir de 8h35
-      const minutesSinceStart = (now.getHours() - startHour) * 60 + (now.getMinutes() - startMinute);
-      if (minutesSinceStart < 0) {
-        // Avant 8h35 → planifier à 8h35
-        nextTime.setHours(startHour, startMinute, 0, 0);
-      } else {
-        // Sinon, aller à la prochaine tranche de 20 min
-        const elapsedIntervals = Math.floor(minutesSinceStart / intervalMinutes) + 1;
-        const totalMinutes = startMinute + elapsedIntervals * intervalMinutes;
-        const hoursToAdd = Math.floor(totalMinutes / 60);
-        const minutesToAdd = totalMinutes % 60;
-        nextTime.setHours(startHour + hoursToAdd, minutesToAdd, 0, 0);
-      }
-
-      // Vérifier si on est encore dans la plage autorisée
-      const endLimit = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHour, endMinute, 0, 0);
-      if (nextTime <= endLimit) {
-        const delay = nextTime.getTime() - now.getTime();
-        if (delay > 0) {
-          const timeoutId = setTimeout(() => {
-            playRandomAmbientSound();
-            scheduleNextRandomSound();
-          }, delay);
-          scheduledTimeouts.push(timeoutId);
-        }
-      }
-    };
-
-    scheduleNextRandomSound();
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        // Onglet réactivé → reprogrammer
-        scheduledTimeouts.forEach(id => clearTimeout(id));
-        scheduledTimeouts.length = 0;
-        scheduleNextRandomSound();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      scheduledTimeouts.forEach(id => clearTimeout(id));
-    };
-  }, [audioUnlocked]);
-
+  // 🔊 Top agent
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
-
     const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
     if (totalCalls < 50) return;
-
     const prevEmployees = prevEmployeesRef.current;
     const currentTop = employees.reduce((top, a) => 
       (a.inbound + a.outbound) > (top?.inbound + top?.outbound || 0) ? a : top, null
@@ -826,97 +645,52 @@ const App = () => {
     const prevTop = prevEmployees.reduce((top, a) => 
       (a.inbound + a.outbound) > (top?.inbound + top?.outbound || 0) ? a : top, null
     );
-
     if (currentTop && (!prevTop || prevTop.name !== currentTop.name)) {
-      console.log(`[Top Agent] 🥇 Nouveau n°1 : ${currentTop.name} (précédent : ${prevTop?.name || 'aucun'})`);
-
-      const allowedFirstNames = new Set([
-        'xavier', 'rana', 'mathys', 'romain',
-        'nicolas', 'julien', 'benjamin', 'malik'
-      ]);
+      const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik']);
       const firstName = currentTop.name.split(' ')[0]?.toLowerCase() || '';
       const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
       playSound(soundToPlay, `Top agent : ${currentTop.name}`);
     }
-
     prevEmployeesRef.current = [...employees];
-  }, [employees, audioUnlocked, kpi.totalAnsweredCalls, kpi.missedCallsTotal, kpi.totalOutboundCalls]);
+  }, [employees, audioUnlocked, kpi]);
 
   return (
     <>
-      <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+      {/* Polices automnales */}
+      <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
 
       <style>
         {`
-          /* === Scrollbar discrète === */
-          ::-webkit-scrollbar {
-            width: 8px;
+          /* Scrollbar automnale */
+          ::-webkit-scrollbar { width: 8px; }
+          ::-webkit-scrollbar-track { background: transparent; }
+          ::-webkit-scrollbar-thumb { 
+            background: transparent; 
+            border-radius: 4px; 
+            transition: background 0.3s ease; 
           }
-          ::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          ::-webkit-scrollbar-thumb {
-            background: transparent;
-            border-radius: 4px;
-            transition: background 0.3s ease;
-          }
-          body.show-scrollbar ::-webkit-scrollbar-thumb {
-            background: rgba(255, 107, 0, 0.6);
-          }
-          body.show-scrollbar ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-          }
+          body.show-scrollbar ::-webkit-scrollbar-thumb { background: #8D6E63; }
+          body.show-scrollbar ::-webkit-scrollbar-track { background: rgba(93, 64, 55, 0.1); }
 
           /* Firefox */
-          * {
-            scrollbar-width: thin;
-            scrollbar-color: transparent transparent;
-          }
-          body.show-scrollbar {
-            scrollbar-color: rgba(255, 107, 0, 0.6) rgba(0, 0, 0, 0.2);
+          * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+          body.show-scrollbar { scrollbar-color: #8D6E63 rgba(93, 64, 55, 0.1); }
+
+          :root {
+            --autumn-text: #5D4037;
+            --autumn-accent: #8D6E63;
           }
 
-          /* === Animations existantes === */
-          @keyframes floating {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-          }
-          @keyframes flicker {
-            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-              opacity: 1;
-            }
-            20%, 24%, 55% {
-              opacity: 0.4;
-            }
-          }
-          @keyframes drip-fall {
-            0% { transform: translateY(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(100vh); opacity: 0; }
-          }
-          @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-          }
-          .halloween-title {
-            font-family: 'Creepster', cursive;
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            text-shadow: 
-              0 0 10px #ff6b00,
-              0 0 20px #ff4500,
-              0 0 30px #8a0000;
-            letter-spacing: 0.1em;
-            animation: flicker 3s infinite;
-          }
-          .floating {
-            animation: floating 3s ease-in-out infinite;
+          .autumn-title {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            letter-spacing: 0.02em;
           }
         `}
       </style>
 
-      {/* 🎃 Fond d'écran sans fixed → scroll OK */}
+      {/* 🍂 Fond d'écran automnal */}
       <Box
         sx={{
           position: 'fixed',
@@ -924,7 +698,7 @@ const App = () => {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/halloween-bg.jpg')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/autumn-bg.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -932,57 +706,54 @@ const App = () => {
         }}
       />
 
+      {/* Conteneur principal */}
       <Box
         sx={{
           minHeight: '100vh',
           py: 4,
           position: 'relative',
           zIndex: 2,
-          color: 'var(--halloween-text, #ffd700)',
+          color: 'var(--autumn-text)',
         }}
-        aria-label="Tableau de bord Halloween en temps réel"
+        aria-label="Tableau de bord automnal en temps réel"
       >
-        <Box
-          sx={{
-            position: 'relative',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            px: 0,
-            mx: 0,
-            width: '100%',
-          }}
-        >
-          <Typography 
-            variant="h1" 
-            align="center" 
-            className="halloween-title"
-            sx={{ mb: 2 }}
+        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', px: 0, mx: 0, width: '100%' }}>
+          
+          {/* ✅ Titre : fond orange pastel + texte orange vif */}
+          <Box
+            sx={{
+              mb: 2,
+              backgroundColor: 'rgba(255, 235, 220, 0.8)', // ✅ fond orange pastel
+              borderRadius: '12px',
+              border: '1px solid #8D6E63',
+              boxShadow: '0 4px 12px rgba(141, 110, 99, 0.2)',
+              padding: { xs: '0.6rem 1rem', md: '0.8rem 1.5rem' },
+              display: 'inline-block',
+              margin: '0 auto',
+            }}
           >
-            ANAVEO - Nightmare Center
-          </Typography>
+            <Typography 
+              variant="h1" 
+              align="center" 
+              className="autumn-title" 
+              sx={{ 
+                color: '#FF6F00', // ✅ orange vif
+                textShadow: '0 2px 4px brown',
+                margin: 0,
+              }}
+            >
+              🍁🍄  ANAVEO - Service Center 🍄🍁
+            </Typography>
+          </Box>
 
-          <Box textAlign="center" mb={1} className="floating">
+          <Box textAlign="center" mb={1}>
             <Clock />
           </Box>
 
           {!isConnected && (
-            <Box textAlign="center" mb={2} sx={{ color: '#ff6b00', fontWeight: 'bold', textShadow: '0 0 8px rgba(255,107,0,0.7)' }}>
+            <Box textAlign="center" mb={2} sx={{ color: '#D2691E', fontWeight: 'bold', textShadow: '0 1px 3px rgba(255,255,255,0.8)' }}>
               ⚠️ Connexion WebSocket perdue. Tentative de reconnexion...
-              <Button
-                size="small"
-                variant="outlined"
-                sx={{
-                  ml: 1,
-                  borderColor: '#ff6b00',
-                  color: '#ff6b00',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,107,0,0.1)',
-                    borderColor: '#ff6b00',
-                  }
-                }}
-                onClick={reconnect}
-              >
+              <Button size="small" variant="outlined" sx={{ ml: 1, borderColor: '#D2691E', color: '#D2691E' }} onClick={reconnect}>
                 Reconnecter
               </Button>
             </Box>
@@ -992,26 +763,11 @@ const App = () => {
             {[
               { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
               { title: "Number of Calls", value: kpi.totalCallsThisWeek.toString(), color: "primary", critical: false },
-              { 
-                title: "Avg Inbound AHT", 
-                value: kpi.avgInboundAHT, 
-                color: getInboundAHTColor(mmssToSeconds(kpi.avgInboundAHT)),
-                critical: isInboundAHTCritical
-              },
-              { 
-                title: "Avg Outbound AHT", 
-                value: kpi.avgOutboundAHT, 
-                color: getOutboundAHTColor(mmssToSeconds(kpi.avgOutboundAHT)),
-                critical: isOutboundAHTCritical
-              },
+              { title: "Avg Inbound AHT", value: kpi.avgInboundAHT, color: getInboundAHTColor(mmssToSeconds(kpi.avgInboundAHT)), critical: isInboundAHTCritical },
+              { title: "Avg Outbound AHT", value: kpi.avgOutboundAHT, color: getOutboundAHTColor(mmssToSeconds(kpi.avgOutboundAHT)), critical: isOutboundAHTCritical },
             ].map((item, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
-                <KPICard 
-                  title={item.title} 
-                  value={item.value.toString()} 
-                  valueColor={item.color}
-                  isCritical={item.critical}
-                />
+                <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} isCritical={item.critical} />
               </Grid>
             ))}
           </Grid>
@@ -1022,20 +778,10 @@ const App = () => {
               { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error", critical: false },
               { title: "Total Inbound Calls", value: kpi.totalInboundCalls, color: "info", critical: false },
               { title: "Total Outbound Calls", value: kpi.totalOutboundCalls, color: "success", critical: false },
-              { 
-                title: "Abandon Rate", 
-                value: kpi.abandonRate, 
-                color: getAbandonColor(kpi.abandonRate),
-                critical: isAbandonRateCritical
-              },
+              { title: "Abandon Rate", value: kpi.abandonRate, color: getAbandonColor(kpi.abandonRate), critical: isAbandonRateCritical },
             ].map((item, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
-                <KPICard 
-                  title={item.title} 
-                  value={item.value.toString()} 
-                  valueColor={item.color}
-                  isCritical={item.critical}
-                />
+                <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} isCritical={item.critical} />
               </Grid>
             ))}
           </Grid>
@@ -1052,7 +798,7 @@ const App = () => {
                     ...emp,
                     avgInboundAHT: formatSecondsToMMSS(emp.inbound > 0 ? Math.floor(emp.inboundHandlingTimeSec / emp.inbound) : 0),
                     avgOutboundAHT: formatSecondsToMMSS(emp.outbound > 0 ? Math.floor(emp.outboundHandlingTimeSec / emp.outbound) : 0),
-                  }))} 
+                  }))}
                   isLoading={!isConnected && employees.length === 0}
                   isConnected={isConnected}
                   lastUpdate={lastUpdate}
@@ -1060,41 +806,30 @@ const App = () => {
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <Box position="relative">
-                  <SLABarchart 
-                    slaData={slaDataForChart} 
-                    wsConnected={isConnected}
-                  />
+                  <SLABarchart slaData={slaDataForChart} wsConnected={isConnected} />
                   {!audioUnlocked && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        bottom: 16,
-                        right: 16,
-                        zIndex: 2,
-                      }}
-                    >
+                    <Box sx={{ position: 'absolute', bottom: 16, right: 16, zIndex: 2 }}>
                       <Button
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
-                          background: 'linear-gradient(135deg, #ff8c00, #ff4500)',
+                          background: 'linear-gradient(135deg, #8D6E63, #5D4037)',
                           color: '#fff',
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '8px 16px',
                           fontSize: '0.95rem',
                           borderRadius: '50px',
-                          border: '2px solid #ffd700',
-                          boxShadow: '0 0 12px rgba(255, 69, 0, 0.7)',
+                          border: '2px solid #D4AF37',
+                          boxShadow: '0 0 8px rgba(141, 110, 99, 0.5)',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #ff6b00, #ff2a00)',
-                            boxShadow: '0 0 20px rgba(255, 107, 0, 0.9)',
+                            background: 'linear-gradient(135deg, #795548, #4E342E)',
+                            boxShadow: '0 0 12px rgba(141, 110, 99, 0.7)',
                             transform: 'scale(1.05)',
                           },
-                          fontFamily: '"Nosifer", cursive',
                         }}
                       >
-                        🎃 Activer les cris !
+                        🍂 Activer les sons
                       </Button>
                     </Box>
                   )}

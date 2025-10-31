@@ -24,8 +24,8 @@ const lunchEndIndex = 11;   // Correspond à 14:00
 
 function CustomLabel({ fill }) {
   return (
-    <text x="50%" y={25} fill={fill} fontSize={14} textAnchor="middle" fontWeight="bold" fontFamily='"Nosifer", cursive'>
-      LUNCH BREAK
+    <text x="49.5%" y={25} fill={fill} fontSize={14} textAnchor="middle" fontWeight="bold" fontFamily='"Roboto", sans-serif'>
+      🍕🍟🍔 LUNCH BREAK 🍔🍟🍕
     </text>
   );
 }
@@ -37,26 +37,24 @@ function LegendComponent() {
     gap: 6, 
     fontWeight: 'bold', 
     fontSize: 12,
-    color: '#ffd700',
-    textShadow: '0 0 6px rgba(255,215,0,0.6)',
+    color: '#5D4037',
   };
   const squareStyle = (color) => ({ 
     width: 14,
     height: 14, 
     backgroundColor: color, 
     borderRadius: 2,
-    boxShadow: `0 0 6px ${color}`,
   });
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, py: 0.5 }}>
       <div style={itemStyle}>
-        <span style={squareStyle('#ff6b00')}></span> 📞 CDS In
+        <span style={squareStyle('#8D6E63')}></span> 📞 Inbound Calls
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#01b68a')}></span> 🎃 CDS Out
+        <span style={squareStyle('#388E3C')}></span> 📞 Outbound Calls
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#ff0a0a')}></span> 👻 Absys
+        <span style={squareStyle('#D32F2F')}></span> ❌ Overflow Calls
       </div>
     </Box>
   );
@@ -65,7 +63,7 @@ function LegendComponent() {
 const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
   if (!value || value <= 0) return null;
   const isAbsysCritical = dataKey === 'ABSYS' && value > 5;
-  const labelColor = isAbsysCritical ? '#ff6b00' : '#fff';
+  const labelColor = isAbsysCritical ? '#D32F2F' : '#5D4037';
 
   return (
     <text
@@ -75,15 +73,21 @@ const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
       textAnchor="middle"
       fontSize={10}
       fontWeight="bold"
-      fontFamily={isAbsysCritical ? '"Orbitron", sans-serif' : 'inherit'}
-      style={{
-        animation: isAbsysCritical ? 'flame-text-pulse 1.5s infinite alternate' : 'none',
-        filter: isAbsysCritical ? 'drop-shadow(0 0 4px #ff6b00)' : 'none',
-      }}
+      fontFamily='"Roboto", sans-serif'
     >
       {value}
     </text>
   );
+};
+
+// ✅ Style mis à jour : fond orange pastel + transparence accrue
+const cardStyle = {
+  backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange crème pastel (80% opacité)
+  borderRadius: 3,
+  border: '1px solid #8D6E63', // Bordure marron automnale
+  boxShadow: '0 4px 12px rgba(141, 110, 99, 0.2)', // Ombre cohérente
+  position: 'relative',
+  overflow: 'hidden',
 };
 
 function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots = [] }) {
@@ -94,36 +98,14 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
   if (callVolumes.length === 0) {
     return (
-      <Card
-        sx={{
-          backgroundColor: 'var(--halloween-paper, #1a0a2e)',
-          borderRadius: 3,
-          border: '1px solid var(--halloween-primary, #ff6b00)',
-          boxShadow: '0 0 15px rgba(255, 107, 0, 0.3)',
-          backdropFilter: 'blur(4px)',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Brume d'ambiance */}
-        <Box sx={{
-          position: 'absolute',
-          top: 0,
-          left: '-50%',
-          width: '200%',
-          height: '100%',
-          background: 'radial-gradient(circle at 40% 50%, rgba(255,107,0,0.08), transparent 70%)',
-          animation: 'smoke-drift 22s linear infinite',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }} />
-        <CardContent sx={{ p: 1, position: 'relative', zIndex: 1 }}>
+      <Card sx={cardStyle}>
+        <CardContent sx={{ p: 1 }}>
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Nosifer", cursive',
-              color: '#ff6b00',
-              textShadow: '0 0 8px rgba(255,107,0,0.7)',
+              fontFamily: '"Roboto", sans-serif',
+              color: '#5D4037',
+              fontWeight: 'bold',
               fontSize: '1.1rem',
             }}
           >
@@ -131,32 +113,20 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           </Typography>
           <Box sx={{ textAlign: 'center', py: 1, mt: 2 }}>
             <Chip
-              label={wsConnected ? '🕸️ No data in the cauldron' : '🔮 Connecting to spirits...'}
+              label={wsConnected ? 'Aucune donnée disponible' : 'Connexion en cours...'}
               size="small"
               sx={{
                 mb: 1,
                 background: wsConnected 
-                  ? 'linear-gradient(135deg, #d32f2f, #b71c1c)' 
-                  : 'linear-gradient(135deg, #ff8c00, #ff4500)',
+                  ? 'linear-gradient(135deg, #D32F2F, #B71C1C)' 
+                  : 'linear-gradient(135deg, #8D6E63, #5D4037)',
                 color: 'white',
-                fontFamily: '"Nosifer", cursive',
-                animation: wsConnected ? 'none' : 'pulse-chip 2s infinite alternate',
+                fontWeight: 'bold',
               }}
             />
             <Skeleton variant="rectangular" width="100%" height={200} />
           </Box>
         </CardContent>
-        <style>{`
-          @keyframes pulse-chip {
-            0% { transform: scale(1); box-shadow: 0 0 6px #ff8c00; }
-            100% { transform: scale(1.05); box-shadow: 0 0 20px #ff4500; }
-          }
-          @keyframes smoke-drift {
-            0% { transform: translateX(0) translateY(0); }
-            50% { transform: translateX(-8%) translateY(-4%); }
-            100% { transform: translateX(0) translateY(0); }
-          }
-        `}</style>
       </Card>
     );
   }
@@ -171,65 +141,30 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
   const tickCount = Math.min(6, domainMax + 1);
 
   return (
-    <Card
-      sx={{
-        backgroundColor: 'var(--halloween-paper, #1a0a2e)',
-        borderRadius: 3,
-        border: '1px solid var(--halloween-primary, #ff6b00)',
-        boxShadow: '0 0 15px rgba(255, 107, 0, 0.3)',
-        backdropFilter: 'blur(4px)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Couches de brume en arrière-plan */}
-      <Box sx={{
-        position: 'absolute',
-        top: 0,
-        left: '-60%',
-        width: '220%',
-        height: '100%',
-        background: 'radial-gradient(circle at 30% 40%, rgba(255,100,0,0.07), transparent 80%)',
-        animation: 'smoke-drift 20s linear infinite',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }} />
-      <Box sx={{
-        position: 'absolute',
-        bottom: '10%',
-        right: '-70%',
-        width: '240%',
-        height: '60%',
-        background: 'radial-gradient(circle at 70% 30%, rgba(138, 43, 226, 0.06), transparent 85%)',
-        animation: 'smoke-drift-reverse 28s linear infinite',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }} />
-
-      <CardContent sx={{ p: 1, position: 'relative', zIndex: 1 }}>
+    <Card sx={cardStyle}>
+      <CardContent sx={{ p: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Nosifer", cursive',
-              color: '#ff6b00',
-              textShadow: '0 0 8px rgba(255,107,0,0.7)',
+              fontFamily: '"Roboto", sans-serif',
+              color: '#5D4037',
+              fontWeight: 'bold',
               fontSize: '1.1rem',
             }}
           >
             📞 Call Volume
           </Typography>
           <Chip
-            label={wsConnected ? '🟢 Live' : '🔴 Disconnected'}
+            label={wsConnected ? '🟢 Live' : '🔴 disconnected'}
             size="small"
             sx={{
               fontSize: 12,
               background: wsConnected 
-                ? 'linear-gradient(135deg, #01b68a, #00897b)' 
-                : 'linear-gradient(135deg, #d32f2f, #b71c1c)',
+                ? 'linear-gradient(135deg, #388E3C, #2E7D32)' 
+                : 'linear-gradient(135deg, #D32F2F, #B71C1C)',
               color: 'white',
               fontWeight: 'bold',
-              animation: wsConnected ? 'pulse-live 2s infinite' : 'none',
             }}
           />
         </Box>
@@ -242,15 +177,15 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               barSize={18}
               stackOffset="none"
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#4a148c" opacity={0.4} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" opacity={0.6} />
 
               <XAxis
                 dataKey="index"
                 tick={{ 
-                  fill: '#ffd700', 
-                  fontSize: 11, 
-                  textShadow: '0 0 4px rgba(255,215,0,0.5)',
-                  fontFamily: '"Orbitron", sans-serif',
+                  fill: '#5D4037', 
+                  fontSize: 13,
+                  fontWeight: 'bold',
+                  fontFamily: '"Roboto", sans-serif',
                 }}
                 tickFormatter={(index) => {
                   const time = halfHourSlots[index] || '';
@@ -266,11 +201,12 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               />
 
               <YAxis
-                stroke="#8a2be2"
+                stroke="#8D6E63"
                 tick={{ 
-                  fill: '#ffd700', 
-                  fontSize: 11,
-                  fontFamily: '"Orbitron", sans-serif',
+                  fill: '#5D4037', 
+                  fontSize: 13,
+                  fontWeight: 'bold',
+                  fontFamily: '"Roboto", sans-serif',
                 }}
                 domain={[0, domainMax]}
                 tickCount={tickCount}
@@ -279,18 +215,18 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
               <Tooltip
                 formatter={(value, name) => {
-                  const labels = { CDS_IN: '📞 CDS In', CDS_OUT: '🎃 CDS Out', ABSYS: '👻 Absys' };
+                  const labels = { CDS_IN: 'Appels entrants', CDS_OUT: 'Appels sortants', ABSYS: 'Appels perdus' };
                   return [value, labels[name] || name];
                 }}
-                labelFormatter={(index) => `Time: ${halfHourSlots[index] || index}`}
+                labelFormatter={(index) => `Heure : ${halfHourSlots[index] || index}`}
                 contentStyle={{
-                  backgroundColor: '#1a0a2e',
-                  border: '1px solid #ff6b00',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #8D6E63',
                   borderRadius: 6,
-                  color: '#ffd700',
+                  color: '#5D4037',
                   fontSize: 12,
-                  fontFamily: '"Orbitron", sans-serif',
-                  boxShadow: '0 0 12px rgba(255, 107, 0, 0.5)',
+                  fontFamily: '"Roboto", sans-serif',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 }}
               />
 
@@ -299,39 +235,36 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 x2={lunchEndIndex}
                 y1={0}
                 y2="dataMax"
-                fill="#8a2be2"
-                fillOpacity={0.2}
-                stroke="#ffd700"
-                strokeOpacity={0.8}
+                fill="#8D6E63"
+                fillOpacity={0.1}
+                stroke="#8D6E63"
+                strokeOpacity={0.6}
                 strokeDasharray="4 4"
               />
-              <ReferenceLine x={lunchStartIndex} stroke="#ffd700" strokeWidth={2} strokeDasharray="6 4" />
-              <ReferenceLine x={lunchEndIndex} stroke="#ffd700" strokeWidth={2} strokeDasharray="6 4" />
-              <CustomLabel fill="#ffd700" />
+              <ReferenceLine x={lunchStartIndex} stroke="#8D6E63" strokeWidth={1.5} strokeDasharray="6 4" />
+              <ReferenceLine x={lunchEndIndex} stroke="#8D6E63" strokeWidth={1.5} strokeDasharray="6 4" />
+              <CustomLabel fill="#5D4037" />
 
               <Bar 
                 dataKey="CDS_IN" 
-                name="CDS In" 
-                fill="#ff6b00" 
+                name="Appels entrants" 
+                fill="#8D6E63" 
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-flame-rise 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
               <Bar 
                 dataKey="CDS_OUT" 
-                name="CDS Out" 
-                fill="#01b68a" 
+                name="Appels sortants" 
+                fill="#388E3C" 
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-flame-rise 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
               <Bar 
                 dataKey="ABSYS" 
-                name="Absys" 
-                fill="#ff0a0a" 
+                name="Appels perdus" 
+                fill="#D32F2F" 
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-flame-rise 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
             </BarChart>
           </ResponsiveContainer>
@@ -339,56 +272,6 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
         <LegendComponent />
       </CardContent>
-
-      {/* Animations CSS intégrées */}
-      <style>
-        {`
-          @keyframes bar-flame-rise {
-            0% { 
-              transform: scaleY(0); 
-              opacity: 0; 
-              transform-origin: bottom;
-            }
-            100% { 
-              transform: scaleY(1); 
-              opacity: 1; 
-            }
-          }
-
-          @keyframes flame-text-pulse {
-            0% { 
-              filter: drop-shadow(0 0 4px #ff6b00); 
-              text-shadow: 0 0 6px rgba(255,107,0,0.7);
-            }
-            50% { 
-              filter: drop-shadow(0 0 12px #ff8c00); 
-              text-shadow: 0 0 10px rgba(255,140,0,0.9);
-            }
-            100% { 
-              filter: drop-shadow(0 0 4px #ff6b00); 
-              text-shadow: 0 0 6px rgba(255,107,0,0.7);
-            }
-          }
-
-          @keyframes pulse-live {
-            0% { box-shadow: 0 0 4px #01b68a; }
-            50% { box-shadow: 0 0 12px #00ff9d; }
-            100% { box-shadow: 0 0 4px #01b68a; }
-          }
-
-          @keyframes smoke-drift {
-            0% { transform: translateX(0) translateY(0); }
-            50% { transform: translateX(-10%) translateY(-5%); }
-            100% { transform: translateX(0) translateY(0); }
-          }
-
-          @keyframes smoke-drift-reverse {
-            0% { transform: translateX(0) translateY(0); }
-            50% { transform: translateX(12%) translateY(3%); }
-            100% { transform: translateX(0) translateY(0); }
-          }
-        `}
-      </style>
     </Card>
   );
 }
