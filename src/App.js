@@ -659,16 +659,23 @@ const App = () => {
       {/* Polices automnales */}
       <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
 
-      {/* === Styles globaux pour corriger la largeur === */}
+      {/* === Styles globaux CORRIGÉS === */}
       <style>
         {`
-          /* Correction essentielle : body occupe toute la largeur */
-          body, #root {
-            width: 100vw;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            box-sizing: border-box;
+          /* FORCER LE CONTENEUR À OCCUPER 100% DE LA LARGEUR DU VIEWPORT */
+          html, body, #root {
+            width: 100vw !important;
+            overflow-x: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            background-color: #f5f0e6 !important;
+          }
+
+          /* Empêcher TOUT élément enfant de déborder */
+          * {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
           }
 
           /* Scrollbar automnale */
@@ -716,12 +723,13 @@ const App = () => {
         }}
       />
 
-      {/* Conteneur principal fixé pour éviter le débordement */}
+      {/* Conteneur principal CORRIGÉ */}
       <Box
         sx={{
           position: 'relative',
           width: '100vw',
-          minWidth: '100%',
+          minWidth: '100vw',
+          maxWidth: '100vw',
           overflowX: 'hidden',
           margin: 0,
           padding: 0,
@@ -729,6 +737,7 @@ const App = () => {
           zIndex: 2,
           color: 'var(--autumn-text)',
           minHeight: '100vh',
+          backgroundColor: 'transparent', // Empêche tout fond blanc
         }}
         aria-label="Tableau de bord automnal en temps réel"
       >
