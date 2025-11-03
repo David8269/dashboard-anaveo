@@ -82,7 +82,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === Clock (version automne, harmonisée avec fond orange pastel) ===
+// === Clock (inchangée) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -104,7 +104,7 @@ function Clock() {
         color: '#5D4037',
         textShadow: '0 2px 4px rgba(255,255,255,0.7)',
         letterSpacing: '0.05em',
-        backgroundColor: 'rgba(255, 235, 220, 0.8)', // ✅ fond orange pastel
+        backgroundColor: 'rgba(255, 235, 220, 0.8)',
         padding: '0.5rem 1rem',
         borderRadius: '8px',
         display: 'inline-block',
@@ -120,7 +120,7 @@ function Clock() {
   );
 }
 
-// === Schedulers & WebSocket ===
+// === Schedulers & WebSocket (inchangés) ===
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -659,8 +659,18 @@ const App = () => {
       {/* Polices automnales */}
       <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
 
+      {/* === Styles globaux pour corriger la largeur === */}
       <style>
         {`
+          /* Correction essentielle : body occupe toute la largeur */
+          body, #root {
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            box-sizing: border-box;
+          }
+
           /* Scrollbar automnale */
           ::-webkit-scrollbar { width: 8px; }
           ::-webkit-scrollbar-track { background: transparent; }
@@ -706,24 +716,40 @@ const App = () => {
         }}
       />
 
-      {/* Conteneur principal */}
+      {/* Conteneur principal fixé pour éviter le débordement */}
       <Box
         sx={{
-          minHeight: '100vh',
-          py: 4,
           position: 'relative',
+          width: '100vw',
+          minWidth: '100%',
+          overflowX: 'hidden',
+          margin: 0,
+          padding: 0,
+          boxSizing: 'border-box',
           zIndex: 2,
           color: 'var(--autumn-text)',
+          minHeight: '100vh',
         }}
         aria-label="Tableau de bord automnal en temps réel"
       >
-        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', px: 0, mx: 0, width: '100%' }}>
+        <Box
+          sx={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            maxWidth: '100%',
+            margin: 0,
+            padding: 0,
+            boxSizing: 'border-box',
+          }}
+        >
           
           {/* ✅ Titre : fond orange pastel + texte orange vif */}
           <Box
             sx={{
               mb: 2,
-              backgroundColor: 'rgba(255, 235, 220, 0.8)', // ✅ fond orange pastel
+              backgroundColor: 'rgba(255, 235, 220, 0.8)',
               borderRadius: '12px',
               border: '1px solid #8D6E63',
               boxShadow: '0 4px 12px rgba(141, 110, 99, 0.2)',
@@ -737,7 +763,7 @@ const App = () => {
               align="center" 
               className="autumn-title" 
               sx={{ 
-                color: '#FF6F00', // ✅ orange vif
+                color: '#FF6F00',
                 textShadow: '0 2px 4px brown',
                 margin: 0,
               }}
@@ -759,7 +785,8 @@ const App = () => {
             </Box>
           )}
 
-          <Grid container spacing={3} justifyContent="center" sx={{ mt: 2, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Principaux">
+          {/* KPI Principaux — padding réduit pour éviter le débordement */}
+          <Grid container spacing={3} justifyContent="center" sx={{ mt: 2, px: { xs: 1.5, sm: 2, md: 2 } }} aria-label="KPI Principaux">
             {[
               { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
               { title: "Number of Calls", value: kpi.totalCallsThisWeek.toString(), color: "primary", critical: false },
@@ -772,7 +799,8 @@ const App = () => {
             ))}
           </Grid>
 
-          <Grid container spacing={3} justifyContent="center" sx={{ mt: 2, px: { xs: 2, sm: 3, md: 4 } }} aria-label="KPI Détail Appels">
+          {/* KPI Détail Appels — padding réduit */}
+          <Grid container spacing={3} justifyContent="center" sx={{ mt: 2, px: { xs: 1.5, sm: 2, md: 2 } }} aria-label="KPI Détail Appels">
             {[
               { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default", critical: false },
               { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error", critical: false },
@@ -786,11 +814,13 @@ const App = () => {
             ))}
           </Grid>
 
-          <Box mt={3} px={{ xs: 2, sm: 3, md: 4 }}>
+          {/* Graphique des volumes — padding réduit */}
+          <Box mt={3} px={{ xs: 1.5, sm: 2, md: 2 }}>
             <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
           </Box>
 
-          <Box mt={{ xs: 8, md: 10 }} pb={8} px={{ xs: 2, sm: 3, md: 4 }}>
+          {/* Tableau et graphique SLA — padding réduit */}
+          <Box mt={{ xs: 8, md: 10 }} pb={8} px={{ xs: 1.5, sm: 2, md: 2 }}>
             <Grid container spacing={4} direction="column">
               <Grid size={{ xs: 12 }}>
                 <AgentTable
