@@ -51,20 +51,44 @@
       --autumn-gold: #D4AF37;
     }
 
-    /* === Scrollbar automnale === */
+    /* === Scrollbar automnale – invisible au repos, visible au scroll/hover === */
     * {
       scrollbar-width: thin;
       scrollbar-color: #8D6E63 #f5f0e6;
     }
+
     *::-webkit-scrollbar {
       width: 8px;
     }
+
     *::-webkit-scrollbar-track {
       background: #f5f0e6;
     }
+
     *::-webkit-scrollbar-thumb {
       background-color: #8D6E63;
       border-radius: 4px;
+      visibility: hidden; /* masquée par défaut */
+    }
+
+    /* Réapparaît au scroll, hover ou focus */
+    html:active::-webkit-scrollbar-thumb,
+    html:hover::-webkit-scrollbar-thumb,
+    html:focus-within::-webkit-scrollbar-thumb {
+      visibility: visible;
+    }
+
+    /* Firefox : on rend la scrollbar transparente au repos */
+    @supports (scrollbar-width: thin) {
+      html {
+        scrollbar-color: transparent #f5f0e6;
+        transition: scrollbar-color 0.3s;
+      }
+      html:active,
+      html:hover,
+      html:focus-within {
+        scrollbar-color: #8D6E63 #f5f0e6;
+      }
     }
 
     /* === Écran de chargement === */
@@ -109,7 +133,7 @@
       position: fixed;
       top: -50px;
       font-size: 50px;
-      opacity: 1; /* ✅ Aucune transparence */
+      opacity: 1;
       pointer-events: none;
       z-index: 1;
       animation: fall linear infinite;
@@ -118,11 +142,11 @@
     @keyframes fall {
       to {
         transform: translateY(105vh) rotate(720deg);
-        opacity: 1; /* Garde l’opacité jusqu’à la fin (disparaît hors écran) */
+        opacity: 1;
       }
     }
 
-    /* 24 feuilles avec variations de position, vitesse et couleur */
+    /* 24 feuilles avec variations */
     .falling-leaf:nth-child(1)  { left: 5%;  animation-duration: 12s;  animation-delay: 0s;   color: #8D6E63; }
     .falling-leaf:nth-child(2)  { left: 15%; animation-duration: 15s;  animation-delay: 1s;   color: #D2691E; }
     .falling-leaf:nth-child(3)  { left: 25%; animation-duration: 10s;  animation-delay: 0.5s; color: #A1887F; }
