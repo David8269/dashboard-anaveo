@@ -7,34 +7,36 @@
   <meta name="description" content="Tableau de bord automnal du Service Center ANAVEO." />
   <title>ANAVEO - 🍂 Centre d’Appels Automnal</title>
 
-  <!-- 🍂 Polices automnales (URLs corrigées – sans espaces !) -->
+  <!-- 🍂 Polices automnales -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
   <!-- 🍁 Styles globaux + feuilles tombantes -->
   <style>
-    /* === Correction essentielle : empêcher tout débordement === */
-    html {
-      width: 100vw;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
-
-    /* === Variables et styles de base === */
-    body {
+    /* === Correction essentielle : fond d'écran couvre 100% de la largeur === */
+    html, body {
       margin: 0;
       padding: 0;
-      background-color: #f5f0e6;
-      color: #5D4037;
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
       width: 100vw;
+      min-height: 100vh;
       overflow-x: hidden;
-      position: relative;
       box-sizing: border-box;
     }
 
+    body {
+      /* ✅ Fond d'écran appliqué directement au body */
+      background-image: url('./images/autumn-bg.jpg');
+      background-size: 100% auto;       /* Étend l'image à toute la largeur */
+      background-position: top center;  /* Garde la chouette en haut */
+      background-repeat: no-repeat;
+      background-color: #f5f0e6;        /* Couleur de secours */
+      color: #5D4037;
+      font-family: 'Roboto', sans-serif;
+      position: relative;
+    }
+
+    /* === Superposition décorative (points automnaux) === */
     body::before {
       content: '';
       position: fixed;
@@ -61,35 +63,28 @@
       --autumn-gold: #D4AF37;
     }
 
-    /* === Scrollbar automnale – invisible au repos, visible au scroll/hover === */
+    /* === Scrollbar automnale === */
     * {
       scrollbar-width: thin;
       scrollbar-color: #8D6E63 #f5f0e6;
       box-sizing: border-box;
     }
-
     *::-webkit-scrollbar {
       width: 8px;
     }
-
     *::-webkit-scrollbar-track {
       background: #f5f0e6;
     }
-
     *::-webkit-scrollbar-thumb {
       background-color: #8D6E63;
       border-radius: 4px;
-      visibility: hidden; /* masquée par défaut */
+      visibility: hidden;
     }
-
-    /* Réapparaît au scroll, hover ou focus */
     html:active::-webkit-scrollbar-thumb,
     html:hover::-webkit-scrollbar-thumb,
     html:focus-within::-webkit-scrollbar-thumb {
       visibility: visible;
     }
-
-    /* Firefox : scrollbar transparente au repos */
     @supports (scrollbar-width: thin) {
       html {
         scrollbar-color: transparent #f5f0e6;
@@ -139,7 +134,7 @@
       50% { transform: translateY(-8px); }
     }
 
-    /* === Feuilles tombantes – OPAQUES (pas de transparence) === */
+    /* === Feuilles tombantes – OPAQUES === */
     .falling-leaf {
       position: fixed;
       top: -50px;
