@@ -156,7 +156,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             📞 Call Volume
           </Typography>
           <Chip
-            label={wsConnected ? '🟢 Live' : '🔴 disconnected'}
+            label={wsConnected ? '🟢 Live' : '🔴 Offline'}
             size="small"
             sx={{
               fontSize: 12,

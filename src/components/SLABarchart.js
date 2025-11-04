@@ -18,7 +18,7 @@ import {
   Tooltip,
 } from 'recharts';
 
-const INBOUND_COLOR = '#F57C00'; // 🟠 Orange Material-UI (remplace le marron)
+const INBOUND_COLOR = '#F57C00'; // 🟠 Orange Material-UI
 const OUTBOUND_COLOR = '#388E3C'; // Vert forêt
 
 const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString());
@@ -136,7 +136,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               stroke="#8D6E63"
               tick={{
                 fill: '#5D4037',
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: 'bold',
                 fontFamily: '"Roboto", sans-serif',
               }}
@@ -146,7 +146,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               stroke="#8D6E63"
               tick={{
                 fill: '#5D4037',
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: 'bold',
                 fontFamily: '"Roboto", sans-serif',
               }}
@@ -174,7 +174,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               dataKey="inbound" 
               name="Appels entrants" 
               fill={INBOUND_COLOR} 
-              maxBarSize={120}
+              maxBarSize={160}  // ✅ Barres plus larges
               animationDuration={800}
             >
               <LabelList
@@ -182,7 +182,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                 position="top"
                 fill={INBOUND_COLOR}
                 fontWeight="bold"
-                fontSize={12}
+                fontSize={15}
                 formatter={hideZeroLabels}
                 fontFamily='"Roboto", sans-serif'
               />
@@ -192,7 +192,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               dataKey="outbound" 
               name="Appels sortants" 
               fill={OUTBOUND_COLOR} 
-              maxBarSize={120}
+              maxBarSize={160}  // ✅ Même largeur pour l’équilibre visuel
               animationDuration={800}
             >
               <LabelList
@@ -200,7 +200,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                 position="top"
                 fill={OUTBOUND_COLOR}
                 fontWeight="bold"
-                fontSize={12}
+                fontSize={15}
                 formatter={hideZeroLabels}
                 fontFamily='"Roboto", sans-serif'
               />
