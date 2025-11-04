@@ -18,7 +18,7 @@ import {
   Tooltip,
 } from 'recharts';
 
-const INBOUND_COLOR = '#8D6E63'; // Marron automnal
+const INBOUND_COLOR = '#F57C00'; // 🟠 Orange Material-UI (remplace le marron)
 const OUTBOUND_COLOR = '#388E3C'; // Vert forêt
 
 const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString());
@@ -174,7 +174,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               dataKey="inbound" 
               name="Appels entrants" 
               fill={INBOUND_COLOR} 
-              maxBarSize={120}           // ✅ Barres plus larges
+              maxBarSize={120}
               animationDuration={800}
             >
               <LabelList
@@ -192,7 +192,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               dataKey="outbound" 
               name="Appels sortants" 
               fill={OUTBOUND_COLOR} 
-              maxBarSize={120}           // ✅ Barres plus larges
+              maxBarSize={120}
               animationDuration={800}
             >
               <LabelList

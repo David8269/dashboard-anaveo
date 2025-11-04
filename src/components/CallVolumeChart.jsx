@@ -48,7 +48,7 @@ function LegendComponent() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, py: 0.5 }}>
       <div style={itemStyle}>
-        <span style={squareStyle('#8D6E63')}></span> 📞 Inbound Calls
+        <span style={squareStyle('#F57C00')}></span> 📞 Inbound Calls
       </div>
       <div style={itemStyle}>
         <span style={squareStyle('#388E3C')}></span> 📞 Outbound Calls
@@ -248,7 +248,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               <Bar 
                 dataKey="CDS_IN" 
                 name="Appels entrants" 
-                fill="#8D6E63" 
+                fill="#F57C00"  // 🟠 Changé ici : orange Material
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
               />
