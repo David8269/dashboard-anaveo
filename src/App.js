@@ -790,7 +790,7 @@ const App = () => {
                 zIndex: 2,
               }}
             >
-              🍇🍷 ANAVEO - Centre de services 🍷🍇
+              🍇🍷 ANAVEO - Service Center 🍷🍇
             </Typography>
           </Box>
 
