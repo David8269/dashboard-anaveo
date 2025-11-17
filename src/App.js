@@ -649,15 +649,15 @@ const App = () => {
       const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'marina', 'malik']);
       const firstName = currentTop.name.split(' ')[0]?.toLowerCase() || '';
       const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
-      playSound(soundToPlay, `Top agent : ${currentTop.name}`);
+      playSound(soundFile, `Top agent : ${currentTop.name}`);
     }
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi]);
 
   return (
     <>
-      {/* Polices automnales */}
-      <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+      {/* Polices élégantes */}
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
 
       {/* === Styles globaux pour corriger la largeur === */}
       <style>
@@ -671,11 +671,11 @@ const App = () => {
             box-sizing: border-box;
           }
 
-          /* Scrollbar automnale */
+          /* Scrollbar vigneron */
           ::-webkit-scrollbar { width: 8px; }
           ::-webkit-scrollbar-track { background: transparent; }
           ::-webkit-scrollbar-thumb { 
-            background: transparent; 
+            background: #5D4037; 
             border-radius: 4px; 
             transition: background 0.3s ease; 
           }
@@ -683,24 +683,29 @@ const App = () => {
           body.show-scrollbar ::-webkit-scrollbar-track { background: rgba(93, 64, 55, 0.1); }
 
           /* Firefox */
-          * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+          * { scrollbar-width: thin; scrollbar-color: #5D4037 transparent; }
           body.show-scrollbar { scrollbar-color: #8D6E63 rgba(93, 64, 55, 0.1); }
 
           :root {
-            --autumn-text: #5D4037;
-            --autumn-accent: #8D6E63;
+            --wine-text: #5D4037;
+            --wine-accent: #8D6E63;
+            --wine-primary: #795548;
+            --wine-secondary: #A1887F;
+            --wine-gold: #D4AF37;
+            --wine-light: #EFEBE9;
           }
 
-          .autumn-title {
-            font-family: 'Roboto', sans-serif;
+          .wine-title {
+            font-family: 'Playfair Display', serif;
             font-weight: 700;
-            font-size: clamp(2rem, 6vw, 3.2rem);
-            letter-spacing: 0.02em;
+            font-size: clamp(2.2rem, 6vw, 3.5rem);
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
           }
         `}
       </style>
 
-      {/* 🍂 Fond d'écran automnal */}
+      {/* 🍇 Fond d'écran vigneron */}
       <Box
         sx={{
           position: 'fixed',
@@ -708,11 +713,24 @@ const App = () => {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/autumn-bg.jpg')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/vineyard-bg.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed', // Pour un effet parallaxe subtil
           zIndex: 0,
+        }}
+      />
+
+      {/* Overlay de transparence pour lisibilité */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          zIndex: 1,
         }}
       />
 
@@ -727,10 +745,10 @@ const App = () => {
           padding: 0,
           boxSizing: 'border-box',
           zIndex: 2,
-          color: 'var(--autumn-text)',
+          color: 'var(--wine-text)',
           minHeight: '100vh',
         }}
-        aria-label="Tableau de bord automnal en temps réel"
+        aria-label="Tableau de bord vigneron en temps réel"
       >
         <Box
           sx={{
@@ -745,30 +763,34 @@ const App = () => {
           }}
         >
           
-          {/* ✅ Titre : fond orange pastel + texte orange vif */}
+          {/* ✅ Titre : fond orange pastel et bordure marron (comme l'horloge) */}
           <Box
             sx={{
               mb: 2,
-              backgroundColor: 'rgba(255, 235, 220, 0.8)',
+              backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange pastel (comme l'horloge)
               borderRadius: '12px',
-              border: '1px solid #8D6E63',
-              boxShadow: '0 4px 12px rgba(141, 110, 99, 0.2)',
-              padding: { xs: '0.6rem 1rem', md: '0.8rem 1.5rem' },
+              border: '1px solid #8D6E63', // Bordure marron (comme l'horloge)
+              boxShadow: '0 2px 6px rgba(141, 110, 99, 0.2)', // Ombre subtile (comme l'horloge)
+              padding: { xs: '0.8rem 1.5rem', md: '1rem 2rem' },
               display: 'inline-block',
               margin: '0 auto',
+              position: 'relative',
+              overflow: 'hidden',
             }}
           >
             <Typography 
               variant="h1" 
               align="center" 
-              className="autumn-title" 
+              className="wine-title" 
               sx={{ 
-                color: '#FF6F00',
-                textShadow: '0 2px 4px brown',
+                color: 'var(--wine-primary)',
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 margin: 0,
+                position: 'relative',
+                zIndex: 2,
               }}
             >
-              🍁🍄  ANAVEO - Service Center 🍄🍁
+              🍇🍷 ANAVEO - Centre de services 🍷🍇
             </Typography>
           </Box>
 
@@ -843,23 +865,23 @@ const App = () => {
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
-                          background: 'linear-gradient(135deg, #8D6E63, #5D4037)',
+                          background: 'linear-gradient(135deg, var(--wine-primary), var(--wine-secondary))',
                           color: '#fff',
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '8px 16px',
                           fontSize: '0.95rem',
                           borderRadius: '50px',
-                          border: '2px solid #D4AF37',
-                          boxShadow: '0 0 8px rgba(141, 110, 99, 0.5)',
+                          border: '2px solid var(--wine-gold)',
+                          boxShadow: '0 0 8px rgba(212, 175, 55, 0.5)',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #795548, #4E342E)',
-                            boxShadow: '0 0 12px rgba(141, 110, 99, 0.7)',
+                            background: 'linear-gradient(135deg, #6D4C41, #5D4037)',
+                            boxShadow: '0 0 12px rgba(212, 175, 55, 0.7)',
                             transform: 'scale(1.05)',
                           },
                         }}
                       >
-                        🍂 Activer les sons
+                        🍷 Activer les sons
                       </Button>
                     </Box>
                   )}

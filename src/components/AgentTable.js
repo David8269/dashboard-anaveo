@@ -46,14 +46,14 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// ✅ Style réutilisable : fond orange pastel + transparence accrue
+// ✅ Style réutilisable : fond orange pastel et bordure marron (comme l'horloge)
 const cardStyle = {
   position: 'relative',
   overflow: 'hidden',
-  backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange pastel (crème pêche) avec 80% d'opacité
+  backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange pastel (comme l'horloge)
   borderRadius: 3,
-  border: '1px solid #8D6E63', // Bordure marron automnale
-  boxShadow: '0 4px 12px rgba(141, 110, 99, 0.2)', // Ombre cohérente
+  border: '1px solid #8D6E63', // Bordure marron (comme l'horloge)
+  boxShadow: '0 2px 6px rgba(141, 110, 99, 0.2)', // Ombre subtile (comme l'horloge)
 };
 
 export default function AgentTable({ employees = [], isLoading = false, isConnected = false, lastUpdate = null }) {
@@ -62,12 +62,14 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
       <Card sx={cardStyle}>
         <CardContent>
           <Typography variant="overline" sx={{
-            fontFamily: '"Roboto", sans-serif',
-            color: '#5D4037',
+            fontFamily: '"Playfair Display", serif',
+            color: 'var(--wine-primary)',
             fontWeight: 'bold',
-            fontSize: '1.1rem',
+            fontSize: '1.2rem',
+            zIndex: 2, // Pour être au-dessus de l'ornement
+            position: 'relative',
           }}>
-            🍂 Performance des agents
+            🍷 Performance des agents
           </Typography>
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Chip 
@@ -75,7 +77,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
               size="small" 
               sx={{
                 mb: 2,
-                background: 'linear-gradient(135deg, #8D6E63, #5D4037)',
+                background: 'linear-gradient(135deg, var(--wine-primary), var(--wine-secondary))',
                 color: 'white',
                 fontWeight: 'bold',
               }} 
@@ -93,11 +95,13 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
             <Typography variant="overline" sx={{
-              fontFamily: '"Roboto", sans-serif',
-              color: '#5D4037',
+              fontFamily: '"Playfair Display", serif',
+              color: 'var(--wine-primary)',
               fontWeight: 'bold',
+              zIndex: 2,
+              position: 'relative',
             }}>
-              🍂 Performance des agents
+              🍷 Performance des agents
             </Typography>
             <Tooltip title={isConnected ? "Connecté" : "Déconnecté"}>
               <Box sx={{
@@ -105,11 +109,13 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                 height: 12,
                 borderRadius: '50%',
                 bgcolor: isConnected ? '#388E3C' : '#D32F2F',
+                zIndex: 2,
+                position: 'relative',
               }} />
             </Tooltip>
           </Box>
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="var(--wine-text)" zIndex={2} position="relative">
               Aucun agent disponible.
             </Typography>
           </Box>
@@ -130,12 +136,14 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
           <Typography variant="overline" sx={{
-            fontFamily: '"Roboto", sans-serif',
-            color: '#5D4037',
+            fontFamily: '"Playfair Display", serif',
+            color: 'var(--wine-primary)',
             fontWeight: 'bold',
-            fontSize: '1.1rem',
+            fontSize: '1.2rem',
+            zIndex: 2,
+            position: 'relative',
           }}>
-            🍂 Performance des agents
+            🍷 Performance des agents
           </Typography>
           <Box display="flex" alignItems="center" gap={1}>
             <Tooltip title={isConnected ? "Connecté" : "Déconnecté"}>
@@ -144,17 +152,19 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                 height: 12,
                 borderRadius: '50%',
                 bgcolor: isConnected ? '#388E3C' : '#D32F2F',
+                zIndex: 2,
+                position: 'relative',
               }} />
             </Tooltip>
             {lastUpdate && (
-              <Typography variant="caption" color="#5D4037">
+              <Typography variant="caption" color="var(--wine-text)" zIndex={2} position="relative">
                 {`MàJ : ${lastUpdate.toLocaleTimeString()}`}
               </Typography>
             )}
           </Box>
         </Box>
 
-        <TableContainer component={Box}>
+        <TableContainer component={Box} sx={{ zIndex: 2, position: 'relative' }}> {/* Pour être au-dessus de l'ornement */}
           <Table size="small" aria-label="tableau des performances des agents">
             <TableHead>
               <TableRow>
@@ -164,7 +174,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     scope="col" 
                     sx={{
                       fontWeight: 'bold',
-                      color: '#5D4037',
+                      color: 'var(--wine-text)',
                       fontFamily: '"Roboto", sans-serif',
                       fontSize: '0.85rem',
                     }} 
@@ -190,7 +200,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     hover 
                     sx={{
                       '&:hover': { 
-                        backgroundColor: 'rgba(141, 110, 99, 0.08)', 
+                        backgroundColor: 'rgba(141, 110, 99, 0.15)', // Hover plus foncé
                         transform: 'scale(1.01)'
                       },
                       transition: 'all 0.2s ease-in-out'
@@ -199,7 +209,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         {medal && <span style={{ fontSize: '18px' }}>{medal}</span>}
-                        <Typography sx={{ color: '#5D4037', fontWeight: 'bold' }}>
+                        <Typography sx={{ color: 'var(--wine-text)', fontWeight: 'bold' }}>
                           {index + 1}
                         </Typography>
                       </Box>
@@ -208,7 +218,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                       <Box display="flex" alignItems="center">
                         <Avatar 
                           sx={{
-                            bgcolor: '#8D6E63', 
+                            bgcolor: 'var(--wine-accent)', 
                             width: 28, 
                             height: 28, 
                             fontSize: 12, 
@@ -218,7 +228,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                         >
                           {getInitials(emp.name) || '?'}
                         </Avatar>
-                        <Typography sx={{ color: '#5D4037', fontWeight: 'bold' }}>
+                        <Typography sx={{ color: 'var(--wine-text)', fontWeight: 'bold' }}>
                           {emp.name || '-'}
                         </Typography>
                       </Box>
@@ -239,7 +249,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <Typography sx={{ color: '#5D4037' }}>
+                      <Typography sx={{ color: 'var(--wine-text)' }}>
                         {emp.inbound != null ? emp.inbound : '-'}
                       </Typography>
                     </TableCell>
@@ -260,11 +270,11 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           }}
                         />
                       ) : (
-                        <Typography sx={{ color: '#5D4037' }}>-</Typography>
+                        <Typography sx={{ color: 'var(--wine-text)' }}>-</Typography>
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      <Typography sx={{ color: '#5D4037' }}>
+                      <Typography sx={{ color: 'var(--wine-text)' }}>
                         {emp.outbound != null ? emp.outbound : '-'}
                       </Typography>
                     </TableCell>
@@ -285,7 +295,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           }}
                         />
                       ) : (
-                        <Typography sx={{ color: '#5D4037' }}>-</Typography>
+                        <Typography sx={{ color: 'var(--wine-text)' }}>-</Typography>
                       )}
                     </TableCell>
                   </TableRow>

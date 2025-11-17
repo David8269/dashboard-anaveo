@@ -25,7 +25,7 @@ const lunchEndIndex = 11;   // Correspond à 14:00
 function CustomLabel({ fill }) {
   return (
     <text x="49.5%" y={25} fill={fill} fontSize={14} textAnchor="middle" fontWeight="bold" fontFamily='"Roboto", sans-serif'>
-      🍕🍟🍔 LUNCH BREAK 🍔🍟🍕
+      🍷 Pause déjeuner 🍷
     </text>
   );
 }
@@ -37,7 +37,7 @@ function LegendComponent() {
     gap: 6, 
     fontWeight: 'bold', 
     fontSize: 12,
-    color: '#5D4037',
+    color: 'var(--wine-text)',
   };
   const squareStyle = (color) => ({ 
     width: 14,
@@ -63,7 +63,7 @@ function LegendComponent() {
 const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
   if (!value || value <= 0) return null;
   const isAbsysCritical = dataKey === 'ABSYS' && value > 5;
-  const labelColor = isAbsysCritical ? '#D32F2F' : '#5D4037';
+  const labelColor = isAbsysCritical ? '#D32F2F' : 'var(--wine-text)';
 
   return (
     <text
@@ -80,12 +80,12 @@ const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
   );
 };
 
-// ✅ Style mis à jour : fond orange pastel + transparence accrue
+// ✅ Style mis à jour : fond orange pastel et bordure marron (comme l'horloge)
 const cardStyle = {
-  backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange crème pastel (80% opacité)
+  backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange pastel (comme l'horloge)
   borderRadius: 3,
-  border: '1px solid #8D6E63', // Bordure marron automnale
-  boxShadow: '0 4px 12px rgba(141, 110, 99, 0.2)', // Ombre cohérente
+  border: '1px solid #8D6E63', // Bordure marron (comme l'horloge)
+  boxShadow: '0 2px 6px rgba(141, 110, 99, 0.2)', // Ombre subtile (comme l'horloge)
   position: 'relative',
   overflow: 'hidden',
 };
@@ -103,13 +103,15 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Roboto", sans-serif',
-              color: '#5D4037',
+              fontFamily: '"Playfair Display", serif',
+              color: 'var(--wine-primary)',
               fontWeight: 'bold',
-              fontSize: '1.1rem',
+              fontSize: '1.2rem',
+              zIndex: 2,
+              position: 'relative',
             }}
           >
-            📞 Call Volume
+            📞 Volume d'appels
           </Typography>
           <Box sx={{ textAlign: 'center', py: 1, mt: 2 }}>
             <Chip
@@ -119,7 +121,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 mb: 1,
                 background: wsConnected 
                   ? 'linear-gradient(135deg, #D32F2F, #B71C1C)' 
-                  : 'linear-gradient(135deg, #8D6E63, #5D4037)',
+                  : 'linear-gradient(135deg, var(--wine-primary), var(--wine-secondary))',
                 color: 'white',
                 fontWeight: 'bold',
               }}
@@ -137,7 +139,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
   }, 0);
 
   const yMax = Math.max(1, isNaN(maxY) ? 1 : maxY);
-  const domainMax = Math.ceil(yMax * 1.3);
+  const domainMax = Math.max(1, Math.ceil(yMax * 1.3)); // S'assurer que ce n'est pas 0
   const tickCount = Math.min(6, domainMax + 1);
 
   return (
@@ -147,13 +149,15 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Roboto", sans-serif',
-              color: '#5D4037',
+              fontFamily: '"Playfair Display", serif',
+              color: 'var(--wine-primary)',
               fontWeight: 'bold',
-              fontSize: '1.1rem',
+              fontSize: '1.2rem',
+              zIndex: 2,
+              position: 'relative',
             }}
           >
-            📞 Call Volume
+            📞 Volume d'appels
           </Typography>
           <Chip
             label={wsConnected ? '🟢 Live' : '🔴 Offline'}
@@ -169,7 +173,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           />
         </Box>
 
-        <Box sx={{ width: '100%', height: 250, mt: 1.5 }} aria-label="Graphique des volumes d'appels">
+        <Box sx={{ width: '100%', height: 250, mt: 1.5, zIndex: 2, position: 'relative' }} aria-label="Graphique des volumes d'appels">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
@@ -182,7 +186,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               <XAxis
                 dataKey="index"
                 tick={{ 
-                  fill: '#5D4037', 
+                  fill: 'var(--wine-text)', 
                   fontSize: 13,
                   fontWeight: 'bold',
                   fontFamily: '"Roboto", sans-serif',
@@ -201,9 +205,9 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               />
 
               <YAxis
-                stroke="#8D6E63"
+                stroke="var(--wine-accent)"
                 tick={{ 
-                  fill: '#5D4037', 
+                  fill: 'var(--wine-text)', 
                   fontSize: 13,
                   fontWeight: 'bold',
                   fontFamily: '"Roboto", sans-serif',
@@ -221,9 +225,9 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 labelFormatter={(index) => `Heure : ${halfHourSlots[index] || index}`}
                 contentStyle={{
                   backgroundColor: '#ffffff',
-                  border: '1px solid #8D6E63',
+                  border: '1px solid var(--wine-accent)',
                   borderRadius: 6,
-                  color: '#5D4037',
+                  color: 'var(--wine-text)',
                   fontSize: 12,
                   fontFamily: '"Roboto", sans-serif',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
@@ -235,20 +239,20 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 x2={lunchEndIndex}
                 y1={0}
                 y2="dataMax"
-                fill="#8D6E63"
-                fillOpacity={0.1}
-                stroke="#8D6E63"
-                strokeOpacity={0.6}
+                fill="var(--wine-accent)"
+                fillOpacity={0.15} // Légèrement plus opaque pour le contraste
+                stroke="var(--wine-accent)"
+                strokeOpacity={0.7}
                 strokeDasharray="4 4"
               />
-              <ReferenceLine x={lunchStartIndex} stroke="#8D6E63" strokeWidth={1.5} strokeDasharray="6 4" />
-              <ReferenceLine x={lunchEndIndex} stroke="#8D6E63" strokeWidth={1.5} strokeDasharray="6 4" />
-              <CustomLabel fill="#5D4037" />
+              <ReferenceLine x={lunchStartIndex} stroke="var(--wine-accent)" strokeWidth={1.5} strokeDasharray="6 4" />
+              <ReferenceLine x={lunchEndIndex} stroke="var(--wine-accent)" strokeWidth={1.5} strokeDasharray="6 4" />
+              <CustomLabel fill="var(--wine-text)" />
 
               <Bar 
                 dataKey="CDS_IN" 
                 name="Appels entrants" 
-                fill="#F57C00"  // 🟠 Changé ici : orange Material
+                fill="#F57C00"  
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
               />

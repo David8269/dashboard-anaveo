@@ -22,7 +22,7 @@ const toNumberOrNull = (val) => {
   return null;
 };
 
-// ✅ Style de base avec transparence et fond orange pastel
+// ✅ Style de base avec transparence et fond orange pastel (comme l'horloge)
 const baseCardStyle = {
   height: '100%',
   borderRadius: 3,
@@ -88,22 +88,22 @@ export default function KPICard({
       case 'warning': return '#F57C00'; // Orange automnal
       case 'error':   return '#D32F2F';
       case 'info':    return '#1976D2'; // Bleu discret
-      default:        return '#5D4037'; // Brun foncé
+      default:        return 'var(--wine-primary)'; // Marron foncé du thème
     }
   };
 
   const icon = getIconForTitle(title || '');
   const displayValue = value != null ? String(value) : '-';
 
-  // ✅ Calcul dynamique du style de la carte avec fond orange pastel
+  // ✅ Calcul dynamique du style de la carte avec fond orange pastel (comme l'horloge)
   const cardSx = {
     ...baseCardStyle,
-    backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange crème pastel (80% opacité)
+    backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange pastel (comme l'horloge)
     height: `${height}px`,
-    border: `1px solid ${isValueCritical ? '#D32F2F' : '#8D6E63'}`,
+    border: `1px solid ${isValueCritical ? '#D32F2F' : '#8D6E63'}`, // Bordure marron (comme l'horloge), rouge si critique
     boxShadow: isValueCritical 
       ? '0 4px 12px rgba(211, 47, 47, 0.25)'
-      : '0 4px 12px rgba(141, 110, 99, 0.2)',
+      : '0 2px 6px rgba(141, 110, 99, 0.2)', // Ombre subtile (comme l'horloge)
     transition: 'all 0.3s ease',
     ...(animate && {
       transform: 'scale(1.03)',
@@ -114,7 +114,7 @@ export default function KPICard({
       boxShadow: isValueCritical
         ? '0 6px 16px rgba(211, 47, 47, 0.35)'
         : '0 6px 16px rgba(141, 110, 99, 0.3)',
-      border: `1px solid ${isValueCritical ? '#C62828' : '#5D4037'}`,
+      border: `1px solid ${isValueCritical ? '#C62828' : '#5D4037'}`, // Bordure marron foncé au hover, rouge si critique
     },
   };
 
@@ -135,7 +135,7 @@ export default function KPICard({
           variant="overline"
           sx={{
             fontWeight: 'bold',
-            color: '#5D4037',
+            color: 'var(--wine-primary)',
             fontFamily: '"Roboto", sans-serif',
             fontSize: '0.85rem',
             display: 'flex',
@@ -152,7 +152,7 @@ export default function KPICard({
           <Typography 
             variant="caption" 
             sx={{ 
-              color: 'text.secondary', 
+              color: 'var(--wine-text)', // Utilise la couleur de texte générale
               display: 'block', 
               mb: 1,
               fontSize: '0.75rem',
@@ -185,7 +185,7 @@ export default function KPICard({
               component="span"
               variant="subtitle1"
               sx={{
-                color: 'text.secondary',
+                color: 'var(--wine-text)', // Couleur de texte secondaire
                 fontWeight: 'normal',
                 fontSize: '1rem',
                 ml: 0.5,

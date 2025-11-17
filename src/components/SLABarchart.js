@@ -19,19 +19,19 @@ import {
 } from 'recharts';
 
 const INBOUND_COLOR = '#F57C00'; // 🟠 Orange Material-UI
-const OUTBOUND_COLOR = '#388E3C'; // Vert forêt
+const OUTBOUND_COLOR = '#388E3C'; // 🟢 Vert forêt
 
 const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString());
 
 const hideZeroLabels = (value) => (value === 0 ? '' : formatNumber(value));
 
-// ✅ Style mis à jour : fond orange pastel + transparence accrue
+// ✅ Style mis à jour : fond orange pastel et bordure marron (comme l'horloge)
 const cardStyle = {
-  backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange crème pastel (80% opacité)
+  backgroundColor: 'rgba(255, 235, 220, 0.8)', // 🍊 Orange pastel (comme l'horloge)
   width: '100%',
   borderRadius: 3,
-  border: '1px solid #8D6E63', // Bordure marron automnale
-  boxShadow: '0 4px 12px rgba(141, 110, 99, 0.2)', // Ombre cohérente
+  border: '1px solid #8D6E63', // Bordure marron (comme l'horloge)
+  boxShadow: '0 2px 6px rgba(141, 110, 99, 0.2)', // Ombre subtile (comme l'horloge)
   position: 'relative',
   overflow: 'hidden',
 };
@@ -64,13 +64,15 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Roboto", sans-serif',
-              color: '#5D4037',
+              fontFamily: '"Playfair Display", serif',
+              color: 'var(--wine-primary)',
               fontWeight: 'bold',
-              fontSize: '1.2rem',
+              fontSize: '1.3rem',
+              zIndex: 2,
+              position: 'relative',
             }}
           >
-            📞 Nombre d'appels
+            📞 Volume d'appels par jour
           </Typography>
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Chip
@@ -80,7 +82,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                 mb: 2,
                 background: wsConnected
                   ? 'linear-gradient(135deg, #D32F2F, #B71C1C)'
-                  : 'linear-gradient(135deg, #8D6E63, #5D4037)',
+                  : 'linear-gradient(135deg, var(--wine-primary), var(--wine-secondary))',
                 color: 'white',
                 fontWeight: 'bold',
               }}
@@ -106,13 +108,15 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Roboto", sans-serif',
-              color: '#5D4037',
+              fontFamily: '"Playfair Display", serif',
+              color: 'var(--wine-primary)',
               fontWeight: 'bold',
-              fontSize: '1.2rem',
+              fontSize: '1.3rem',
+              zIndex: 2,
+              position: 'relative',
             }}
           >
-            📞 Nombre d'appels
+            📞 Volume d'appels par jour
           </Typography>
           <Chip
             label={wsConnected ? '🟢 En direct' : '🔴 Déconnecté'}
@@ -127,15 +131,15 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           />
         </Box>
 
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={400} sx={{ zIndex: 2, position: 'relative' }}>
           <BarChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" opacity={0.6} />
 
             <XAxis
               dataKey="dayLabel"
-              stroke="#8D6E63"
+              stroke="var(--wine-accent)"
               tick={{
-                fill: '#5D4037',
+                fill: 'var(--wine-text)',
                 fontSize: 15,
                 fontWeight: 'bold',
                 fontFamily: '"Roboto", sans-serif',
@@ -143,9 +147,9 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             />
 
             <YAxis
-              stroke="#8D6E63"
+              stroke="var(--wine-accent)"
               tick={{
-                fill: '#5D4037',
+                fill: 'var(--wine-text)',
                 fontSize: 15,
                 fontWeight: 'bold',
                 fontFamily: '"Roboto", sans-serif',
@@ -161,9 +165,9 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               labelFormatter={(label) => `Jour : ${label}`}
               contentStyle={{
                 backgroundColor: '#ffffff',
-                border: '1px solid #8D6E63',
+                border: '1px solid var(--wine-accent)',
                 borderRadius: 6,
-                color: '#5D4037',
+                color: 'var(--wine-text)',
                 fontSize: 12,
                 fontFamily: '"Roboto", sans-serif',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
@@ -174,7 +178,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               dataKey="inbound" 
               name="Appels entrants" 
               fill={INBOUND_COLOR} 
-              maxBarSize={160}  // ✅ Barres plus larges
+              maxBarSize={160}
               animationDuration={800}
             >
               <LabelList
@@ -192,7 +196,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               dataKey="outbound" 
               name="Appels sortants" 
               fill={OUTBOUND_COLOR} 
-              maxBarSize={160}  // ✅ Même largeur pour l’équilibre visuel
+              maxBarSize={160}
               animationDuration={800}
             >
               <LabelList
@@ -208,7 +212,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           </BarChart>
         </ResponsiveContainer>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, pt: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, pt: 1, zIndex: 2, position: 'relative' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box sx={{ width: 14, height: 14, bgcolor: INBOUND_COLOR, borderRadius: '2px' }} />
             <Typography variant="body2" sx={{ color: INBOUND_COLOR, fontWeight: 'bold', fontFamily: '"Roboto", sans-serif' }}>
