@@ -25,7 +25,7 @@ const lunchEndIndex = 11;   // Correspond à 14:00
 function CustomLabel({ fill }) {
   return (
     <text x="49.5%" y={25} fill={fill} fontSize={14} textAnchor="middle" fontWeight="bold" fontFamily='"Roboto", sans-serif'>
-      🍷 Pause déjeuner 🍷
+      🍷 Lunch break 🍷
     </text>
   );
 }
@@ -157,7 +157,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               position: 'relative',
             }}
           >
-            📞 Volume d'appels
+            📞 Call volume
           </Typography>
           <Chip
             label={wsConnected ? '🟢 Live' : '🔴 Offline'}
