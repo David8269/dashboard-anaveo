@@ -649,7 +649,7 @@ const App = () => {
       const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'marina', 'malik']);
       const firstName = currentTop.name.split(' ')[0]?.toLowerCase() || '';
       const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
-      playSound(soundFile, `Top agent : ${currentTop.name}`);
+      playSound(soundToPlay, `Top agent : ${currentTop.name}`);
     }
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi]);
