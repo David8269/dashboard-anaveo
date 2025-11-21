@@ -120,7 +120,7 @@ function Clock() {
   );
 }
 
-// === Schedulers & WebSocket (inchangés) ===
+// === Schedulers & WebSocket (corrigé) ===
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -276,15 +276,18 @@ const useWebSocketData = (url, onLostCall) => {
 
   const startPing = () => {
     stopPing();
+    // Envoi de ping toutes les 30 secondes au lieu de 10
     pingIntervalRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         try {
-          wsRef.current.send(JSON.stringify({ type: 'keepalive', ts: Date.now() }));
+          wsRef.current.send(JSON.stringify({ type: 'ping', ts: Date.now() }));
         } catch (e) {
-          console.warn('[WS] ⚠️ Keepalive échoué', e);
+          console.warn('[WS] ⚠️ Ping échoué', e);
+          // Fermeture proactive en cas d'erreur d'envoi
+          wsRef.current?.close();
         }
       }
-    }, 10000);
+    }, 30000);
   };
 
   const connect = () => {
@@ -302,11 +305,12 @@ const useWebSocketData = (url, onLostCall) => {
       setIsConnected(false);
       wsRef.current = new WebSocket(url);
 
+      // Timeout de connexion plus long
       connectionTimeoutRef.current = setTimeout(() => {
         if (wsRef.current?.readyState === WebSocket.CONNECTING) {
           wsRef.current?.close();
         }
-      }, 10000);
+      }, 15000);
 
       wsRef.current.onopen = () => {
         if (!isMountedRef.current) return;
@@ -328,7 +332,8 @@ const useWebSocketData = (url, onLostCall) => {
         if (!isMountedRef.current) return;
         const msg = event.data;
         if (typeof msg === 'string') {
-          if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"')) {
+          // Gestion des messages de ping/pong
+          if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"') || msg.includes('"type":"ping"') || msg.includes('"type":"pong"')) {
             return;
           }
 
@@ -408,10 +413,11 @@ const useWebSocketData = (url, onLostCall) => {
 
       wsRef.current.onclose = (e) => {
         if (!isMountedRef.current) return;
-        console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
+        console.warn(`[WS] 🔌 Déconnecté (code ${e.code}, raison: ${e.reason})`);
         setIsConnected(false);
         stopPing();
 
+        // Ne pas reconnecter si la fermeture est normale (code 1000)
         if (e.code !== 1000 && isMountedRef.current) {
           reconnectAttemptsRef.current += 1;
           connect();
