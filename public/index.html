@@ -1,12 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ANAVEO - Service Center</title>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="./favicon-christmas.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Tableau de bord festif du Service Center ANAVEO — Joyeux Noël à toute l'équipe !" />
+  <title>ANAVEO - 🎄 Centre d’Appels de Noël</title>
+
+  <!-- 🎄 Polices festives -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- 🎁 Styles globaux + décorations tombantes -->
+  <style>
+    /* === Variables et styles de base === */
+    :root {
+      --christmas-bg: #ffffff;
+      --christmas-paper: #ffffff;
+      --christmas-primary: #d42426;
+      --christmas-secondary: #228b22;
+      --christmas-error: #c1272d;
+      --christmas-success: #2e8b57;
+      --christmas-warning: #ffaa00;
+      --christmas-text: #000;
+      --christmas-gold: #ffd700;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    body {
+      background-color: var(--christmas-bg);
+      color: var(--christmas-text);
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      position: relative;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* === Arrière-plan décoratif subtil === */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(212, 36, 38, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(34, 139, 34, 0.02) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* === Écran de chargement festif === */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;
+      z-index: 1000;
+      transition: opacity 0.5s;
+    }
+
+    .loading-content {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(212, 36, 38, 0.3);
+      border: 2px solid #d42426;
+      max-width: 90vw;
+      font-family: 'Mountains of Christmas', cursive;
+    }
+
+    .santa-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #d42426;
+      text-shadow: 0 0 10px rgba(255,215,0,0.7);
+      animation: bounce-gentle 3s ease-in-out infinite;
+    }
+
+    @keyframes bounce-gentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* === Décorations tombantes – totalement opaques === */
+    .falling-festive {
+      position: fixed;
+      top: -100px;
+      font-size: 36px;
+      opacity: 1; /* ✅ Aucune transparence */
+      pointer-events: none;
+      z-index: 1;
+      animation: fall-festive linear infinite;
+      text-shadow: 
+        0 0 6px var(--christmas-gold),
+        0 0 12px rgba(255, 215, 0, 0.7);
+      will-change: transform;
+    }
+
+    @keyframes fall-festive {
+      0% {
+        transform: translateY(-10vh) rotate(0deg);
+      }
+      100% {
+        transform: translateY(110vh) rotate(720deg);
+      }
+    }
+
+    /* === Variations individuelles === */
+    .falling-festive:nth-child(1)  { left: 5%;  animation-duration: 14s;  animation-delay: 0s;   font-size: 36px; color: #d42426; }
+    .falling-festive:nth-child(2)  { left: 15%; animation-duration: 17s;  animation-delay: 1s;   font-size: 42px; color: #ffd700; }
+    .falling-festive:nth-child(3)  { left: 25%; animation-duration: 12s;  animation-delay: 0.5s; font-size: 38px; color: #228b22; }
+    .falling-festive:nth-child(4)  { left: 35%; animation-duration: 20s;  animation-delay: 2s;   font-size: 44px; color: #d42426; }
+    .falling-festive:nth-child(5)  { left: 45%; animation-duration: 15s;  animation-delay: 1.2s; font-size: 40px; color: #ffd700; }
+    .falling-festive:nth-child(6)  { left: 55%; animation-duration: 18s;  animation-delay: 0.8s; font-size: 36px; color: #228b22; }
+    .falling-festive:nth-child(7)  { left: 65%; animation-duration: 13s;  animation-delay: 1.5s; font-size: 42px; color: #d42426; }
+    .falling-festive:nth-child(8)  { left: 75%; animation-duration: 16s;  animation-delay: 0.3s; font-size: 38px; color: #ffd700; }
+    .falling-festive:nth-child(9)  { left: 85%; animation-duration: 19s;  animation-delay: 1.8s; font-size: 44px; color: #228b22; }
+    .falling-festive:nth-child(10) { left: 10%; animation-duration: 14.5s; animation-delay: 0.7s; font-size: 40px; color: #d42426; }
+    .falling-festive:nth-child(11) { left: 20%; animation-duration: 17.5s; animation-delay: 1.1s; font-size: 36px; color: #ffd700; }
+    .falling-festive:nth-child(12) { left: 30%; animation-duration: 12.5s; animation-delay: 0.9s; font-size: 42px; color: #228b22; }
+    .falling-festive:nth-child(13) { left: 40%; animation-duration: 15.5s; animation-delay: 0.4s; font-size: 38px; color: #d42426; }
+    .falling-festive:nth-child(14) { left: 50%; animation-duration: 18.5s; animation-delay: 1.3s; font-size: 44px; color: #ffd700; }
+    .falling-festive:nth-child(15) { left: 60%; animation-duration: 13.5s; animation-delay: 0.6s; font-size: 40px; color: #228b22; }
+    .falling-festive:nth-child(16) { left: 70%; animation-duration: 16.5s; animation-delay: 1.7s; font-size: 36px; color: #d42426; }
+    .falling-festive:nth-child(17) { left: 80%; animation-duration: 14.2s; animation-delay: 0.2s; font-size: 42px; color: #ffd700; }
+    .falling-festive:nth-child(18) { left: 90%; animation-duration: 17.2s; animation-delay: 1.4s; font-size: 38px; color: #228b22; }
+    .falling-festive:nth-child(19) { left: 5%;  animation-duration: 12.8s; animation-delay: 0.1s; font-size: 44px; color: #d42426; }
+    .falling-festive:nth-child(20) { left: 12%; animation-duration: 19.5s; animation-delay: 1.9s; font-size: 40px; color: #ffd700; }
+    .falling-festive:nth-child(21) { left: 18%; animation-duration: 15.2s; animation-delay: 0.5s; font-size: 36px; color: #228b22; }
+    .falling-festive:nth-child(22) { left: 28%; animation-duration: 18.2s; animation-delay: 1.0s; font-size: 42px; color: #d42426; }
+    .falling-festive:nth-child(23) { left: 38%; animation-duration: 13.8s; animation-delay: 0.7s; font-size: 38px; color: #ffd700; }
+    .falling-festive:nth-child(24) { left: 48%; animation-duration: 16.8s; animation-delay: 1.6s; font-size: 44px; color: #228b22; }
+  </style>
+</head>
+<body>
+  <!-- 🎄 24 décorations tombantes – totalement opaques -->
+  <div class="falling-festive">🎄</div>
+  <div class="falling-festive">🎅</div>
+  <div class="falling-festive">🎁</div>
+  <div class="falling-festive">❄️</div>
+  <div class="falling-festive">⭐</div>
+  <div class="falling-festive">🎄</div>
+  <div class="falling-festive">🎅</div>
+  <div class="falling-festive">🎁</div>
+  <div class="falling-festive">❄️</div>
+  <div class="falling-festive">⭐</div>
+  <div class="falling-festive">🎄</div>
+  <div class="falling-festive">🎅</div>
+  <div class="falling-festive">🎁</div>
+  <div class="falling-festive">❄️</div>
+  <div class="falling-festive">⭐</div>
+  <div class="falling-festive">🎄</div>
+  <div class="falling-festive">🎅</div>
+  <div class="falling-festive">🎁</div>
+  <div class="falling-festive">❄️</div>
+  <div class="falling-festive">⭐</div>
+  <div class="falling-festive">🎄</div>
+  <div class="falling-festive">🎅</div>
+  <div class="falling-festive">🎁</div>
+  <div class="falling-festive">❄️</div>
+
+  <!-- 🎄 Écran de chargement de Noël -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <div class="santa-icon">🎅</div>
+      Préparation du traîneau du Père Noël…
+    </div>
+  </div>
+
+  <!-- ✅ Conteneur React -->
+  <div id="root"></div>
+
+  <!-- Masquer l'écran de chargement après le chargement initial -->
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+          loader.style.opacity = '0';
+          setTimeout(() => loader.remove(), 500);
+        }
+      }, 800);
+    });
+  </script>
+</body>
 </html>
