@@ -277,14 +277,12 @@ const useWebSocketData = (url, onLostCall) => {
 
   const startPing = () => {
     stopPing();
-    // Envoi de ping toutes les 30 secondes au lieu de 10
     pingIntervalRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         try {
           wsRef.current.send(JSON.stringify({ type: 'ping', ts: Date.now() }));
         } catch (e) {
           console.warn('[WS] ⚠️ Ping échoué', e);
-          // Fermeture proactive en cas d'erreur d'envoi
           wsRef.current?.close();
         }
       }
@@ -306,7 +304,6 @@ const useWebSocketData = (url, onLostCall) => {
       setIsConnected(false);
       wsRef.current = new WebSocket(url);
 
-      // Timeout de connexion plus long
       connectionTimeoutRef.current = setTimeout(() => {
         if (wsRef.current?.readyState === WebSocket.CONNECTING) {
           wsRef.current?.close();
@@ -333,7 +330,6 @@ const useWebSocketData = (url, onLostCall) => {
         if (!isMountedRef.current) return;
         const msg = event.data;
         if (typeof msg === 'string') {
-          // Gestion des messages de ping/pong
           if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"') || msg.includes('"type":"ping"') || msg.includes('"type":"pong"')) {
             return;
           }
@@ -418,7 +414,6 @@ const useWebSocketData = (url, onLostCall) => {
         setIsConnected(false);
         stopPing();
 
-        // Ne pas reconnecter si la fermeture est normale (code 1000)
         if (e.code !== 1000 && isMountedRef.current) {
           reconnectAttemptsRef.current += 1;
           connect();
@@ -677,9 +672,8 @@ const App = () => {
           .snowflake {
             position: fixed;
             top: -20px;
-            color: #ffffff; /* Blanc opaque */
+            color: #ffffff;
             font-size: 1.2rem;
-            /* ✅ text-shadow retiré */
             z-index: 1;
             opacity: 0;
             animation: snow 10s linear forwards;
@@ -859,7 +853,8 @@ const App = () => {
             <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
           </Box>
 
-          <Box mt={{ xs: 7, md: 9 }} pb={7} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
+          {/* 🔽 ESPACE AJOUTÉ ICI : mt augmenté pour descendre les widgets du bas */}
+          <Box mt={{ xs: 12, md: 16 }} pb={7} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
             <Grid container spacing={4} direction="column">
               <Grid size={{ xs: 12 }}>
                 <AgentTable

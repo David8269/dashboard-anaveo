@@ -24,7 +24,7 @@ const lunchEndIndex = 11;   // Correspond à 14:00
 
 function CustomLabel({ fill }) {
   return (
-    <text x="49.2%" y={25} fill={fill} fontSize={14} textAnchor="middle" fontWeight="bold" fontFamily='"Mountains of Christmas", cursive'>
+    <text x="50%" y={25} fill={fill} fontSize={14} textAnchor="middle" fontWeight="bold" fontFamily='"Mountains of Christmas", cursive'>
       🍬🍭☕ HOT CHOCOLATE ☕🍭🍬
     </text>
   );
