@@ -11,6 +11,6 @@ export const AUTHORIZED_AGENTS = new Set([
   'rana al kas ellia',
   'christophe rizet',
   'yannick mallon',
-  'claire cassegrain',
+  'gwenaelle valenti',
   'cédric saniez'
 ]);
