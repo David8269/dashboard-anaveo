@@ -1,118 +1,20 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Box,
   Grid,
-  Container,
   Typography,
   Button,
+  Paper,
 } from '@mui/material';
 import KPICard from './components/KPICard';
 import SLABarchart from './components/SLABarchart';
 import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
+import { useCallAggregates } from './hooks/useCallAggregates';
+import { parseCDRLine } from './utils/cdrParser';
+import { AUTHORIZED_AGENTS } from './config/agents';
 
-// 🔊 Fonction de lecture audio — utilise PUBLIC_URL
-const playSound = (filename) => {
-  try {
-    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
-    audio.play().catch(e => console.warn(`Échec lecture ${filename} :`, e));
-  } catch (error) {
-    console.error('Erreur lecture son :', error);
-  }
-};
-
-// 🕒 Horloge — MATCH EXACT DU TITRE (police, liseré, ombres, pas de cadre)
-function Clock() {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timerId = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timerId);
-  }, []);
-
-  const hours = time.getHours().toString().padStart(2, '0');
-  const minutes = time.getMinutes().toString().padStart(2, '0');
-  const seconds = time.getSeconds().toString().padStart(2, '0');
-
-  return (
-    <>
-      <style>
-        {`
-          @keyframes glitch-digital {
-            0% { clip-path: inset(0 0 0 0); transform: translate(0); }
-            10% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-            20% { clip-path: inset(15% 0 75% 0); transform: translate(2px, 2px); }
-            30% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-            40% { clip-path: inset(35% 0 55% 0); transform: translate(2px, -2px); }
-            50% { clip-path: inset(45% 0 45% 0); transform: translate(-2px, -2px); }
-            60% { clip-path: inset(35% 0 55% 0); transform: translate(2px, 2px); }
-            70% { clip-path: inset(25% 0 65% 0); transform: translate(-2px, 2px); }
-            80% { clip-path: inset(15% 0 75% 0); transform: translate(2px, -2px); }
-            90% { clip-path: inset(5% 0 85% 0); transform: translate(-2px, -2px); }
-            100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-          }
-          .clock-glitch {
-            position: relative;
-            font-family: 'Orbitron', 'Roboto', sans-serif;
-            font-weight: 900;
-            font-size: clamp(2rem, 8vw, 3.5rem);
-            letter-spacing: 0.1em;
-            color: #fff;
-            user-select: none;
-            text-align: center;
-            text-transform: uppercase;
-            text-shadow: 
-              0 0 8px rgba(255,255,255,0.7),
-              0 0 12px rgba(255,255,255,0.5),
-              0 0 16px rgba(255,255,255,0.3);
-            padding: 0.5rem 1rem;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 4px;
-            background: transparent;
-            display: inline-block;
-          }
-          .clock-glitch::before,
-          .clock-glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            left: 0;
-            width: 100%;
-            opacity: 0.8;
-          }
-          .clock-glitch::before {
-            animation: glitch-digital 2.5s infinite linear alternate-reverse;
-            color: #ff0;
-            left: -1px;
-            mix-blend-mode: screen;
-          }
-          .clock-glitch::after {
-            animation: glitch-digital 2s infinite linear alternate;
-            color: #ffa500;
-            left: 1px;
-            mix-blend-mode: screen;
-            opacity: 0.6;
-          }
-        `}
-      </style>
-      <Box
-        className="clock-glitch"
-        data-text={`${hours}:${minutes}:${seconds}`}
-        role="status"
-        aria-live="polite"
-        sx={{
-          display: 'inline-block',
-          margin: '0 auto',
-          '&::before, &::after': {
-            pointerEvents: 'none'
-          }
-        }}
-      >
-        {hours}:{minutes}:{seconds}
-      </Box>
-    </>
-  );
-}
-
+// === Helpers (inchangés) ===
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -146,13 +48,15 @@ const getAbandonColor = (rateStr) => {
   return rate <= 15 ? 'success' : 'error';
 };
 
-const parseCDRDate = (str) => {
-  if (!str) return null;
-  const [datePart, timePart] = str.split(' ');
-  if (!datePart || !timePart) return null;
-  const [y, m, d] = datePart.split('/');
-  const [hh, mm, ss] = timePart.split(':');
-  return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), Number(ss)));
+const isAbandonCritical = (rateStr) => {
+  const rate = parseInt(rateStr, 10);
+  return !isNaN(rate) && rate > 15;
+};
+
+const getLocalDateStr = (date) => {
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+  return localDate.toISOString().split('T')[0];
 };
 
 const generateHalfHourSlots = () => {
@@ -166,38 +70,111 @@ const generateHalfHourSlots = () => {
 
 const halfHourSlots = generateHalfHourSlots();
 
-const getSlotIndex = (date) => {
-  if (!date) return -1;
+const isInBusinessHours = (date) => {
+  if (!date) return false;
   const h = date.getHours();
   const m = date.getMinutes();
-  if (h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30)) {
-    return -1;
-  }
-  for (let i = halfHourSlots.length - 1; i >= 0; i--) {
-    const [slotH, slotM] = halfHourSlots[i].split(':').map(Number);
-    if (h > slotH || (h === slotH && m >= slotM)) {
-      return i;
-    }
-  }
-  return -1;
+  return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
 };
 
-const getLocalDateStr = (date) => {
-  const offset = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offset * 60 * 1000);
-  return localDate.toISOString().split('T')[0];
+const mmssToSeconds = (mmss) => {
+  if (!mmss || mmss === '-') return null;
+  const [m, s] = mmss.split(':').map(Number);
+  return m * 60 + s;
 };
 
-const formatDateToLocalISO = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+// === Clock (version Nouvel An – avec flou) ===
+function Clock() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timerId = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timerId);
+  }, []);
+
+  const hours = time.getHours().toString().padStart(2, '0');
+  const minutes = time.getMinutes().toString().padStart(2, '0');
+  const seconds = time.getSeconds().toString().padStart(2, '0');
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        fontFamily: '"Orbitron", sans-serif',
+        fontWeight: 'bold',
+        fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
+        color: '#d4af37',
+        textShadow: '0 0 12px rgba(212, 175, 55, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(4px)', // 👈 Flou ajouté
+        WebkitBackdropFilter: 'blur(4px)', // compatibilité
+        padding: { xs: '0.5rem 1rem', md: '0.8rem 1.4rem' },
+        borderRadius: '16px',
+        display: 'inline-block',
+        margin: '0 auto',
+        border: '1px solid rgba(212, 175, 55, 0.6)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+      }}
+      role="status"
+      aria-live="polite"
+    >
+      {hours}:{minutes}:{seconds}
+    </Paper>
+  );
+}
+
+// === Schedulers & WebSocket (inchangés) ===
+const useDailyResetScheduler = (resetFn) => {
+  useEffect(() => {
+    const scheduleNextReset = () => {
+      const now = new Date();
+      const nextReset = new Date();
+      nextReset.setHours(8, 0, 0, 0);
+      if (now >= nextReset) nextReset.setDate(nextReset.getDate() + 1);
+      const delay = nextReset.getTime() - now.getTime();
+      const timeoutId = setTimeout(() => {
+        resetFn();
+        scheduleNextReset();
+      }, delay);
+      return () => clearTimeout(timeoutId);
+    };
+    return scheduleNextReset();
+  }, [resetFn]);
+};
+
+const useWeeklyResetScheduler = (resetFn) => {
+  useEffect(() => {
+    const scheduleNextReset = () => {
+      const now = new Date();
+      const nextReset = new Date();
+
+      const dayOfWeek = now.getDay();
+      let daysUntilMonday = 1 - dayOfWeek;
+      if (daysUntilMonday <= 0) daysUntilMonday += 7;
+
+      nextReset.setDate(now.getDate() + daysUntilMonday);
+      nextReset.setHours(8, 0, 0, 0);
+
+      if (dayOfWeek === 1 && now.getHours() >= 8) {
+        nextReset.setDate(nextReset.getDate() + 7);
+      }
+
+      const delay = nextReset.getTime() - now.getTime();
+      const timeoutId = setTimeout(() => {
+        resetFn();
+        scheduleNextReset();
+      }, delay);
+
+      return () => clearTimeout(timeoutId);
+    };
+    return scheduleNextReset();
+  }, [resetFn]);
 };
 
 const useWebSocketData = (url, onLostCall) => {
-  const [cumulativeAgents, setCumulativeAgents] = useState({});
   const [allCalls, setAllCalls] = useState([]);
+  const [dailyCalls, setDailyCalls] = useState([]);
+  const [weeklyCalls, setWeeklyCalls] = useState([]);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
@@ -205,7 +182,9 @@ const useWebSocketData = (url, onLostCall) => {
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const connectionTimeoutRef = useRef(null);
+  const pingIntervalRef = useRef(null);
   const isMountedRef = useRef(true);
+  const reconnectAttemptsRef = useRef(0);
 
   const getStorageKey = () => `callData_${getLocalDateStr(new Date())}`;
 
@@ -240,6 +219,7 @@ const useWebSocketData = (url, onLostCall) => {
   };
 
   const loadCallsFromStorage = () => {
+    const seen = new Set();
     const calls = [];
     const today = new Date();
     for (let i = 0; i < 7; i++) {
@@ -255,667 +235,673 @@ const useWebSocketData = (url, onLostCall) => {
             startTime: call.startTime ? new Date(call.startTime) : null,
             endTime: call.endTime ? new Date(call.endTime) : null,
             receivedAt: call.receivedAt ? new Date(call.receivedAt) : null,
-          })).filter(call => call.startTime);
-          calls.push(...loadedCalls);
+          })).filter(call => call.startTime && call.id);
+
+          for (const call of loadedCalls) {
+            if (!seen.has(call.id)) {
+              seen.add(call.id);
+              calls.push(call);
+            }
+          }
         }
       } catch (e) {
         console.warn(`[Storage] ⚠️ Chargement échoué pour ${key}`, e);
         localStorage.removeItem(key);
       }
-    }
+    };
+    console.log(`[Storage] ✅ ${calls.length} appels chargés depuis localStorage`);
     return calls;
   };
 
-  const rebuildAgentsFromCalls = (calls) => {
-    const agents = {};
-    calls.forEach(cdr => {
-      if (cdr.callType === 'ABSYS') return;
-      const { callType, agentName } = cdr;
-      if (!agentName) return;
-      if (!agents[agentName]) {
-        agents[agentName] = {
-          name: agentName,
-          status: 'online',
-          inbound: 0,
-          missed: 0,
-          outbound: 0,
-          inboundHandlingTimeSec: 0,
-          outboundHandlingTimeSec: 0,
-        };
-      }
-      const agent = agents[agentName];
-      if (callType === 'CDS_IN') {
-        if (['src_participant_terminated', 'dst_participant_terminated'].includes(cdr.status)) {
-          agent.inbound += 1;
-          agent.inboundHandlingTimeSec += cdr.durationSec || 0;
-        } else if (cdr.status.includes('missed') || cdr.status.includes('abandoned')) {
-          agent.missed += 1;
+  const resetDailyData = () => {
+    setDailyCalls([]);
+    setLastUpdate(null);
+    console.log('[Reset] 🌅 Réinitialisation quotidienne (KPI vidé, SLA conservé)');
+  };
+
+  const resetWeeklyData = () => {
+    setAllCalls([]);
+    setDailyCalls([]);
+    setWeeklyCalls([]);
+    setLastUpdate(null);
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('callData_'))
+      .forEach(k => localStorage.removeItem(k));
+    console.log('[Reset] 📅 Réinitialisation hebdomadaire complète');
+  };
+
+  const stopPing = () => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+  };
+
+  const startPing = () => {
+    stopPing();
+    pingIntervalRef.current = setInterval(() => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        try {
+          wsRef.current.send(JSON.stringify({ type: 'keepalive', ts: Date.now() }));
+        } catch (e) {
+          console.warn('[WS] ⚠️ Keepalive échoué', e);
         }
-      } else if (callType === 'CDS_OUT') {
-        agent.outbound += 1;
-        agent.outboundHandlingTimeSec += cdr.durationSec || 0;
       }
-    });
-    return agents;
-  };
-
-  const parseCDRLine = (line) => {
-    if (!line || !line.startsWith('Call ')) return null;
-    const fields = line.substring(5).split(',');
-    const caller = fields[7] || '';
-    const status = fields[6] || '';
-    const durationStr = fields[2] || '00:00:00';
-    const technicalKeywords = new Set([
-      'provider', 'queue', 'extension', 'external_line', 'default',
-      'ReplacedDst', 'Chain:', 'Front Office', 'Sortante', 'outbound_rule',
-      '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-    ]);
-    const isLikelyName = (str) => {
-      const clean = str.trim();
-      if (!clean) return false;
-      if (technicalKeywords.has(clean)) return false;
-      if (/^\d+$/.test(clean)) return false;
-      if (!/[a-zA-ZÀ-ÿ]/.test(clean)) return false;
-      return true;
-    };
-    let agentName = '';
-    for (let i = fields.length - 1; i >= 0; i--) {
-      const field = (fields[i] || '').trim();
-      if (isLikelyName(field)) {
-        agentName = field
-          .replace(/\(.*?\)/g, '')
-          .replace(/\.+$/, '')
-          .trim();
-        break;
-      }
-    }
-    const isFrontOffice = line.includes(',Front Office,');
-    let callType = 'OTHER';
-    if (agentName && (/^\d+$/.test(agentName) || agentName.startsWith('Chain:'))) {
-      agentName = '';
-    }
-    if (isFrontOffice) {
-      callType = agentName ? 'CDS_IN' : 'ABSYS';
-    } else if (caller.startsWith('Ext.')) {
-      callType = agentName ? 'CDS_OUT' : 'OTHER';
-    }
-    return {
-      id: fields[0] || '',
-      startTime: parseCDRDate(fields[3]),
-      endTime: parseCDRDate(fields[5]),
-      status,
-      caller,
-      queue: isFrontOffice ? 'Front Office' : '',
-      agentName: agentName || '',
-      duration: durationStr,
-      callType,
-    };
-  };
-
-  const isInBusinessHours = (date) => {
-    if (!date) return false;
-    const h = date.getHours();
-    const m = date.getMinutes();
-    return !(h < 8 || (h === 8 && m < 30) || h > 18 || (h === 18 && m > 30));
+    }, 45000);
   };
 
   const connect = () => {
     if (!isMountedRef.current) return;
-    console.log(`[WS] 🔄 Connexion à ${url}`);
-    setError(null);
-    setIsConnected(false);
-    wsRef.current = new WebSocket(url);
-    connectionTimeoutRef.current = setTimeout(() => {
-      if (wsRef.current?.readyState === WebSocket.CONNECTING) {
-        wsRef.current?.close();
-      }
-    }, 10000);
-    wsRef.current.onopen = () => {
+
+    const baseDelay = 5000;
+    const maxDelay = 30000;
+    const delay = reconnectAttemptsRef.current === 0 ? 0 : Math.min(baseDelay * Math.pow(2, reconnectAttemptsRef.current - 1), maxDelay);
+
+    console.log(`[WS] 🔄 Tentative de connexion dans ${delay / 1000}s (essai #${reconnectAttemptsRef.current})`);
+    reconnectTimeoutRef.current = setTimeout(() => {
       if (!isMountedRef.current) return;
-      clearTimeout(connectionTimeoutRef.current);
-      console.log('[WS] ✅ Connecté');
-      setIsConnected(true);
+      console.log(`[WS] 🔄 Connexion à ${url}`);
       setError(null);
-      try {
-        wsRef.current.send(JSON.stringify({ type: "subscribe", topic: "cdr/live" }));
-      } catch (err) {
-        console.warn('[WS] ⚠️ Souscription échouée:', err);
-      }
+      setIsConnected(false);
+      wsRef.current = new WebSocket(url);
 
-      const heartbeatInterval = setInterval(() => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          try {
-            wsRef.current.send('{"type":"ping"}');
-          } catch (e) {
-            console.warn('[WS] ⚠️ Heartbeat échoué');
-          }
+      connectionTimeoutRef.current = setTimeout(() => {
+        if (wsRef.current?.readyState === WebSocket.CONNECTING) {
+          wsRef.current?.close();
         }
-      }, 30000);
-      wsRef.current.heartbeatInterval = heartbeatInterval;
-    };
-    wsRef.current.onmessage = (event) => {
-      if (!isMountedRef.current) return;
-      const msg = event.data;
-      if (typeof msg === 'string' && msg.startsWith('Call ')) {
-        const cdr = parseCDRLine(msg);
-        if (cdr && cdr.startTime) {
-          if (isLunchBreak(cdr.startTime)) {
-            cdr.callType = 'ABSYS';
-            cdr.agentName = '';
-          }
+      }, 10000);
 
-          const { callType } = cdr;
-          const dur = cdr.duration.split(':').map(Number);
-          const durationSec = (dur[0] || 0) * 3600 + (dur[1] || 0) * 60 + (dur[2] || 0);
+      wsRef.current.onopen = () => {
+        if (!isMountedRef.current) return;
+        clearTimeout(connectionTimeoutRef.current);
+        console.log('[WS] ✅ Connecté');
+        setIsConnected(true);
+        setError(null);
+        reconnectAttemptsRef.current = 0;
+        startPing();
 
-          if (callType === 'ABSYS' && durationSec <= 59 && !isLunchBreak(cdr.startTime)) {
-            if (onLostCall) onLostCall();
+        try {
+          wsRef.current.send(JSON.stringify({ type: "subscribe", topic: "cdr/live" }));
+        } catch (err) {
+          console.warn('[WS] ⚠️ Souscription échouée:', err);
+        }
+      };
+
+      wsRef.current.onmessage = (event) => {
+        if (!isMountedRef.current) return;
+        const msg = event.data;
+        if (typeof msg === 'string') {
+          if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"')) {
             return;
           }
 
-          const callWithSec = { ...cdr, durationSec, receivedAt: new Date() };
+          console.log(`[WS] 📥 Message brut reçu :`, msg);
+
+          const cdr = parseCDRLine(msg);
+          if (!cdr) {
+            console.debug('[CDR] ❌ Appel ignoré (parsing échoué)', msg);
+            return;
+          }
+
+          console.log(`[CDR] 📋 Appel parsé :`, {
+            id: cdr.id,
+            type: cdr.callType,
+            caller: cdr.caller,
+            agent: cdr.agentName,
+            duration: cdr.durationSec,
+            startTime: cdr.startTime?.toISOString(),
+            status: cdr.status,
+          });
+
+          if (!cdr.startTime || !cdr.id) {
+            console.debug('[CDR] ❌ Appel ignoré (données manquantes)', cdr);
+            return;
+          }
+
+          if (isLunchBreak(cdr.startTime)) {
+            console.debug(`[Appel] 🥪 Pause déjeuner détectée pour : ${cdr.id}`);
+          }
+
+          const callWithSec = { ...cdr, receivedAt: new Date() };
+
+          let isLostCall = false;
+          if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime)) {
+            isLostCall = cdr.durationSec >= 59;
+          }
 
           if (isInBusinessHours(cdr.startTime)) {
             setAllCalls(prev => {
+              const exists = prev.some(call => call.id === callWithSec.id);
+              if (exists) {
+                console.debug(`[Appel] 🔄 Ignoré (déjà présent) : ${callWithSec.id}`);
+                return prev;
+              }
               const updated = [...prev, callWithSec];
               saveCallsToStorage(updated);
+              console.log(`[Appel] 🆕 Ajouté à l'historique : ${callWithSec.id}`);
               return updated;
             });
 
-            const { agentName } = cdr;
-            if (agentName && callType !== 'ABSYS') {
-              setCumulativeAgents(prev => {
-                const agent = prev[agentName] || {
-                  name: agentName,
-                  status: 'online',
-                  inbound: 0,
-                  missed: 0,
-                  outbound: 0,
-                  inboundHandlingTimeSec: 0,
-                  outboundHandlingTimeSec: 0,
-                };
-                const updated = { ...agent };
-                if (callType === 'CDS_IN') {
-                  if (['src_participant_terminated', 'dst_participant_terminated'].includes(cdr.status)) {
-                    updated.inbound += 1;
-                    updated.inboundHandlingTimeSec += durationSec;
-                  } else if (cdr.status.includes('missed') || cdr.status.includes('abandoned')) {
-                    updated.missed += 1;
-                  }
-                } else if (callType === 'CDS_OUT') {
-                  updated.outbound += 1;
-                  updated.outboundHandlingTimeSec += durationSec;
-                }
-                return { ...prev, [agentName]: updated };
-              });
+            setDailyCalls(prev => {
+              if (prev.some(call => call.id === callWithSec.id)) return prev;
+              return [...prev, callWithSec];
+            });
+
+            setWeeklyCalls(prev => {
+              if (prev.some(call => call.id === callWithSec.id)) return prev;
+              return [...prev, callWithSec];
+            });
+
+            if (isLostCall && onLostCall) {
+              onLostCall(callWithSec.id);
             }
+
+            setLastUpdate(new Date());
+          } else {
+            console.debug(`[Appel] 🕒 Ignoré (hors heures d'ouverture) : ${callWithSec.id}`);
           }
-          setLastUpdate(new Date());
         }
-      }
-    };
-    wsRef.current.onerror = (err) => {
-      if (!isMountedRef.current) return;
-      console.error('[WS] ❌ Erreur:', err);
-      setIsConnected(false);
-    };
-    wsRef.current.onclose = (e) => {
-      if (!isMountedRef.current) return;
-      console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
-      setIsConnected(false);
+      };
 
-      if (wsRef.current?.heartbeatInterval) {
-        clearInterval(wsRef.current.heartbeatInterval);
-        wsRef.current.heartbeatInterval = null;
-      }
+      wsRef.current.onerror = (err) => {
+        if (!isMountedRef.current) return;
+        console.error('[WS] ❌ Erreur:', err);
+        setIsConnected(false);
+      };
 
-      if (e.code !== 1000 && isMountedRef.current) {
-        reconnectTimeoutRef.current = setTimeout(connect, 5000);
-      }
-    };
-  };
+      wsRef.current.onclose = (e) => {
+        if (!isMountedRef.current) return;
+        console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
+        setIsConnected(false);
+        stopPing();
 
-  const resetDailyData = () => {
-    setAllCalls([]);
-    setCumulativeAgents({});
-    setLastUpdate(null);
-    localStorage.removeItem(getStorageKey());
+        if (e.code !== 1000 && isMountedRef.current) {
+          reconnectAttemptsRef.current += 1;
+          connect();
+        }
+      };
+    }, delay);
   };
 
   useEffect(() => {
     isMountedRef.current = true;
+    reconnectAttemptsRef.current = 0;
     cleanupOldStorage();
     const storedCalls = loadCallsFromStorage();
     setAllCalls(storedCalls);
-    const rebuiltAgents = rebuildAgentsFromCalls(storedCalls);
-    setCumulativeAgents(rebuiltAgents);
+
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+    const todayCalls = storedCalls.filter(call => 
+      call.startTime && call.startTime >= startOfToday
+    );
+    setDailyCalls(todayCalls);
+
+    const startOfWeek = new Date(today);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const thisWeekCalls = storedCalls.filter(call =>
+      call.startTime && call.startTime >= startOfWeek
+    );
+    setWeeklyCalls(thisWeekCalls);
+
     connect();
+
     return () => {
       isMountedRef.current = false;
-      if (wsRef.current?.heartbeatInterval) clearInterval(wsRef.current.heartbeatInterval);
-      if (wsRef.current) wsRef.current.close();
+      if (wsRef.current) wsRef.current.close(1000, 'Unmount');
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       if (connectionTimeoutRef.current) clearTimeout(connectionTimeoutRef.current);
+      stopPing();
     };
   }, [url]);
 
   const reconnect = () => {
-    if (wsRef.current) wsRef.current.close();
+    reconnectAttemptsRef.current = 0;
+    if (wsRef.current) wsRef.current.close(1000, 'Manual reconnect');
     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+    stopPing();
     connect();
   };
 
-  const now = new Date();
-  const recentCalls = allCalls.filter(call =>
-    call.startTime && (now - call.startTime) < 24 * 60 * 60 * 1000
-  );
-
-  const callVolumes = halfHourSlots.map((time, index) => ({
-    index,
-    time,
-    CDS_IN: 0,
-    CDS_OUT: 0,
-    ABSYS: 0,
-  }));
-
-  recentCalls.forEach(call => {
-    const slotIndex = getSlotIndex(call.startTime);
-    if (slotIndex >= 0 && slotIndex < callVolumes.length) {
-      if (call.callType === 'CDS_IN') callVolumes[slotIndex].CDS_IN += 1;
-      else if (call.callType === 'CDS_OUT') callVolumes[slotIndex].CDS_OUT += 1;
-      else if (call.callType === 'ABSYS') callVolumes[slotIndex].ABSYS += 1;
-    }
-  });
-
-  const employees = Object.values(cumulativeAgents);
-  const totalInboundFromAgents = employees.reduce((sum, a) => sum + a.inbound + a.missed, 0);
-  const totalMissedFromAgents = employees.reduce((sum, a) => sum + a.missed, 0);
-  const achieved = totalInboundFromAgents > 0 ? Math.max(60, 100 - Math.round((totalMissedFromAgents / totalInboundFromAgents) * 100)) : 100;
-  const slaData = [{ queue: 'Front Office', target: 90, achieved }];
-
   return {
-    employees,
-    callVolumes,
-    slaData,
+    dailyCalls,
+    weeklyCalls,
+    allCalls,
     lastUpdate,
     isConnected,
     error,
     reconnect,
     halfHourSlots,
-    allCalls,
     resetDailyData,
+    resetWeeklyData,
   };
 };
 
-const useWeeklyCallStats = (calls = []) => {
-  return useMemo(() => {
-    const today = new Date();
-    const monday = new Date(today);
-    const dayOfWeek = monday.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    monday.setDate(monday.getDate() + daysToMonday);
-    monday.setHours(0, 0, 0, 0);
-
-    const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
-    const weekData = [];
-    for (let i = 0; i < 5; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      const isoDate = formatDateToLocalISO(date);
-      weekData.push({
-        date: isoDate,
-        dayLabel: dayNames[i],
-        inbound: 0,
-        outbound: 0,
-      });
-    }
-
-    calls.forEach(call => {
-      if (!call.startTime || call.callType === 'ABSYS') return;
-      const callDate = getLocalDateStr(call.startTime);
-      const dayIndex = weekData.findIndex(d => d.date === callDate);
-      if (dayIndex !== -1) {
-        if (call.callType === 'CDS_IN') {
-          weekData[dayIndex].inbound += 1;
-        } else if (call.callType === 'CDS_OUT') {
-          weekData[dayIndex].outbound += 1;
-        }
-      }
+// === Sons (inchangés) ===
+const playSound = (filename, context = '', volume = 0.8) => {
+  try {
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
+    audio.volume = volume;
+    const logContext = context ? `(${context})` : '';
+    console.log(`[Son] 🔊 Lecture : ${filename} ${logContext}`);
+    audio.play().catch(e => {
+      console.warn(`[Son] ❌ Échec lecture ${filename}:`, e.message);
     });
-
-    return weekData;
-  }, [calls]);
+  } catch (error) {
+    console.error(`[Son] 💥 Erreur :`, error);
+  }
 };
 
-const useKpiCalculations = (employees = [], dailyStats = [], allCalls = []) => {
-  return useMemo(() => {
-    if (!Array.isArray(employees)) employees = [];
-    if (!Array.isArray(dailyStats)) dailyStats = [];
-    if (!Array.isArray(allCalls)) allCalls = [];
-
-    const totals = employees.reduce((acc, emp) => {
-      acc.totalInboundCalls += (emp.inbound || 0) + (emp.missed || 0);
-      acc.totalAnsweredCalls += emp.inbound || 0;
-      acc.missedFromAgents += emp.missed || 0;
-      acc.totalOutboundCalls += emp.outbound || 0;
-      acc.totalInboundHandling += emp.inboundHandlingTimeSec || 0;
-      acc.totalOutboundHandling += emp.outboundHandlingTimeSec || 0;
-      acc.totalAnsweredInbound += emp.inbound || 0;
-      acc.totalAnsweredOutbound += emp.outbound || 0;
-      return acc;
-    }, {
-      totalInboundCalls: 0,
-      totalAnsweredCalls: 0,
-      missedFromAgents: 0,
-      totalOutboundCalls: 0,
-      totalInboundHandling: 0,
-      totalOutboundHandling: 0,
-      totalAnsweredInbound: 0,
-      totalAnsweredOutbound: 0,
-    });
-
-    const absysMissed = allCalls.filter(call => {
-      if (call.callType !== 'ABSYS' || call.durationSec < 60) return false;
-      const start = call.startTime;
-      if (!start) return true;
-      const h = start.getHours();
-      const m = start.getMinutes();
-      const totalMinutes = h * 60 + m;
-      return !(totalMinutes >= 750 && totalMinutes < 840);
-    }).length;
-
-    const totalMissed = totals.missedFromAgents + absysMissed;
-    const totalInbound = totals.totalInboundCalls + absysMissed;
-    const cdsInboundTotal = dailyStats.reduce((sum, day) => sum + day.inbound, 0);
-    const cdsOutboundTotal = dailyStats.reduce((sum, day) => sum + day.outbound, 0);
-    const avgInboundAHTSec = totals.totalAnsweredInbound > 0
-      ? Math.floor(totals.totalInboundHandling / totals.totalAnsweredInbound)
-      : 0;
-    const avgOutboundAHTSec = totals.totalAnsweredOutbound > 0
-      ? Math.floor(totals.totalOutboundHandling / totals.totalAnsweredOutbound)
-      : 0;
-    const globalAHTSec = (totals.totalAnsweredInbound + totals.totalAnsweredOutbound) > 0
-      ? Math.floor((totals.totalInboundHandling + totals.totalOutboundHandling) / (totals.totalAnsweredInbound + totals.totalAnsweredOutbound))
-      : 0;
-    const abandonRate = totalInbound > 0
-      ? `${Math.round((totalMissed / totalInbound) * 100)}%`
-      : '0%';
-
-    return {
-      totalAgents: employees.length,
-      onlineAgents: employees.length,
-      totalInboundCalls: totalInbound,
-      totalAnsweredCalls: totals.totalAnsweredCalls,
-      missedCallsTotal: totalMissed,
-      totalOutboundCalls: totals.totalOutboundCalls,
-      globalAHTSec,
-      averageHandlingTime: formatSecondsToMMSS(globalAHTSec),
-      abandonRate,
-      avgInboundAHT: formatSecondsToMMSS(avgInboundAHTSec),
-      avgOutboundAHT: formatSecondsToMMSS(avgOutboundAHTSec),
-      cdsInboundTotal,
-      cdsOutboundTotal,
-    };
-  }, [employees, dailyStats, allCalls]);
-};
-
-const useDailyResetScheduler = (resetFn) => {
-  useEffect(() => {
-    const scheduleNextReset = () => {
-      const now = new Date();
-      const nextReset = new Date();
-      nextReset.setHours(8, 0, 0, 0);
-      if (now >= nextReset) nextReset.setDate(nextReset.getDate() + 1);
-      const delay = nextReset.getTime() - now.getTime();
-      const timeoutId = setTimeout(() => {
-        resetFn();
-        scheduleNextReset();
-      }, delay);
-      return () => clearTimeout(timeoutId);
-    };
-    return scheduleNextReset();
-  }, [resetFn]);
-};
-
-// 🔊 Composant principal
+// === App ===
 const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
-  const [lastScheduledSounds, setLastScheduledSounds] = useState({});
   const prevEmployeesRef = useRef([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const scheduledTimeoutsRef = useRef([]);
 
-  const handleLostCall = () => {
-    if (audioUnlocked) {
-      playSound('fatality.mp3');
-    }
+  // Gestion scrollbar
+  useEffect(() => {
+    let hideScrollTimeout;
+    const handleScroll = () => {
+      document.body.classList.add('show-scrollbar');
+      clearTimeout(hideScrollTimeout);
+      hideScrollTimeout = setTimeout(() => {
+        document.body.classList.remove('show-scrollbar');
+      }, 1000);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(hideScrollTimeout);
+    };
+  }, []);
+
+  const unlockAudio = () => {
+    if (audioUnlocked) return;
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
+    audio.play().then(() => setAudioUnlocked(true)).catch(() => {});
+  };
+
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    ['click', 'keydown', 'touchstart'].forEach(e => window.addEventListener(e, unlock, { once: true }));
+    return () => {
+      ['click', 'keydown', 'touchstart'].forEach(e => window.removeEventListener(e, unlock));
+    };
+  }, []);
+
+  const handleLostCall = (callId) => {
+    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/fatality.mp3`);
+    audio.volume = 0.9;
+    audio.play().catch(() => {});
   };
 
   const {
-    employees,
-    callVolumes,
-    slaData,
+    dailyCalls,
+    weeklyCalls,
     lastUpdate,
     isConnected,
     error,
     reconnect,
     halfHourSlots,
-    allCalls,
     resetDailyData,
+    resetWeeklyData,
   } = useWebSocketData(WS_URL, handleLostCall);
 
   useDailyResetScheduler(resetDailyData);
+  useWeeklyResetScheduler(resetWeeklyData);
 
-  const dailyStats = useWeeklyCallStats(allCalls);
-  const kpi = useKpiCalculations(employees, dailyStats, allCalls);
+  const { employees, callVolumes, kpi } = useCallAggregates(dailyCalls, halfHourSlots);
 
-  // 🔊 Gestion fiable des sons horaires (vérification chaque seconde)
+  const slaDataForChart = useMemo(() => {
+    const template = [
+      { dayLabel: 'Lun', inbound: 0, outbound: 0 },
+      { dayLabel: 'Mar', inbound: 0, outbound: 0 },
+      { dayLabel: 'Mer', inbound: 0, outbound: 0 },
+      { dayLabel: 'Jeu', inbound: 0, outbound: 0 },
+      { dayLabel: 'Ven', inbound: 0, outbound: 0 },
+    ];
+    const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    return weeklyCalls.reduce((acc, call) => {
+      if (!call.startTime || !['CDS_IN', 'CDS_OUT'].includes(call.callType)) return acc;
+      const dayLabel = dayNames[call.startTime.getDay()];
+      const day = acc.find(d => d.dayLabel === dayLabel);
+      if (day) {
+        if (call.callType === 'CDS_IN') day.inbound += 1;
+        else if (call.callType === 'CDS_OUT') day.outbound += 1;
+      }
+      return acc;
+    }, [...template]);
+  }, [weeklyCalls]);
+
+  const isInboundAHTCritical = useMemo(() => {
+    const seconds = mmssToSeconds(kpi.avgInboundAHT);
+    return getInboundAHTColor(seconds) === 'error';
+  }, [kpi.avgInboundAHT]);
+
+  const isOutboundAHTCritical = useMemo(() => {
+    const seconds = mmssToSeconds(kpi.avgOutboundAHT);
+    return getOutboundAHTColor(seconds) === 'error';
+  }, [kpi.avgOutboundAHT]);
+
+  const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
+
+  // 🔊 Sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
-
-    const interval = setInterval(() => {
+    scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+    scheduledTimeoutsRef.current = [];
+    const scheduleSoundAt = (targetHour, targetMinute, soundFile, label) => {
       const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const timeKey = `${hours}:${minutes}`;
-
-      if (lastScheduledSounds[timeKey]) return;
-
-      let soundToPlay = null;
-      if (hours === 8 && minutes === 30) {
-        soundToPlay = 'debut.mp3';
-      } else if (hours === 12 && minutes === 30) {
-        soundToPlay = 'pause.mp3';
-      } else if (hours === 14 && minutes === 0) {
-        soundToPlay = 'reprise.mp3';
-      } else if (hours === 18 && minutes === 0) {
-        soundToPlay = 'fin.mp3';
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), targetHour, targetMinute, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const scheduledTime = today > now ? today : tomorrow;
+      const delay = scheduledTime.getTime() - now.getTime();
+      const timeoutId = setTimeout(() => {
+        playSound(soundFile, label);
+        const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
+        scheduledTimeoutsRef.current.push(nextId);
+      }, delay);
+      return timeoutId;
+    };
+    const timeouts = [
+      scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée'),
+      scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner'),
+      scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause'),
+      scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
+    ];
+    scheduledTimeoutsRef.current = timeouts;
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+        scheduledTimeoutsRef.current = [];
+        const newTimeouts = [
+          scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée'),
+          scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner'),
+          scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause'),
+          scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
+        ];
+        scheduledTimeoutsRef.current = newTimeouts;
       }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
+    };
+  }, [audioUnlocked]);
 
-      if (soundToPlay) {
-        playSound(soundToPlay);
-        setLastScheduledSounds(prev => ({ ...prev, [timeKey]: true }));
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [audioUnlocked, lastScheduledSounds]);
-
-  // ✅ CORRIGÉ : Ne joue "passage.mp3" que si total ≥ 50 (CDS_IN + CDS_OUT) ET un agent devient 1er
+  // 🔊 Top agent
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
-
-    const now = new Date();
-    const startOfDay = new Date(now);
-    startOfDay.setHours(8, 30, 0, 0);
-    if (now < startOfDay) {
-      startOfDay.setDate(startOfDay.getDate() - 1);
-    }
-
-    const totalRelevantCalls = allCalls.filter(call =>
-      call.startTime &&
-      call.startTime >= startOfDay &&
-      (call.callType === 'CDS_IN' || call.callType === 'CDS_OUT')
-    ).length;
-
-    if (totalRelevantCalls < 50) return;
-
+    const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
+    if (totalCalls < 50) return;
     const prevEmployees = prevEmployeesRef.current;
-    const currentEmployees = [...employees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
-    const prevSorted = [...prevEmployees].sort((a, b) => (b.inbound + b.outbound) - (a.inbound + a.outbound));
-
-    const currentTopAgent = currentEmployees[0];
-    const wasTopBefore = prevSorted.length > 0 && prevSorted[0]?.name === currentTopAgent.name;
-
-    if (!wasTopBefore && currentTopAgent) {
-      playSound('passage.mp3');
+    const currentTop = employees.reduce((top, a) => 
+      (a.inbound + a.outbound) > (top?.inbound + top?.outbound || 0) ? a : top, null
+    );
+    const prevTop = prevEmployees.reduce((top, a) => 
+      (a.inbound + a.outbound) > (top?.inbound + top?.outbound || 0) ? a : top, null
+    );
+    if (currentTop && (!prevTop || prevTop.name !== currentTop.name)) {
+      const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik']);
+      const firstName = currentTop.name.split(' ')[0]?.toLowerCase() || '';
+      const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
+      playSound(soundToPlay, `Top agent : ${currentTop.name}`);
     }
-
     prevEmployeesRef.current = [...employees];
-  }, [employees, audioUnlocked, allCalls]);
-
-  useEffect(() => {
-    console.table(dailyStats.map(d => ({ date: d.date, day: d.dayLabel, in: d.inbound, out: d.outbound })));
-  }, [dailyStats]);
-
-  const unlockAudio = () => {
-    const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/silent.wav`);
-    audio.play()
-      .then(() => {
-        console.log('✅ Sons activés via silent.wav');
-        setAudioUnlocked(true);
-      })
-      .catch(err => {
-        console.warn('❌ Échec activation sons :', err);
-      });
-  };
+  }, [employees, audioUnlocked, kpi]);
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundImage: `url('${process.env.PUBLIC_URL}/images/background-dashboard.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        py: 4,
-        position: 'relative',
-        '& > *': { position: 'relative', zIndex: 1 },
-      }}
-      aria-label="Tableau de bord en temps réel du centre d'appels"
-    >
-      <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 0 }} />
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, color: '#fff' }}>
-        <Typography variant="h1" align="center" sx={{ fontWeight: 'bold', fontSize: { xs: '2rem', md: '3rem' }, textShadow: '0 0 10px rgba(0,0,0,0.9)', mb: 2 }}>
-          ANAVEO - Service Center
-        </Typography>
+    <>
+      {/* ✅ POLICES */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap"
+        rel="stylesheet"
+      />
 
-        <Box textAlign="center" mb={1}>
-          <Clock />
-        </Box>
+      <style>
+        {`
+          /* ✨ Paillettes subtiles */
+          @keyframes sparkle {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0.7; }
+          }
+          .sparkle {
+            position: fixed;
+            top: -20px;
+            font-size: 1rem;
+            color: #d4af37;
+            z-index: 1;
+            opacity: 0;
+            animation: sparkle 8s linear forwards;
+            pointer-events: none;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+          }
+          .sparkle:nth-child(2n) { left: 10%; animation-duration: 10s; animation-delay: 1s; }
+          .sparkle:nth-child(3n) { left: 20%; animation-duration: 12s; animation-delay: 2s; }
+          .sparkle:nth-child(4n) { left: 35%; animation-duration: 9s; animation-delay: 0.5s; }
+          .sparkle:nth-child(5n) { left: 50%; animation-duration: 11s; animation-delay: 3s; }
+          .sparkle:nth-child(6n) { left: 65%; animation-duration: 8s; animation-delay: 1.5s; }
+          .sparkle:nth-child(7n) { left: 80%; animation-duration: 13s; animation-delay: 4s; }
+          .sparkle:nth-child(8n) { left: 90%; animation-duration: 10s; animation-delay: 2.5s; }
 
-        {/* 🔹 LIGNE 1 */}
-        <Grid container spacing={3} justifyContent="center" sx={{ mt: 4 }} aria-label="KPI Principaux">
-          {[
-            { title: "Total Agents", value: kpi.totalAgents, color: "info" },
-            { 
-              title: "Number of Calls",
-              value: (kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls).toString(),
-              color: "primary" 
-            },
-            { 
-              title: "Avg Inbound AHT", 
-              value: kpi.avgInboundAHT, 
-              color: getInboundAHTColor(
-                parseInt(kpi.avgInboundAHT.split(':')[0]) * 60 + 
-                parseInt(kpi.avgInboundAHT.split(':')[1])
-              ) 
-            },
-            { 
-              title: "Avg Outbound AHT", 
-              value: kpi.avgOutboundAHT, 
-              color: getOutboundAHTColor(
-                parseInt(kpi.avgOutboundAHT.split(':')[0]) * 60 + 
-                parseInt(kpi.avgOutboundAHT.split(':')[1])
-              ) 
-            },
-          ].map((item, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
-              <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} />
-            </Grid>
-          ))}
-        </Grid>
+          /* Scrollbar dorée */
+          ::-webkit-scrollbar { width: 8px; }
+          ::-webkit-scrollbar-track { background: transparent; }
+          ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(to bottom, #d4af37, #b8860b);
+            border-radius: 5px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: all 0.3s ease;
+          }
+          body.show-scrollbar ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(to bottom, #ffd700, #d4af37); 
+          }
+          body.show-scrollbar ::-webkit-scrollbar-track { 
+            background: rgba(212, 175, 55, 0.1); 
+          }
 
-        {/* 🔹 LIGNE 2 */}
-        <Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }} aria-label="KPI Détail Appels">
-          {[
-            { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default" },
-            { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error" },
-            { title: "Total Inbound Calls", value: kpi.totalInboundCalls, color: "info" },
-            { title: "Total Outbound Calls", value: kpi.totalOutboundCalls, color: "success" },
-            { title: "Abandon Rate", value: kpi.abandonRate, color: getAbandonColor(kpi.abandonRate) },
-          ].map((item, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
-              <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} />
-            </Grid>
-          ))}
-        </Grid>
+          /* Firefox */
+          * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+          body.show-scrollbar { 
+            scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); 
+          }
+        `}
+      </style>
 
-        <Box mt={6}>
-          <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
-        </Box>
+      {/* 🎉 Fond d’écran */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/newyear-bg.jpg')`,
+          backgroundSize: '100% auto',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          zIndex: 0,
+        }}
+      />
 
-        <Box mt={{ xs: 8, md: 10 }}>
-          <Grid container spacing={4} direction="column">
-            <Grid size={{ xs: 12 }}>
-              <AgentTable
-                employees={employees.map(emp => ({
-                  ...emp,
-                  avgInboundAHT: formatSecondsToMMSS(emp.inbound > 0 ? Math.floor(emp.inboundHandlingTimeSec / emp.inbound) : 0),
-                  avgOutboundAHT: formatSecondsToMMSS(emp.outbound > 0 ? Math.floor(emp.outboundHandlingTimeSec / emp.outbound) : 0),
-                }))}
-                isLoading={!isConnected && employees.length === 0}
-                isConnected={isConnected}
-                lastUpdate={lastUpdate}
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <Box position="relative">
-                <SLABarchart 
-                  slaData={dailyStats} 
-                  wsConnected={isConnected} 
-                />
-                {!audioUnlocked && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 16,
-                      right: 16,
-                      zIndex: 2,
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      color="success"
-                      size="small"
-                      onClick={unlockAudio}
-                      sx={{
-                        fontWeight: 'bold',
-                        textTransform: 'none',
-                        padding: '6px 12px',
-                        fontSize: '0.875rem',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                      }}
-                    >
-                      🔊 Activer les sons
-                    </Button>
-                  </Box>
-                )}
-              </Box>
-            </Grid>
+      {/* ✨ Paillettes */}
+      {[...Array(8)].map((_, i) => (
+        <div key={i} className="sparkle">✨</div>
+      ))}
+
+      {/* Conteneur principal */}
+      <Box
+        sx={{
+          minHeight: '100vh',
+          py: { xs: 2, md: 4 },
+          position: 'relative',
+          zIndex: 2,
+          color: '#ffffff',
+          fontFamily: '"Roboto", sans-serif',
+          px: { xs: 0.5, sm: 1, md: 2 },
+        }}
+        aria-label="Tableau de bord du Nouvel An en temps réel"
+      >
+        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
+          {/* Titre élégant avec flou */}
+          <Box
+            sx={{
+              mb: 2,
+              backgroundColor: 'rgba(0, 0, 0, 0.55)',
+              backdropFilter: 'blur(4px)', // 👈 Flou ajouté
+              WebkitBackdropFilter: 'blur(4px)', // compatibilité
+              borderRadius: '18px',
+              border: '2px solid rgba(212, 175, 55, 0.7)',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
+              padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
+              display: 'inline-block',
+              margin: '0 auto',
+              textAlign: 'center',
+            }}
+          >
+            <Typography
+              variant="h1"
+              align="center"
+              sx={{
+                fontFamily: '"Great Vibes", cursive',
+                fontWeight: 'bold',
+                fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
+                color: '#d4af37',
+                textShadow: '0 0 14px rgba(212, 175, 55, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
+                margin: 0,
+                letterSpacing: '0.02em',
+              }}
+            >
+             🥂 Anaveo - Bonne Année 2026 ! 🥂
+            </Typography>
+          </Box>
+
+          <Box textAlign="center" mb={2}>
+            <Clock />
+          </Box>
+
+          {!isConnected && (
+            <Box
+              textAlign="center"
+              mb={2}
+              sx={{
+                color: '#ffd700',
+                fontWeight: 'bold',
+                fontFamily: '"Roboto", sans-serif',
+                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                px: { xs: 2, sm: 3 },
+              }}
+            >
+              ⚠️ Connexion WebSocket perdue. Tentative de reconnexion...
+              <Button
+                size="small"
+                variant="outlined"
+                sx={{
+                  ml: 1,
+                  borderColor: '#d4af37',
+                  color: '#ffd700',
+                  borderRadius: '20px',
+                  fontWeight: 600,
+                  fontFamily: '"Orbitron", sans-serif',
+                }}
+                onClick={reconnect}
+              >
+                Reconnecter
+              </Button>
+            </Box>
+          )}
+
+          <Grid container spacing={2.5} justifyContent="center" sx={{ mt: 1.5, px: { xs: 1.5, sm: 2.5, md: 3.5 } }} aria-label="KPI Principaux">
+            {[
+              { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
+              { title: "Number of Calls", value: kpi.totalCallsThisWeek.toString(), color: "primary", critical: false },
+              { title: "Avg Inbound AHT", value: kpi.avgInboundAHT, color: getInboundAHTColor(mmssToSeconds(kpi.avgInboundAHT)), critical: isInboundAHTCritical },
+              { title: "Avg Outbound AHT", value: kpi.avgOutboundAHT, color: getOutboundAHTColor(mmssToSeconds(kpi.avgOutboundAHT)), critical: isOutboundAHTCritical },
+            ].map((item, i) => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
+                <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} isCritical={item.critical} />
+              </Grid>
+            ))}
           </Grid>
+
+          <Grid container spacing={2.5} justifyContent="center" sx={{ mt: 2, px: { xs: 1.5, sm: 2.5, md: 3.5 } }} aria-label="KPI Détail Appels">
+            {[
+              { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default", critical: false },
+              { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error", critical: false },
+              { title: "Total Inbound Calls", value: kpi.totalInboundCalls, color: "info", critical: false },
+              { title: "Total Outbound Calls", value: kpi.totalOutboundCalls, color: "success", critical: false },
+              { title: "Abandon Rate", value: kpi.abandonRate, color: getAbandonColor(kpi.abandonRate), critical: isAbandonRateCritical },
+            ].map((item, i) => (
+              <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
+                <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} isCritical={item.critical} />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Box mt={3} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
+            <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
+          </Box>
+
+          <Box mt={{ xs: 7, md: 9 }} pb={7} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
+            <Grid container spacing={4} direction="column">
+              <Grid size={{ xs: 12 }}>
+                <AgentTable
+                  employees={employees.map((emp) => ({
+                    ...emp,
+                    avgInboundAHT: formatSecondsToMMSS(emp.inbound > 0 ? Math.floor(emp.inboundHandlingTimeSec / emp.inbound) : 0),
+                    avgOutboundAHT: formatSecondsToMMSS(emp.outbound > 0 ? Math.floor(emp.outboundHandlingTimeSec / emp.outbound) : 0),
+                  }))}
+                  isLoading={!isConnected && employees.length === 0}
+                  isConnected={isConnected}
+                  lastUpdate={lastUpdate}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Box position="relative">
+                  <SLABarchart slaData={slaDataForChart} wsConnected={isConnected} />
+                  {!audioUnlocked && (
+                    <Box sx={{ position: 'absolute', bottom: 16, right: 16, zIndex: 2 }}>
+                      <Button
+                        variant="contained"
+                        onClick={unlockAudio}
+                        sx={{
+                          background: 'linear-gradient(135deg, #000, #333)',
+                          color: '#ffd700',
+                          fontWeight: 'bold',
+                          textTransform: 'none',
+                          padding: '10px 20px',
+                          fontSize: '1rem',
+                          borderRadius: '50px',
+                          border: '2px solid #d4af37',
+                          boxShadow: '0 0 14px rgba(212, 175, 55, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #222, #000)',
+                            boxShadow: '0 0 20px rgba(255, 215, 0, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
+                            transform: 'scale(1.05)',
+                          },
+                          fontFamily: '"Orbitron", sans-serif',
+                        }}
+                      >
+                        🥂 Célébrer la nouvelle année !
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
         </Box>
-      </Container>
-    </Box>
+      </Box>
+    </>
   );
 };
 

@@ -16,26 +16,21 @@ import {
   Tooltip,
 } from '@mui/material';
 
-// 🎨 Couleurs selon statut
-const getStatusColor = (status) => {
-  if (!status) return 'default';
-  switch (status.toLowerCase()) {
-    case 'available': return 'success';
-    case 'online': return 'info';
-    case 'unavailable': return 'error';
-    default: return 'default';
-  }
+const getStatusConfig = (status) => {
+  if (!status) return { color: 'default', icon: '❓' };
+  const lower = status.toLowerCase();
+  if (lower === 'available' || lower === 'online') return { color: 'success', icon: '🥂' };
+  if (lower === 'unavailable') return { color: 'warning', icon: '⏸️' };
+  return { color: 'default', icon: '⭐' };
 };
 
-// 🎨 Couleurs selon durée (en secondes)
 const getDurationColor = (seconds) => {
   if (!seconds || isNaN(seconds)) return 'default';
-  if (seconds <= 600) return 'success'; // ≤ 10min
-  if (seconds <= 900) return 'warning'; // ≤ 15min
-  return 'error'; // > 15min
+  if (seconds <= 600) return 'success';
+  if (seconds <= 900) return 'warning';
+  return 'error';
 };
 
-// 👤 Initiales pour avatar
 const getInitials = (name = '') =>
   name
     .split(' ')
@@ -45,185 +40,326 @@ const getInitials = (name = '') =>
     .toUpperCase()
     .substring(0, 2);
 
+const mmssToSeconds = (mmss) => {
+  if (!mmss || mmss === '-') return null;
+  const [m, s] = mmss.split(':').map(Number);
+  return m * 60 + s;
+};
+
 export default function AgentTable({ employees = [], isLoading = false, isConnected = false, lastUpdate = null }) {
   if (isLoading) {
     return (
-      <Card sx={{ backgroundColor: 'background.paper', borderRadius: 3 }}>
+      <Card sx={{
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+        backdropFilter: 'blur(6px)', // 👈 Flou ajouté
+        WebkitBackdropFilter: 'blur(6px)', // compatibilité
+        borderRadius: 3,
+        border: '1px solid rgba(212, 175, 55, 0.7)',
+        boxShadow: '0 0 20px rgba(212, 175, 55, 0.5)',
+      }}>
         <CardContent>
-          <Typography variant="overline" color="text.secondary" gutterBottom>
-            Performance des agents
+          <Typography variant="overline" sx={{
+            fontFamily: '"Orbitron", sans-serif',
+            color: '#d4af37',
+            textShadow: '0 0 8px rgba(212, 175, 55, 0.8)',
+            fontSize: '1.2rem',
+            fontWeight: 'bold',
+          }}>
+            🥂 Célébration des excellences 2026
           </Typography>
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Chip label="Connexion WebSocket..." color="warning" size="small" sx={{ mb: 2 }} />
-            <Skeleton variant="rectangular" width="100%" height={400} />
+            <Chip label="Connexion au gala..." size="small" sx={{
+              mb: 2,
+              background: 'linear-gradient(135deg, #000, #333)',
+              color: '#ffd700',
+              fontFamily: '"Great Vibes", cursive',
+              animation: 'pulse-gold 2s infinite alternate',
+            }} />
+            <Skeleton variant="rectangular" width="100%" height={400} sx={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
           </Box>
         </CardContent>
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: '-50%',
+          width: '200%',
+          height: '100%',
+          background: 'radial-gradient(circle at 50% 50%, rgba(212,175,55,0.08), transparent 70%)',
+          animation: 'gold-glow 15s linear infinite',
+          pointerEvents: 'none',
+        }} />
+        <style>{`
+          @keyframes pulse-gold {
+            0% { transform: scale(1); box-shadow: 0 0 8px #ffd700; }
+            100% { transform: scale(1.04); box-shadow: 0 0 20px #ffd700; }
+          }
+          @keyframes gold-glow {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-6%) translateY(-3%); }
+            100% { transform: translateX(0) translateY(0); }
+          }
+        `}</style>
       </Card>
     );
   }
 
   if (!employees || employees.length === 0) {
     return (
-      <Card sx={{ backgroundColor: 'background.paper', borderRadius: 3 }}>
+      <Card sx={{
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+        backdropFilter: 'blur(6px)', // 👈 Flou ajouté
+        WebkitBackdropFilter: 'blur(6px)', // compatibilité
+        borderRadius: 3,
+        border: '1px solid rgba(212, 175, 55, 0.7)',
+        boxShadow: '0 0 20px rgba(212, 175, 55, 0.5)',
+      }}>
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-            <Typography variant="overline" color="text.secondary">
-              Performance des agents
+            <Typography variant="overline" sx={{
+              fontFamily: '"Orbitron", sans-serif',
+              color: '#d4af37',
+              textShadow: '0 0 8px rgba(212, 175, 55, 0.8)',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+            }}>
+              🥂 Célébration des excellences 2026
             </Typography>
-            <Tooltip title={isConnected ? "Connecté en temps réel" : "Déconnecté"}>
-              <Box
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  bgcolor: isConnected ? 'success.main' : 'error.main',
-                  animation: isConnected ? 'pulse 2s infinite' : 'none',
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.5 },
-                  },
-                }}
-              />
+            <Tooltip title={isConnected ? "Connecté au gala" : "Déconnecté"}>
+              <Box sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                bgcolor: isConnected ? '#d4af37' : '#8b0000',
+                animation: isConnected ? 'pulse-glow 2s infinite' : 'none',
+              }} />
             </Tooltip>
           </Box>
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              Aucune donnée disponible.
+            <Typography variant="body2" color="#ffd700" sx={{ textShadow: '0 0 6px rgba(212,175,55,0.6)' }}>
+              🌟 Aucun agent en scène...
             </Typography>
           </Box>
         </CardContent>
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: '-50%',
+          width: '200%',
+          height: '100%',
+          background: 'radial-gradient(circle at 50% 50%, rgba(212,175,55,0.08), transparent 70%)',
+          animation: 'gold-glow 15s linear infinite',
+          pointerEvents: 'none',
+        }} />
       </Card>
     );
   }
 
-  // ✅ Tri des agents par total d'appels (entrants + sortants), du plus élevé au plus faible
-  const sortedEmployees = useMemo(() => {
-    return [...employees].sort((a, b) => {
-      const totalA = (a.inbound || 0) + (a.outbound || 0);
-      const totalB = (b.inbound || 0) + (b.outbound || 0);
-      return totalB - totalA; // Décroissant
-    });
-  }, [employees]);
-
-  // 🏆 Fonction utilitaire pour obtenir l'emoji médaille
-  const getMedalEmoji = (rank) => {
-    if (rank === 0) return '🥇';
-    if (rank === 1) return '🥈';
-    if (rank === 2) return '🥉';
-    return null;
-  };
+  const sortedEmployees = useMemo(() => [...employees].sort((a, b) => ((b.inbound || 0) + (b.outbound || 0)) - ((a.inbound || 0) + (a.outbound || 0))), [employees]);
+  const getMedalEmoji = (rank) => rank === 0 ? '🏆' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : null;
 
   return (
-    <Card sx={{ backgroundColor: 'background.paper', borderRadius: 3 }}>
+    <Card sx={{
+      position: 'relative',
+      overflow: 'hidden',
+      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+      backdropFilter: 'blur(6px)', // 👈 Flou ajouté
+      WebkitBackdropFilter: 'blur(6px)', // compatibilité
+      borderRadius: 3,
+      border: '1px solid rgba(212, 175, 55, 0.7)',
+      boxShadow: '0 0 20px rgba(212, 175, 55, 0.5)',
+    }}>
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-          <Typography variant="overline" color="text.secondary">
-            Performance des agents
+          <Typography variant="overline" sx={{
+            fontFamily: '"Orbitron", sans-serif',
+            color: '#d4af37',
+            textShadow: '0 0 8px rgba(212, 175, 55, 0.8)',
+            fontSize: '1.2rem',
+            fontWeight: 'bold',
+          }}>
+            🥂 Célébration des excellences 2026
           </Typography>
           <Box display="flex" alignItems="center" gap={1}>
-            <Tooltip title={isConnected ? "Connecté en temps réel" : "Déconnecté"}>
-              <Box
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  bgcolor: isConnected ? 'success.main' : 'error.main',
-                  animation: isConnected ? 'pulse 2s infinite' : 'none',
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.5 },
-                  },
-                }}
-              />
+            <Tooltip title={isConnected ? "Connecté au gala" : "Déconnecté"}>
+              <Box sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                bgcolor: isConnected ? '#d4af37' : '#8b0000',
+                animation: isConnected ? 'pulse-glow 2s infinite' : 'none',
+              }} />
             </Tooltip>
             {lastUpdate && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="#ffd700" sx={{ textShadow: '0 0 4px rgba(212,175,55,0.5)' }}>
                 {`MàJ : ${lastUpdate.toLocaleTimeString()}`}
               </Typography>
             )}
           </Box>
         </Box>
+
         <TableContainer component={Box}>
           <Table size="small" aria-label="tableau des performances des agents">
             <TableHead>
               <TableRow>
-                <TableCell scope="col" sx={{ fontWeight: 'bold' }}>#</TableCell>
-                <TableCell scope="col" sx={{ fontWeight: 'bold' }}>Agent</TableCell>
-                <TableCell scope="col" sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                <TableCell scope="col" align="right" sx={{ fontWeight: 'bold' }}>Appels entrants</TableCell>
-                {/* ❌ COLONNE "Appels manqués" SUPPRIMÉE */}
-                <TableCell scope="col" align="right" sx={{ fontWeight: 'bold' }}>Durée moyenne (entrant)</TableCell>
-                <TableCell scope="col" align="right" sx={{ fontWeight: 'bold' }}>Appels sortants</TableCell>
-                <TableCell scope="col" align="right" sx={{ fontWeight: 'bold' }}>Durée moyenne (sortant)</TableCell>
+                {['#', 'Agent', 'Statut', 'Appels entrants', 'Durée moy (entrant)', 'Appels sortants', 'Durée moy (sortant)'].map((label, i) => (
+                  <TableCell
+                    key={i}
+                    scope="col"
+                    sx={{
+                      fontWeight: 'bold',
+                      color: '#ffd700',
+                      textShadow: '0 0 6px rgba(212,175,55,0.7)',
+                      fontFamily: '"Orbitron", sans-serif',
+                      fontSize: '0.85rem',
+                    }}
+                    align={i >= 3 ? 'right' : 'left'}
+                  >
+                    {label}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedEmployees.map((emp, index) => {
                 const medal = getMedalEmoji(index);
+                const inboundSec = mmssToSeconds(emp.avgInboundAHT);
+                const outboundSec = mmssToSeconds(emp.avgOutboundAHT);
+                const inboundCritical = getDurationColor(inboundSec) === 'error';
+                const outboundCritical = getDurationColor(outboundSec) === 'error';
+                const statusConfig = getStatusConfig(emp.status);
 
                 return (
-                  <TableRow key={emp.id || `emp-${index}`} hover tabIndex={-1} role="row">
-                    <TableCell>{index + 1}</TableCell>
+                  <TableRow
+                    key={emp.id || `emp-${index}`}
+                    hover
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                        boxShadow: 'inset 0 0 12px rgba(212, 175, 55, 0.4)',
+                        transform: 'scale(1.02)',
+                      },
+                      transition: 'all 0.25s ease-in-out',
+                    }}
+                  >
                     <TableCell>
-                      <Box display="flex" alignItems="center">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         {medal && (
-                          <span style={{ marginRight: '6px', fontSize: '18px' }}>
+                          <span
+                            style={{
+                              fontSize: '18px',
+                              filter: 'drop-shadow(0 0 8px gold)',
+                              animation: 'medal-glow 2.5s infinite alternate',
+                            }}
+                          >
                             {medal}
                           </span>
                         )}
+                        <Typography sx={{ color: '#fff', fontWeight: 'bold' }}>{index + 1}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box display="flex" alignItems="center">
                         <Avatar
                           sx={{
-                            bgcolor: '#546e7a',
-                            width: 24,
-                            height: 24,
+                            bgcolor: '#d4af37',
+                            color: '#000',
+                            width: 28,
+                            height: 28,
                             fontSize: 12,
                             mr: 1,
+                            border: '1px solid #ffd700',
+                            transition: 'all 0.3s',
+                            '&:hover': { transform: 'rotate(5deg) scale(1.1)' },
                           }}
                         >
                           {getInitials(emp.name) || '?'}
                         </Avatar>
-                        {emp.name || '-'}
+                        <Typography sx={{ color: '#fff', fontWeight: 'bold' }}>{emp.name || '-'}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={emp.status || 'online'}
-                        color={getStatusColor(emp.status)}
+                        label={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            {statusConfig.icon}
+                            {emp.status || 'actif'}
+                          </Box>
+                        }
                         size="small"
-                        variant="filled"
+                        sx={{
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'scale(1.1)',
+                            boxShadow: '0 0 12px #ffd700',
+                          },
+                          ...(statusConfig.color === 'success'
+                            ? { backgroundColor: '#228b22', color: '#fff' }
+                            : statusConfig.color === 'warning'
+                            ? { backgroundColor: '#ffaa00', color: '#000' }
+                            : { backgroundColor: '#616161', color: '#fff' }),
+                        }}
                       />
                     </TableCell>
-                    <TableCell align="right">{emp.inbound != null ? emp.inbound : '-'}</TableCell>
-                    {/* ❌ CELLULE "Appels manqués" SUPPRIMÉE */}
+                    <TableCell align="right">
+                      <Typography sx={{ color: '#fff' }}>{emp.inbound != null ? emp.inbound : '-'}</Typography>
+                    </TableCell>
                     <TableCell align="right">
                       {emp.avgInboundAHT ? (
                         <Chip
                           label={emp.avgInboundAHT}
-                          color={getDurationColor(
-                            parseInt(emp.avgInboundAHT.split(':')[0]) * 60 +
-                              parseInt(emp.avgInboundAHT.split(':')[1])
-                          )}
                           size="small"
-                          sx={{ fontWeight: 'bold', minWidth: 60 }}
+                          sx={{
+                            fontWeight: 'bold',
+                            minWidth: 60,
+                            color: '#fff',
+                            transition: 'all 0.3s',
+                            ...(inboundCritical
+                              ? {
+                                  backgroundColor: '#8b0000',
+                                  fontFamily: '"Great Vibes", cursive',
+                                  animation: 'pulse-gold 2s infinite alternate',
+                                }
+                              : getDurationColor(inboundSec) === 'warning'
+                              ? { backgroundColor: '#ffaa00', color: '#000' }
+                              : { backgroundColor: '#228b22' }),
+                          }}
                         />
                       ) : (
-                        '-'
+                        <Typography sx={{ color: '#fff' }}>-</Typography>
                       )}
                     </TableCell>
-                    <TableCell align="right">{emp.outbound != null ? emp.outbound : '-'}</TableCell>
+                    <TableCell align="right">
+                      <Typography sx={{ color: '#fff' }}>{emp.outbound != null ? emp.outbound : '-'}</Typography>
+                    </TableCell>
                     <TableCell align="right">
                       {emp.avgOutboundAHT ? (
                         <Chip
                           label={emp.avgOutboundAHT}
-                          color={getDurationColor(
-                            parseInt(emp.avgOutboundAHT.split(':')[0]) * 60 +
-                              parseInt(emp.avgOutboundAHT.split(':')[1])
-                          )}
                           size="small"
-                          sx={{ fontWeight: 'bold', minWidth: 60 }}
+                          sx={{
+                            fontWeight: 'bold',
+                            minWidth: 60,
+                            color: '#fff',
+                            transition: 'all 0.3s',
+                            ...(outboundCritical
+                              ? {
+                                  backgroundColor: '#8b0000',
+                                  fontFamily: '"Great Vibes", cursive',
+                                  animation: 'pulse-gold 2s infinite alternate',
+                                }
+                              : getDurationColor(outboundSec) === 'warning'
+                              ? { backgroundColor: '#ffaa00', color: '#000' }
+                              : { backgroundColor: '#228b22' }),
+                          }}
                         />
                       ) : (
-                        '-'
+                        <Typography sx={{ color: '#fff' }}>-</Typography>
                       )}
                     </TableCell>
                   </TableRow>
@@ -233,6 +369,37 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           </Table>
         </TableContainer>
       </CardContent>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: '-50%',
+          width: '200%',
+          height: '100%',
+          background: 'radial-gradient(circle at 50% 50%, rgba(212,175,55,0.08), transparent 70%)',
+          animation: 'gold-glow 15s linear infinite',
+          pointerEvents: 'none',
+        }}
+      />
+      <style>{`
+        @keyframes medal-glow {
+          0% { filter: drop-shadow(0 0 6px gold); }
+          100% { filter: drop-shadow(0 0 12px gold) drop-shadow(0 0 20px #ffd700); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+          50% { box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
+        }
+        @keyframes pulse-gold {
+          0% { transform: scale(1); box-shadow: 0 0 8px #ffd700; }
+          100% { transform: scale(1.04); box-shadow: 0 0 20px #ffd700; }
+        }
+        @keyframes gold-glow {
+          0% { transform: translateX(0) translateY(0); }
+          50% { transform: translateX(-6%) translateY(-3%); }
+          100% { transform: translateX(0) translateY(0); }
+        }
+      `}</style>
     </Card>
   );
 }

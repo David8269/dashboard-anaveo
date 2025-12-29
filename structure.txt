@@ -25,8 +25,15 @@
     ├── static/
     └── ...
 
-/etc/nginx/sites-available/
-└── anaveo.conf                     # Configuration Nginx pour le projet
-
-/etc/nginx/sites-enabled/
-└── anaveo.conf -> ../sites-available/anaveo.conf
+/public
+  /sounds
+    - jingle-bells.mp3        → début journée (8h30)
+    - silent-night.mp3        → pause midi (12h30)
+    - we-wish-you.mp3         → reprise (14h)
+    - sleigh-bells.mp3        → fin journée (18h)
+    - ho-ho-ho.mp3            → top agent générique
+    - fatality-noel.mp3       → appel perdu
+    - silent.wav              → déblocage audio (fichier vide ou 0.1s de silence)
+    - (optionnel) xavier-noel.mp3, rana-noel.mp3, etc.
+  /images
+    - christmas-bg.jpg        → fond de Noël (ou supprimez la ligne si vous voulez garder sombre)
