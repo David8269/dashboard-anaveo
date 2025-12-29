@@ -83,7 +83,11 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
+<<<<<<< HEAD
 // === Clock (version Nouvel An – avec flou) ===
+=======
+// === Clock (version Noël — transparence sans flou) ===
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
 function Clock() {
   const [time, setTime] = useState(new Date());
 
@@ -100,6 +104,7 @@ function Clock() {
     <Paper
       elevation={0}
       sx={{
+<<<<<<< HEAD
         fontFamily: '"Orbitron", sans-serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
@@ -114,6 +119,20 @@ function Clock() {
         margin: '0 auto',
         border: '1px solid rgba(212, 175, 55, 0.6)',
         boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+=======
+        fontFamily: '"Mountains of Christmas", cursive',
+        fontWeight: 'bold',
+        fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
+        color: '#000',
+        textShadow: '0 2px 6px rgba(255,215,0,0.7), 0 1px 2px rgba(0,0,0,0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.65)',
+        padding: { xs: '0.4rem 0.8rem', md: '0.6rem 1.2rem' },
+        borderRadius: '14px',
+        display: 'inline-block',
+        margin: '0 auto',
+        border: '1px solid #d42426',
+        boxShadow: '0 4px 12px rgba(212, 36, 38, 0.3)',
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
       }}
       role="status"
       aria-live="polite"
@@ -123,7 +142,11 @@ function Clock() {
   );
 }
 
+<<<<<<< HEAD
 // === Schedulers & WebSocket (inchangés) ===
+=======
+// === Schedulers & WebSocket (corrigé) ===
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
 const useDailyResetScheduler = (resetFn) => {
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -282,12 +305,22 @@ const useWebSocketData = (url, onLostCall) => {
     pingIntervalRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         try {
+<<<<<<< HEAD
           wsRef.current.send(JSON.stringify({ type: 'keepalive', ts: Date.now() }));
         } catch (e) {
           console.warn('[WS] ⚠️ Keepalive échoué', e);
         }
       }
     }, 45000);
+=======
+          wsRef.current.send(JSON.stringify({ type: 'ping', ts: Date.now() }));
+        } catch (e) {
+          console.warn('[WS] ⚠️ Ping échoué', e);
+          wsRef.current?.close();
+        }
+      }
+    }, 30000);
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
   };
 
   const connect = () => {
@@ -309,7 +342,11 @@ const useWebSocketData = (url, onLostCall) => {
         if (wsRef.current?.readyState === WebSocket.CONNECTING) {
           wsRef.current?.close();
         }
+<<<<<<< HEAD
       }, 10000);
+=======
+      }, 15000);
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
 
       wsRef.current.onopen = () => {
         if (!isMountedRef.current) return;
@@ -331,7 +368,11 @@ const useWebSocketData = (url, onLostCall) => {
         if (!isMountedRef.current) return;
         const msg = event.data;
         if (typeof msg === 'string') {
+<<<<<<< HEAD
           if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"')) {
+=======
+          if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"') || msg.includes('"type":"ping"') || msg.includes('"type":"pong"')) {
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
             return;
           }
 
@@ -411,7 +452,11 @@ const useWebSocketData = (url, onLostCall) => {
 
       wsRef.current.onclose = (e) => {
         if (!isMountedRef.current) return;
+<<<<<<< HEAD
         console.warn(`[WS] 🔌 Déconnecté (code ${e.code})`);
+=======
+        console.warn(`[WS] 🔌 Déconnecté (code ${e.code}, raison: ${e.reason})`);
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
         setIsConnected(false);
         stopPing();
 
@@ -481,7 +526,11 @@ const useWebSocketData = (url, onLostCall) => {
   };
 };
 
+<<<<<<< HEAD
 // === Sons (inchangés) ===
+=======
+// === Sons (inchangés — noms conservés) ===
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
 const playSound = (filename, context = '', volume = 0.8) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
@@ -590,7 +639,11 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
+<<<<<<< HEAD
   // 🔊 Sons horaires
+=======
+  // 🔊 Sons horaires (noms conservés)
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
   useEffect(() => {
     if (!audioUnlocked) return;
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
@@ -636,7 +689,11 @@ const App = () => {
     };
   }, [audioUnlocked]);
 
+<<<<<<< HEAD
   // 🔊 Top agent
+=======
+  // 🔊 Top agent (noms conservés)
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
     const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
@@ -659,6 +716,7 @@ const App = () => {
 
   return (
     <>
+<<<<<<< HEAD
       {/* ✅ POLICES */}
       <link
         href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap"
@@ -697,11 +755,50 @@ const App = () => {
           ::-webkit-scrollbar-track { background: transparent; }
           ::-webkit-scrollbar-thumb { 
             background: linear-gradient(to bottom, #d4af37, #b8860b);
+=======
+      {/* Polices */}
+      <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+      <style>
+        {`
+          /* ❄️ Neige opaque — sans lueur dorée */
+          @keyframes snow {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 1; }
+          }
+          .snowflake {
+            position: fixed;
+            top: -20px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            z-index: 1;
+            opacity: 0;
+            animation: snow 10s linear forwards;
+            pointer-events: none;
+          }
+          .snowflake:nth-child(2n) { left: 8%; animation-duration: 12s; animation-delay: 2s; }
+          .snowflake:nth-child(3n) { left: 18%; animation-duration: 15s; animation-delay: 4s; }
+          .snowflake:nth-child(4n) { left: 28%; animation-duration: 11s; animation-delay: 1s; }
+          .snowflake:nth-child(5n) { left: 38%; animation-duration: 13s; animation-delay: 3s; }
+          .snowflake:nth-child(6n) { left: 48%; animation-duration: 9s; animation-delay: 0s; }
+          .snowflake:nth-child(7n) { left: 58%; animation-duration: 14s; animation-delay: 5s; }
+          .snowflake:nth-child(8n) { left: 68%; animation-duration: 10s; animation-delay: 2s; }
+          .snowflake:nth-child(9n) { left: 78%; animation-duration: 12s; animation-delay: 6s; }
+          .snowflake:nth-child(10n) { left: 88%; animation-duration: 11s; animation-delay: 1s; }
+
+          /* Scrollbar Noël */
+          ::-webkit-scrollbar { width: 8px; }
+          ::-webkit-scrollbar-track { background: transparent; }
+          ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(to bottom, #d42426, #8b0000);
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
             border-radius: 5px;
             border: 2px solid transparent;
             background-clip: padding-box;
             transition: all 0.3s ease;
           }
+<<<<<<< HEAD
           body.show-scrollbar ::-webkit-scrollbar-thumb { 
             background: linear-gradient(to bottom, #ffd700, #d4af37); 
           }
@@ -736,6 +833,43 @@ const App = () => {
       {/* ✨ Paillettes */}
       {[...Array(8)].map((_, i) => (
         <div key={i} className="sparkle">✨</div>
+=======
+          body.show-scrollbar ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #ffaa00, #d42426); }
+          body.show-scrollbar ::-webkit-scrollbar-track { background: rgba(212, 36, 38, 0.1); }
+
+          /* Firefox */
+          * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+          body.show-scrollbar { scrollbar-color: #d42426 rgba(212, 36, 38, 0.1); }
+
+          :root {
+            --christmas-bg: #ffffff;
+            --christmas-text: #000;
+            --christmas-accent: #ffd700;
+            --christmas-primary: #d42426;
+          }
+        `}
+      </style>
+
+      {/* ❄️ Fond d’écran : ton hibou en bonnet */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/christmas-bg.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          zIndex: 0,
+        }}
+      />
+
+      {/* ❄️ Neige opaque et sans lueur */}
+      {[...Array(10)].map((_, i) => (
+        <div key={i} className="snowflake">❄</div>
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
       ))}
 
       {/* Conteneur principal */}
@@ -745,6 +879,7 @@ const App = () => {
           py: { xs: 2, md: 4 },
           position: 'relative',
           zIndex: 2,
+<<<<<<< HEAD
           color: '#ffffff',
           fontFamily: '"Roboto", sans-serif',
           px: { xs: 0.5, sm: 1, md: 2 },
@@ -763,11 +898,30 @@ const App = () => {
               border: '2px solid rgba(212, 175, 55, 0.7)',
               boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
+=======
+          color: 'var(--christmas-text)',
+          fontFamily: '"Roboto", sans-serif',
+          px: { xs: 0.5, sm: 1, md: 2 },
+        }}
+        aria-label="Tableau de bord de Noël en temps réel"
+      >
+        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
+          {/* ✅ Titre — avec textShadow vert */}
+          <Box
+            sx={{
+              mb: 2,
+              backgroundColor: 'rgba(255, 255, 255, 0.70)',
+              borderRadius: '16px',
+              border: '2px solid #d42426',
+              boxShadow: '0 6px 20px rgba(212, 36, 38, 0.3)',
+              padding: { xs: '0.7rem 1.2rem', md: '1rem 2rem' },
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
               display: 'inline-block',
               margin: '0 auto',
               textAlign: 'center',
             }}
           >
+<<<<<<< HEAD
             <Typography
               variant="h1"
               align="center"
@@ -782,6 +936,34 @@ const App = () => {
               }}
             >
              🥂 Anaveo - Bonne Année 2026 ! 🥂
+=======
+            <Typography 
+              variant="h1" 
+              align="center" 
+              sx={{ 
+                fontFamily: '"Mountains of Christmas", cursive',
+                fontWeight: 'bold',
+                fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3.2rem' },
+                color: '#d42426',
+                textShadow: '0 0 8px rgba(0, 255, 0, 0.8), 2px 2px 4px rgba(0, 100, 0, 0.5)',
+                margin: 0,
+                letterSpacing: '0.03em',
+                '&::before': {
+                  content: '"🎄🎅"',
+                  marginRight: '0.5rem',
+                  fontSize: '1.2em',
+                  verticalAlign: 'middle',
+                },
+                '&::after': {
+                  content: '"🎅🎄"',
+                  marginLeft: '0.5rem',
+                  fontSize: '1.2em',
+                  verticalAlign: 'middle',
+                },
+              }}
+            >
+              ANAVEO - Christmas Center
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
             </Typography>
           </Box>
 
@@ -790,6 +972,7 @@ const App = () => {
           </Box>
 
           {!isConnected && (
+<<<<<<< HEAD
             <Box
               textAlign="center"
               mb={2}
@@ -813,6 +996,25 @@ const App = () => {
                   fontWeight: 600,
                   fontFamily: '"Orbitron", sans-serif',
                 }}
+=======
+            <Box textAlign="center" mb={2} sx={{ 
+              color: '#d42426', 
+              fontWeight: 'bold', 
+              textShadow: '0 1px 3px rgba(255,215,0,0.5)',
+              px: { xs: 2, sm: 3 }
+            }}>
+              ⚠️ Connexion WebSocket perdue. Tentative de reconnexion...
+              <Button 
+                size="small" 
+                variant="outlined" 
+                sx={{ 
+                  ml: 1, 
+                  borderColor: '#d42426', 
+                  color: '#d42426',
+                  borderRadius: '20px',
+                  fontWeight: 600,
+                }} 
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
                 onClick={reconnect}
               >
                 Reconnecter
@@ -851,11 +1053,20 @@ const App = () => {
             <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
           </Box>
 
+<<<<<<< HEAD
           <Box mt={{ xs: 7, md: 9 }} pb={7} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
             <Grid container spacing={4} direction="column">
               <Grid size={{ xs: 12 }}>
                 <AgentTable
                   employees={employees.map((emp) => ({
+=======
+          {/* 🔽 ESPACE AJOUTÉ ICI : mt augmenté pour descendre les widgets du bas */}
+          <Box mt={{ xs: 12, md: 16 }} pb={7} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
+            <Grid container spacing={4} direction="column">
+              <Grid size={{ xs: 12 }}>
+                <AgentTable
+                  employees={employees.map(emp => ({
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
                     ...emp,
                     avgInboundAHT: formatSecondsToMMSS(emp.inbound > 0 ? Math.floor(emp.inboundHandlingTimeSec / emp.inbound) : 0),
                     avgOutboundAHT: formatSecondsToMMSS(emp.outbound > 0 ? Math.floor(emp.outboundHandlingTimeSec / emp.outbound) : 0),
@@ -874,13 +1085,18 @@ const App = () => {
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
+<<<<<<< HEAD
                           background: 'linear-gradient(135deg, #000, #333)',
+=======
+                          background: 'linear-gradient(135deg, #d42426, #8b0000)',
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
                           color: '#ffd700',
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '10px 20px',
                           fontSize: '1rem',
                           borderRadius: '50px',
+<<<<<<< HEAD
                           border: '2px solid #d4af37',
                           boxShadow: '0 0 14px rgba(212, 175, 55, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
                           '&:hover': {
@@ -892,6 +1108,19 @@ const App = () => {
                         }}
                       >
                         🥂 Célébrer la nouvelle année !
+=======
+                          border: '2px solid #ffd700',
+                          boxShadow: '0 0 12px rgba(212, 36, 38, 0.6), 0 4px 8px rgba(0,0,0,0.15)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #b01e1e, #660000)',
+                            boxShadow: '0 0 18px rgba(255, 215, 0, 0.8), 0 6px 12px rgba(0,0,0,0.2)',
+                            transform: 'scale(1.05)',
+                          },
+                          fontFamily: '"Mountains of Christmas", cursive',
+                        }}
+                      >
+                        🎄 Allumer les cloches !
+>>>>>>> b10f4178cd08d38775d6e21be334baa21a8b1ff5
                       </Button>
                     </Box>
                   )}
