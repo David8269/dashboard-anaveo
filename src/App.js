@@ -100,8 +100,8 @@ function Clock() {
         fontFamily: '"Orbitron", sans-serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-        color: '#00a8e8',
-        textShadow: '0 0 12px rgba(0, 168, 232, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
+        color: '#00d8ff', // Bleu plus clair
+        textShadow: '0 0 12px rgba(0, 216, 255, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
@@ -109,7 +109,7 @@ function Clock() {
         borderRadius: '16px',
         display: 'inline-block',
         margin: '0 auto',
-        border: '1px solid rgba(0, 168, 232, 0.6)',
+        border: '1px solid rgba(0, 216, 255, 0.6)', // Bordure plus claire
         boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
       }}
       role="status"
@@ -655,28 +655,28 @@ const App = () => {
 .snowflake:nth-child(7n) { left: 80%; animation-duration: 15s; animation-delay: 4s; }
 .snowflake:nth-child(8n) { left: 90%; animation-duration: 12s; animation-delay: 2.5s; }
 
-/* Scrollbar enneigée */
+/* Scrollbar enneigée - bleu plus clair */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #00a8e8, #0077cc);
+  background: linear-gradient(to bottom, #00d8ff, #00a8e8);
   border-radius: 5px;
   border: 2px solid transparent;
   background-clip: padding-box;
   transition: all 0.3s ease;
 }
 body.show-scrollbar ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #00bfff, #00a8e8);
+  background: linear-gradient(to bottom, #00e6ff, #00d8ff);
 }
 body.show-scrollbar ::-webkit-scrollbar-track {
-  background: rgba(0, 168, 232, 0.1);
+  background: rgba(0, 216, 255, 0.1);
 }
 * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-body.show-scrollbar { scrollbar-color: #00a8e8 rgba(0, 168, 232, 0.1); }
+body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
 `}
       </style>
 
-      {/* 🎿 Fond d’écran hiver */}
+      {/* 🎿 Fond d'écran hiver */}
       <Box
         sx={{
           position: 'fixed',
@@ -711,7 +711,7 @@ body.show-scrollbar { scrollbar-color: #00a8e8 rgba(0, 168, 232, 0.1); }
         aria-label="Tableau de bord des sports d'hiver en temps réel"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {/* Titre élégant avec effet gel */}
+          {/* Titre élégant avec effet gel - couleurs plus claires */}
           <Box
             sx={{
               mb: 2,
@@ -719,8 +719,8 @@ body.show-scrollbar { scrollbar-color: #00a8e8 rgba(0, 168, 232, 0.1); }
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
               borderRadius: '18px',
-              border: '2px solid rgba(0, 168, 232, 0.7)',
-              boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
+              border: '2px solid rgba(0, 216, 255, 0.7)', // Bordure bleu plus clair
+              boxShadow: '0 6px 20px rgba(0, 216, 255, 0.3)', // Ombre bleu plus claire
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
               display: 'inline-block',
               margin: '0 auto',
@@ -734,8 +734,8 @@ body.show-scrollbar { scrollbar-color: #00a8e8 rgba(0, 168, 232, 0.1); }
                 fontFamily: '"Montserrat", sans-serif',
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#00a8e8',
-                textShadow: '0 0 14px rgba(0, 168, 232, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
+                color: '#00d8ff', // Bleu plus clair
+                textShadow: '0 0 14px rgba(0, 216, 255, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
                 margin: 0,
                 letterSpacing: '0.02em',
               }}
@@ -753,7 +753,7 @@ body.show-scrollbar { scrollbar-color: #00a8e8 rgba(0, 168, 232, 0.1); }
               textAlign="center"
               mb={2}
               sx={{
-                color: '#00bfff',
+                color: '#00e6ff', // Couleur de texte plus claire
                 fontWeight: 'bold',
                 textShadow: '0 1px 3px rgba(0,0,0,0.6)',
                 px: { xs: 2, sm: 3 },
@@ -765,8 +765,8 @@ body.show-scrollbar { scrollbar-color: #00a8e8 rgba(0, 168, 232, 0.1); }
                 variant="outlined"
                 sx={{
                   ml: 1,
-                  borderColor: '#00a8e8',
-                  color: '#00bfff',
+                  borderColor: '#00d8ff', // Bordure bleu plus clair
+                  color: '#00e6ff', // Texte plus clair
                   borderRadius: '20px',
                   fontWeight: 600,
                   fontFamily: '"Orbitron", sans-serif',
@@ -832,18 +832,18 @@ body.show-scrollbar { scrollbar-color: #00a8e8 rgba(0, 168, 232, 0.1); }
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
-                          background: 'linear-gradient(135deg, #000, #1a365d)',
-                          color: '#00bfff',
+                          background: 'linear-gradient(135deg, #000, #005580)', // Dégradé bleu plus foncé mais plus vif
+                          color: '#00e6ff', // Texte plus clair
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '10px 20px',
                           fontSize: '1rem',
                           borderRadius: '50px',
-                          border: '2px solid #00a8e8',
-                          boxShadow: '0 0 14px rgba(0, 168, 232, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
+                          border: '2px solid #00d8ff', // Bordure bleu plus clair
+                          boxShadow: '0 0 14px rgba(0, 216, 255, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #2a4a7a, #000)',
-                            boxShadow: '0 0 20px rgba(0, 191, 255, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
+                            background: 'linear-gradient(135deg, #003366, #000)',
+                            boxShadow: '0 0 20px rgba(0, 230, 255, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
                             transform: 'scale(1.05)',
                           },
                           fontFamily: '"Orbitron", sans-serif',

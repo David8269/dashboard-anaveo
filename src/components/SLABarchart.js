@@ -18,8 +18,8 @@ import {
   Tooltip,
 } from 'recharts';
 
-const INBOUND_COLOR = '#00a8e8';   // Bleu glace
-const OUTBOUND_COLOR = '#2e8b57'; // Vert forêt (pour les remontées)
+const INBOUND_COLOR = '#00d8ff';   // Bleu plus clair
+const OUTBOUND_COLOR = '#00ff80'; // Vert plus voyant (néon)
 
 const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString());
 
@@ -55,8 +55,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           WebkitBackdropFilter: 'blur(6px)',
           width: '100%',
           borderRadius: 3,
-          border: '1px solid rgba(0, 168, 232, 0.7)',
-          boxShadow: '0 0 15px rgba(0, 168, 232, 0.5)',
+          border: '1px solid rgba(0, 216, 255, 0.7)',
+          boxShadow: '0 0 15px rgba(0, 216, 255, 0.5)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -67,8 +67,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 40% 50%, rgba(0,168,232,0.08), transparent 70%)',
-          animation: 'blue-drift 22s linear infinite',
+          background: 'radial-gradient(circle at 40% 50%, rgba(0,216,255,0.08), transparent 70%)',
+          animation: 'blue-drift-clair 22s linear infinite',
           pointerEvents: 'none',
           zIndex: 0,
         }} />
@@ -77,8 +77,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             variant="overline"
             sx={{
               fontFamily: '"Montserrat", sans-serif',
-              color: '#00a8e8',
-              textShadow: '0 0 8px rgba(0,168,232,0.8)',
+              color: '#00d8ff',
+              textShadow: '0 0 8px rgba(0,216,255,0.8)',
               fontSize: '1.3rem',
             }}
           >
@@ -92,10 +92,10 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                 mb: 2,
                 background: wsConnected
                   ? 'linear-gradient(135deg, #8b0000, #000)'
-                  : 'linear-gradient(135deg, #000, #1a365d)',
-                color: '#00bfff',
+                  : 'linear-gradient(135deg, #000, #005580)',
+                color: '#00e6ff',
                 fontFamily: '"Montserrat", sans-serif',
-                animation: wsConnected ? 'none' : 'pulse-blue 1.5s infinite alternate',
+                animation: wsConnected ? 'none' : 'pulse-blue-clair 1.5s infinite alternate',
               }}
             />
             <Skeleton 
@@ -107,12 +107,12 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           </Box>
         </CardContent>
         <style>{`
-          @keyframes pulse-blue {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,191,255,0.6); }
-            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(0,191,255,0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0,191,255,0.6); }
+          @keyframes pulse-blue-clair {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,230,255,0.6); }
+            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(0,230,255,0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0,230,255,0.6); }
           }
-          @keyframes blue-drift {
+          @keyframes blue-drift-clair {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-8%) translateY(-4%); }
             100% { transform: translateX(0) translateY(0); }
@@ -126,13 +126,13 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     <>
       <style>
         {`
-          @keyframes pulse-blue {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,191,255,0.6); }
-            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(0,191,255,0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0,191,255,0.6); }
+          @keyframes pulse-blue-clair {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,230,255,0.6); }
+            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(0,230,255,0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0,230,255,0.6); }
           }
 
-          @keyframes bar-rise-blue {
+          @keyframes bar-rise-blue-clair {
             0% { 
               opacity: 0.6; 
               transform: scaleY(0); 
@@ -144,12 +144,12 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             }
           }
 
-          @keyframes twinkle-blue {
-            0%, 100% { text-shadow: 0 0 6px rgba(0,168,232,0.7); }
-            50% { text-shadow: 0 0 12px rgba(0,191,255,0.9); }
+          @keyframes twinkle-blue-clair {
+            0%, 100% { text-shadow: 0 0 6px rgba(0,216,255,0.7); }
+            50% { text-shadow: 0 0 12px rgba(0,230,255,0.9); }
           }
 
-          @keyframes blue-drift-chart {
+          @keyframes blue-drift-chart-clair {
             0% { transform: translateX(0) translateY(0); opacity: 0.5; }
             50% { transform: translateX(-6%) translateY(-3%); opacity: 0.7; }
             100% { transform: translateX(0) translateY(0); opacity: 0.5; }
@@ -164,12 +164,12 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           WebkitBackdropFilter: 'blur(6px)',
           width: '100%',
           borderRadius: 3,
-          border: '1px solid rgba(0, 168, 232, 0.7)',
-          boxShadow: '0 0 15px rgba(0, 168, 232, 0.5)',
+          border: '1px solid rgba(0, 216, 255, 0.7)',
+          boxShadow: '0 0 15px rgba(0, 216, 255, 0.5)',
           position: 'relative',
           overflow: 'hidden',
           ...(animate && {
-            animation: 'pulse-blue 0.6s ease-in-out',
+            animation: 'pulse-blue-clair 0.6s ease-in-out',
           }),
           '&::before': {
             content: '""',
@@ -178,8 +178,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, transparent, #00bfff, #00a8e8, #00bfff, transparent)',
-            animation: 'twinkle-blue 3s infinite',
+            background: 'linear-gradient(90deg, transparent, #00e6ff, #00d8ff, #00e6ff, transparent)',
+            animation: 'twinkle-blue-clair 3s infinite',
             zIndex: 2,
           },
           '&::after': {
@@ -189,10 +189,10 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             left: '-60%',
             width: '220%',
             height: '70%',
-            background: 'radial-gradient(circle at 50% 40%, rgba(46,139,87,0.07), transparent 80%)',
+            background: 'radial-gradient(circle at 50% 40%, rgba(0,255,128,0.08), transparent 80%)',
             pointerEvents: 'none',
             zIndex: 0,
-            animation: 'blue-drift-chart 25s linear infinite',
+            animation: 'blue-drift-chart-clair 25s linear infinite',
           },
         }}
       >
@@ -202,8 +202,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               variant="overline"
               sx={{
                 fontFamily: '"Orbitron", sans-serif',
-                color: '#00a8e8',
-                textShadow: '0 0 8px rgba(0,168,232,0.8)',
+                color: '#00d8ff',
+                textShadow: '0 0 8px rgba(0,216,255,0.8)',
                 fontSize: '1.3rem',
               }}
             >
@@ -213,11 +213,11 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               label="🟢 En direct"
               size="small"
               sx={{
-                background: 'linear-gradient(135deg, #00a8e8, #0077cc)',
-                color: '#fff',
+                background: 'linear-gradient(135deg, #00d8ff, #00a8e8)',
+                color: '#000',
                 fontWeight: 'bold',
                 fontFamily: '"Orbitron", sans-serif',
-                animation: 'pulse-blue 2s infinite',
+                animation: 'pulse-blue-clair 2s infinite',
               }}
             />
           </Box>
@@ -228,24 +228,24 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               margin={{ top: 30, right: 20, left: 10, bottom: 20 }}
               barSize={100}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#00a8e8" opacity={0.3} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#00d8ff" opacity={0.3} />
 
               <XAxis
                 dataKey="dayLabel"
-                stroke="#00a8e8"
+                stroke="#00d8ff"
                 tick={{
-                  fill: '#00bfff',
+                  fill: '#00e6ff',
                   fontSize: 22,
                   fontWeight: 'bold',
                   fontFamily: '"Orbitron", sans-serif',
-                  textShadow: '0 0 4px rgba(0,168,232,0.5)',
+                  textShadow: '0 0 4px rgba(0,216,255,0.5)',
                 }}
               />
 
               <YAxis
-                stroke="#00a8e8"
+                stroke="#00d8ff"
                 tick={{
-                  fill: '#00bfff',
+                  fill: '#00e6ff',
                   fontSize: 22,
                   fontWeight: 'bold',
                   fontFamily: '"Orbitron", sans-serif',
@@ -261,12 +261,12 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                 labelFormatter={(label) => `Jour : ${label}`}
                 contentStyle={{
                   backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                  border: '1px solid #00a8e8',
+                  border: '1px solid #00d8ff',
                   borderRadius: 6,
-                  color: '#00bfff',
+                  color: '#00e6ff',
                   fontSize: 12,
                   fontFamily: '"Montserrat", sans-serif',
-                  boxShadow: '0 0 12px rgba(0, 168, 232, 0.6)',
+                  boxShadow: '0 0 12px rgba(0, 216, 255, 0.6)',
                 }}
               />
 
@@ -275,19 +275,19 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                 name="Descente"
                 fill={INBOUND_COLOR}
                 animationDuration={1200}
-                style={{ animation: 'bar-rise-blue 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
+                style={{ animation: 'bar-rise-blue-clair 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
               >
                 <LabelList
                   dataKey="inbound"
                   position="top"
-                  fill="#00bfff"
+                  fill="#00e6ff"
                   fontWeight="bold"
                   fontSize={22}
                   formatter={hideZeroLabels}
                   style={{
-                    textShadow: '0 0 6px rgba(0,168,232,0.8)',
+                    textShadow: '0 0 6px rgba(0,216,255,0.8)',
                     fontFamily: '"Orbitron", sans-serif',
-                    animation: 'twinkle-blue 3s infinite alternate',
+                    animation: 'twinkle-blue-clair 3s infinite alternate',
                   }}
                 />
               </Bar>
@@ -297,19 +297,19 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                 name="Remontée"
                 fill={OUTBOUND_COLOR}
                 animationDuration={1200}
-                style={{ animation: 'bar-rise-blue 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
+                style={{ animation: 'bar-rise-blue-clair 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
               >
                 <LabelList
                   dataKey="outbound"
                   position="top"
-                  fill="#2e8b57"
+                  fill="#000"
                   fontWeight="bold"
                   fontSize={22}
                   formatter={hideZeroLabels}
                   style={{
-                    textShadow: '0 0 6px rgba(46,139,87,0.6)',
+                    textShadow: '0 0 6px rgba(0,255,128,0.8)',
                     fontFamily: '"Orbitron", sans-serif',
-                    animation: 'twinkle-blue 3s infinite alternate',
+                    animation: 'twinkle-blue-clair 3s infinite alternate',
                   }}
                 />
               </Bar>
@@ -325,8 +325,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   fontFamily: '"Orbitron", sans-serif',
                   fontWeight: 'bold',
                   fontSize: 22,
-                  color: '#00bfff',
-                  textShadow: '0 0 4px rgba(0,168,232,0.6)',
+                  color: '#00e6ff',
+                  textShadow: '0 0 4px rgba(0,216,255,0.6)',
                 }}
               >
                 ⛷️ Descente
@@ -340,8 +340,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   fontFamily: '"Orbitron", sans-serif',
                   fontWeight: 'bold',
                   fontSize: 22,
-                  color: '#2e8b57',
-                  textShadow: '0 0 4px rgba(46,139,87,0.5)',
+                  color: '#000',
+                  textShadow: '0 0 4px rgba(0,255,128,0.5)',
                 }}
               >
                 🚠 Remontée

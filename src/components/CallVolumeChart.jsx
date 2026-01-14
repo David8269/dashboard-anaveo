@@ -37,8 +37,8 @@ function LegendComponent() {
     gap: 6, 
     fontWeight: 'bold', 
     fontSize: 12,
-    color: '#00bfff',
-    textShadow: '0 0 4px rgba(0,168,232,0.6)',
+    color: '#00e6ff',
+    textShadow: '0 0 4px rgba(0,216,255,0.6)',
   };
   const squareStyle = (color) => ({ 
     width: 14,
@@ -50,10 +50,10 @@ function LegendComponent() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, py: 0.5 }}>
       <div style={itemStyle}>
-        <span style={squareStyle('#00a8e8')}></span> ⛷️ CDS_IN
+        <span style={squareStyle('#00d8ff')}></span> ⛷️ CDS_IN
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#2e8b57')}></span> 🚠 CDS_OUT
+        <span style={squareStyle('#00ff80')}></span> 🚠 CDS_OUT
       </div>
       <div style={itemStyle}>
         <span style={squareStyle('#8b0000')}></span> ❄️ ABSYS
@@ -65,7 +65,7 @@ function LegendComponent() {
 const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
   if (!value || value <= 0) return null;
   const isAbsysCritical = dataKey === 'ABSYS' && value > 5;
-  const labelColor = isAbsysCritical ? '#00bfff' : '#ffffff';
+  const labelColor = isAbsysCritical ? '#00e6ff' : '#ffffff';
 
   return (
     <text
@@ -78,7 +78,7 @@ const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
       fontFamily={isAbsysCritical ? '"Montserrat", sans-serif' : 'inherit'}
       style={{
         animation: isAbsysCritical ? 'pulse-blue 2s infinite alternate' : 'none',
-        filter: isAbsysCritical ? 'drop-shadow(0 0 6px #00bfff)' : 'none',
+        filter: isAbsysCritical ? 'drop-shadow(0 0 6px #00e6ff)' : 'none',
       }}
     >
       {value}
@@ -100,8 +100,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           backdropFilter: 'blur(6px)',
           WebkitBackdropFilter: 'blur(6px)',
           borderRadius: 3,
-          border: '1px solid rgba(0, 168, 232, 0.7)',
-          boxShadow: '0 0 15px rgba(0, 168, 232, 0.5)',
+          border: '1px solid rgba(0, 216, 255, 0.7)',
+          boxShadow: '0 0 15px rgba(0, 216, 255, 0.5)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -112,8 +112,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 40% 50%, rgba(0,168,232,0.08), transparent 70%)',
-          animation: 'blue-drift 22s linear infinite',
+          background: 'radial-gradient(circle at 40% 50%, rgba(0,216,255,0.08), transparent 70%)',
+          animation: 'blue-drift-clair 22s linear infinite',
           pointerEvents: 'none',
           zIndex: 0,
         }} />
@@ -122,8 +122,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             variant="overline"
             sx={{
               fontFamily: '"Montserrat", sans-serif',
-              color: '#00a8e8',
-              textShadow: '0 0 8px rgba(0,168,232,0.8)',
+              color: '#00d8ff',
+              textShadow: '0 0 8px rgba(0,216,255,0.8)',
               fontSize: '1.2rem',
             }}
           >
@@ -137,10 +137,10 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 mb: 1,
                 background: wsConnected 
                   ? 'linear-gradient(135deg, #8b0000, #000)' 
-                  : 'linear-gradient(135deg, #000, #1a365d)',
-                color: '#00bfff',
+                  : 'linear-gradient(135deg, #000, #005580)',
+                color: '#00e6ff',
                 fontFamily: '"Montserrat", sans-serif',
-                animation: wsConnected ? 'none' : 'pulse-blue 2s infinite alternate',
+                animation: wsConnected ? 'none' : 'pulse-blue-clair 2s infinite alternate',
               }}
             />
             <Skeleton 
@@ -152,11 +152,11 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           </Box>
         </CardContent>
         <style>{`
-          @keyframes pulse-blue {
-            0% { transform: scale(1); box-shadow: 0 0 8px #00bfff; }
-            100% { transform: scale(1.04); box-shadow: 0 0 20px #00bfff; }
+          @keyframes pulse-blue-clair {
+            0% { transform: scale(1); box-shadow: 0 0 8px #00e6ff; }
+            100% { transform: scale(1.04); box-shadow: 0 0 20px #00e6ff; }
           }
-          @keyframes blue-drift {
+          @keyframes blue-drift-clair {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-8%) translateY(-4%); }
             100% { transform: translateX(0) translateY(0); }
@@ -182,8 +182,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
         borderRadius: 3,
-        border: '1px solid rgba(0, 168, 232, 0.7)',
-        boxShadow: '0 0 15px rgba(0, 168, 232, 0.5)',
+        border: '1px solid rgba(0, 216, 255, 0.7)',
+        boxShadow: '0 0 15px rgba(0, 216, 255, 0.5)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -194,8 +194,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
         left: '-60%',
         width: '220%',
         height: '100%',
-        background: 'radial-gradient(circle at 30% 40%, rgba(0,168,232,0.07), transparent 80%)',
-        animation: 'blue-drift 20s linear infinite',
+        background: 'radial-gradient(circle at 30% 40%, rgba(0,216,255,0.07), transparent 80%)',
+        animation: 'blue-drift-clair 20s linear infinite',
         pointerEvents: 'none',
         zIndex: 0,
       }} />
@@ -205,8 +205,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
         right: '-70%',
         width: '240%',
         height: '60%',
-        background: 'radial-gradient(circle at 70% 30%, rgba(46, 139, 87, 0.06), transparent 85%)',
-        animation: 'blue-drift-reverse 28s linear infinite',
+        background: 'radial-gradient(circle at 70% 30%, rgba(0,255,128,0.08), transparent 85%)',
+        animation: 'blue-drift-reverse-clair 28s linear infinite',
         pointerEvents: 'none',
         zIndex: 0,
       }} />
@@ -217,8 +217,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             variant="overline"
             sx={{
               fontFamily: '"Orbitron", sans-serif',
-              color: '#00a8e8',
-              textShadow: '0 0 8px rgba(0,168,232,0.8)',
+              color: '#00d8ff',
+              textShadow: '0 0 8px rgba(0,216,255,0.8)',
               fontSize: '1.2rem',
             }}
           >
@@ -230,11 +230,11 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             sx={{
               fontSize: 12,
               background: wsConnected 
-                ? 'linear-gradient(135deg, #00a8e8, #0077cc)' 
+                ? 'linear-gradient(135deg, #00d8ff, #00a8e8)'
                 : 'linear-gradient(135deg, #8b0000, #000)',
-              color: wsConnected ? '#fff' : '#00bfff',
+              color: wsConnected ? '#000' : '#00e6ff',
               fontWeight: 'bold',
-              animation: wsConnected ? 'pulse-glow 2s infinite' : 'none',
+              animation: wsConnected ? 'pulse-glow-clair 2s infinite' : 'none',
             }}
           />
         </Box>
@@ -247,16 +247,16 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               barSize={18}
               stackOffset="none"
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#00a8e8" opacity={0.3} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#00d8ff" opacity={0.3} />
 
-              {/* Axe X – polices et couleurs bleues */}
+              {/* Axe X – polices et couleurs bleues plus claires */}
               <XAxis
                 dataKey="index"
                 tick={{
-                  fill: '#00bfff',
+                  fill: '#00e6ff',
                   fontSize: 22,
                   fontWeight: 'bold',
-                  textShadow: '0 0 4px rgba(0,168,232,0.6)',
+                  textShadow: '0 0 4px rgba(0,216,255,0.6)',
                   fontFamily: '"Montserrat", sans-serif',
                 }}
                 tickFormatter={(index) => {
@@ -272,11 +272,11 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 tickMargin={12}
               />
 
-              {/* Axe Y – bleu et élégant */}
+              {/* Axe Y – bleu plus clair et élégant */}
               <YAxis
-                stroke="#00a8e8"
+                stroke="#00d8ff"
                 tick={{
-                  fill: '#00bfff',
+                  fill: '#00e6ff',
                   fontSize: 16,
                   fontWeight: 'bold',
                   fontFamily: '"Orbitron", sans-serif',
@@ -298,12 +298,12 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 labelFormatter={(index) => `Heure : ${halfHourSlots[index] || index}`}
                 contentStyle={{
                   backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                  border: '1px solid #00a8e8',
+                  border: '1px solid #00d8ff',
                   borderRadius: 6,
-                  color: '#00bfff',
+                  color: '#00e6ff',
                   fontSize: 12,
                   fontFamily: '"Montserrat", sans-serif',
-                  boxShadow: '0 0 12px rgba(0, 168, 232, 0.6)',
+                  boxShadow: '0 0 12px rgba(0, 216, 255, 0.6)',
                 }}
               />
 
@@ -312,39 +312,39 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 x2={lunchEndIndex}
                 y1={0}
                 y2="dataMax"
-                fill="#00a8e8"
+                fill="#00d8ff"
                 fillOpacity={0.1}
-                stroke="#0077cc"
+                stroke="#00a8e8"
                 strokeOpacity={0.7}
                 strokeDasharray="4 4"
               />
-              <ReferenceLine x={lunchStartIndex} stroke="#00a8e8" strokeWidth={2} strokeDasharray="6 4" />
-              <ReferenceLine x={lunchEndIndex} stroke="#00a8e8" strokeWidth={2} strokeDasharray="6 4" />
-              <CustomLabel fill="#00a8e8" />
+              <ReferenceLine x={lunchStartIndex} stroke="#00d8ff" strokeWidth={2} strokeDasharray="6 4" />
+              <ReferenceLine x={lunchEndIndex} stroke="#00d8ff" strokeWidth={2} strokeDasharray="6 4" />
+              <CustomLabel fill="#00d8ff" />
 
               <Bar 
                 dataKey="CDS_IN" 
                 name="Descente" 
-                fill="#00a8e8" 
+                fill="#00d8ff"
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-blue 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-blue-clair 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
               <Bar 
                 dataKey="CDS_OUT" 
                 name="Remontée" 
-                fill="#2e8b57" 
+                fill="#00ff80"
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-blue 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-blue-clair 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
               <Bar 
                 dataKey="ABSYS" 
                 name="Dérapage" 
-                fill="#8b0000" 
+                fill="#8b0000"
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-blue 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-blue-clair 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
             </BarChart>
           </ResponsiveContainer>
@@ -355,7 +355,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
       <style>
         {`
-          @keyframes bar-rise-blue {
+          @keyframes bar-rise-blue-clair {
             0% { 
               transform: scaleY(0); 
               opacity: 0; 
@@ -367,29 +367,29 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             }
           }
 
-          @keyframes pulse-blue {
+          @keyframes pulse-blue-clair {
             0% { 
               transform: scale(1); 
-              box-shadow: 0 0 8px #00bfff; 
+              box-shadow: 0 0 8px #00e6ff; 
             }
             100% { 
               transform: scale(1.04); 
-              box-shadow: 0 0 20px #00bfff; 
+              box-shadow: 0 0 20px #00e6ff; 
             }
           }
 
-          @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 168, 232, 0.7); }
-            50% { box-shadow: 0 0 0 8px rgba(0, 168, 232, 0); }
+          @keyframes pulse-glow-clair {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 216, 255, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(0, 216, 255, 0); }
           }
 
-          @keyframes blue-drift {
+          @keyframes blue-drift-clair {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-10%) translateY(-5%); }
             100% { transform: translateX(0) translateY(0); }
           }
 
-          @keyframes blue-drift-reverse {
+          @keyframes blue-drift-reverse-clair {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(12%) translateY(3%); }
             100% { transform: translateX(0) translateY(0); }

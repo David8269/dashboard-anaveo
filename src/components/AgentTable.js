@@ -56,14 +56,14 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
         borderRadius: 3,
-        border: '1px solid rgba(0, 168, 232, 0.7)',
-        boxShadow: '0 0 20px rgba(0, 168, 232, 0.5)',
+        border: '1px solid rgba(0, 216, 255, 0.7)', // Bordure bleu plus clair
+        boxShadow: '0 0 20px rgba(0, 216, 255, 0.5)', // Ombre bleu plus clair
       }}>
         <CardContent>
           <Typography variant="overline" sx={{
             fontFamily: '"Orbitron", sans-serif',
-            color: '#00a8e8',
-            textShadow: '0 0 8px rgba(0, 168, 232, 0.8)',
+            color: '#00d8ff', // Bleu plus clair
+            textShadow: '0 0 8px rgba(0, 216, 255, 0.8)', // Ombre plus claire
             fontSize: '1.2rem',
             fontWeight: 'bold',
           }}>
@@ -72,8 +72,8 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Chip label="Connexion à la station..." size="small" sx={{
               mb: 2,
-              background: 'linear-gradient(135deg, #000, #1a365d)',
-              color: '#00bfff',
+              background: 'linear-gradient(135deg, #000, #005580)', // Dégradé bleu plus foncé mais plus vif
+              color: '#00e6ff', // Texte plus clair
               fontFamily: '"Montserrat", sans-serif',
               animation: 'pulse-blue 2s infinite alternate',
             }} />
@@ -86,14 +86,14 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 50% 50%, rgba(0,168,232,0.08), transparent 70%)',
+          background: 'radial-gradient(circle at 50% 50%, rgba(0,216,255,0.08), transparent 70%)', // Fond avec nouveau bleu
           animation: 'blue-glow 15s linear infinite',
           pointerEvents: 'none',
         }} />
         <style>{`
           @keyframes pulse-blue {
-            0% { transform: scale(1); box-shadow: 0 0 8px #00bfff; }
-            100% { transform: scale(1.04); box-shadow: 0 0 20px #00bfff; }
+            0% { transform: scale(1); box-shadow: 0 0 8px #00e6ff; } /* Couleur plus claire */
+            100% { transform: scale(1.04); box-shadow: 0 0 20px #00e6ff; } /* Couleur plus claire */
           }
           @keyframes blue-glow {
             0% { transform: translateX(0) translateY(0); }
@@ -114,15 +114,15 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
         borderRadius: 3,
-        border: '1px solid rgba(0, 168, 232, 0.7)',
-        boxShadow: '0 0 20px rgba(0, 168, 232, 0.5)',
+        border: '1px solid rgba(0, 216, 255, 0.7)', // Bordure bleu plus clair
+        boxShadow: '0 0 20px rgba(0, 216, 255, 0.5)', // Ombre bleu plus clair
       }}>
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
             <Typography variant="overline" sx={{
               fontFamily: '"Orbitron", sans-serif',
-              color: '#00a8e8',
-              textShadow: '0 0 8px rgba(0, 168, 232, 0.8)',
+              color: '#00d8ff', // Bleu plus clair
+              textShadow: '0 0 8px rgba(0, 216, 255, 0.8)', // Ombre plus claire
               fontSize: '1.2rem',
               fontWeight: 'bold',
             }}>
@@ -133,13 +133,13 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                 width: 12,
                 height: 12,
                 borderRadius: '50%',
-                bgcolor: isConnected ? '#00a8e8' : '#8b0000',
+                bgcolor: isConnected ? '#00d8ff' : '#8b0000', // Point de connection plus visible
                 animation: isConnected ? 'pulse-glow 2s infinite' : 'none',
               }} />
             </Tooltip>
           </Box>
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="#00bfff" sx={{ textShadow: '0 0 6px rgba(0,168,232,0.6)' }}>
+            <Typography variant="body2" color="#00e6ff" sx={{ textShadow: '0 0 6px rgba(0,216,255,0.6)' }}> {/* Texte plus clair */}
               🌟 Aucun skieur sur les pistes...
             </Typography>
           </Box>
@@ -150,7 +150,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 50% 50%, rgba(0,168,232,0.08), transparent 70%)',
+          background: 'radial-gradient(circle at 50% 50%, rgba(0,216,255,0.08), transparent 70%)', // Fond avec nouveau bleu
           animation: 'blue-glow 15s linear infinite',
           pointerEvents: 'none',
         }} />
@@ -169,15 +169,15 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
       backdropFilter: 'blur(6px)',
       WebkitBackdropFilter: 'blur(6px)',
       borderRadius: 3,
-      border: '1px solid rgba(0, 168, 232, 0.7)',
-      boxShadow: '0 0 20px rgba(0, 168, 232, 0.5)',
+      border: '1px solid rgba(0, 216, 255, 0.7)', // Bordure bleu plus clair
+      boxShadow: '0 0 20px rgba(0, 216, 255, 0.5)', // Ombre bleu plus clair
     }}>
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
           <Typography variant="overline" sx={{
             fontFamily: '"Orbitron", sans-serif',
-            color: '#00a8e8',
-            textShadow: '0 0 8px rgba(0, 168, 232, 0.8)',
+            color: '#00d8ff', // Bleu plus clair
+            textShadow: '0 0 8px rgba(0, 216, 255, 0.8)', // Ombre plus claire
             fontSize: '1.2rem',
             fontWeight: 'bold',
           }}>
@@ -189,12 +189,12 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                 width: 12,
                 height: 12,
                 borderRadius: '50%',
-                bgcolor: isConnected ? '#00a8e8' : '#8b0000',
+                bgcolor: isConnected ? '#00d8ff' : '#8b0000', // Point de connection plus visible
                 animation: isConnected ? 'pulse-glow 2s infinite' : 'none',
               }} />
             </Tooltip>
             {lastUpdate && (
-              <Typography variant="caption" color="#00bfff" sx={{ textShadow: '0 0 4px rgba(0,168,232,0.5)' }}>
+              <Typography variant="caption" color="#00e6ff" sx={{ textShadow: '0 0 4px rgba(0,216,255,0.5)' }}> {/* Texte plus clair */}
                 {`MàJ : ${lastUpdate.toLocaleTimeString()}`}
               </Typography>
             )}
@@ -211,8 +211,8 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     scope="col"
                     sx={{
                       fontWeight: 'bold',
-                      color: '#00bfff',
-                      textShadow: '0 0 6px rgba(0,168,232,0.7)',
+                      color: '#00e6ff', // Texte plus clair
+                      textShadow: '0 0 6px rgba(0,216,255,0.7)', // Ombre plus prononcée
                       fontFamily: '"Orbitron", sans-serif',
                       fontSize: '0.85rem',
                     }}
@@ -238,8 +238,8 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     hover
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(0, 168, 232, 0.08)',
-                        boxShadow: 'inset 0 0 12px rgba(0, 168, 232, 0.4)',
+                        backgroundColor: 'rgba(0, 216, 255, 0.08)', // Fond hover plus clair
+                        boxShadow: 'inset 0 0 12px rgba(0, 216, 255, 0.4)', // Ombre plus prononcée
                         transform: 'scale(1.02)',
                       },
                       transition: 'all 0.25s ease-in-out',
@@ -251,7 +251,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           <span
                             style={{
                               fontSize: '18px',
-                              filter: 'drop-shadow(0 0 8px #00bfff)',
+                              filter: 'drop-shadow(0 0 8px #00e6ff)', // Ombre plus prononcée
                               animation: 'medal-glow 2.5s infinite alternate',
                             }}
                           >
@@ -265,13 +265,13 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                       <Box display="flex" alignItems="center">
                         <Avatar
                           sx={{
-                            bgcolor: '#00a8e8',
-                            color: '#fff',
+                            bgcolor: '#00d8ff', // Bleu plus clair
+                            color: '#000', // Texte noir pour meilleur contraste
                             width: 28,
                             height: 28,
                             fontSize: 12,
                             mr: 1,
-                            border: '1px solid #00bfff',
+                            border: '1px solid #00e6ff', // Bordure plus claire
                             transition: 'all 0.3s',
                             '&:hover': { transform: 'rotate(5deg) scale(1.1)' },
                           }}
@@ -296,10 +296,10 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           transition: 'all 0.3s ease',
                           '&:hover': {
                             transform: 'scale(1.1)',
-                            boxShadow: '0 0 12px #00bfff',
+                            boxShadow: '0 0 12px #00e6ff', // Ombre plus prononcée
                           },
                           ...(statusConfig.color === 'success'
-                            ? { backgroundColor: '#228b22', color: '#fff' }
+                            ? { backgroundColor: '#00ff80', color: '#000' } // Vert plus voyant avec texte noir
                             : statusConfig.color === 'warning'
                             ? { backgroundColor: '#ffaa00', color: '#000' }
                             : { backgroundColor: '#616161', color: '#fff' }),
@@ -321,13 +321,13 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                             transition: 'all 0.3s',
                             ...(inboundCritical
                               ? {
-                                  backgroundColor: '#8b0000',
+                                  backgroundColor: '#ff5252', // Rouge plus visible
                                   fontFamily: '"Montserrat", sans-serif',
                                   animation: 'pulse-blue 2s infinite alternate',
                                 }
                               : getDurationColor(inboundSec) === 'warning'
                               ? { backgroundColor: '#ffaa00', color: '#000' }
-                              : { backgroundColor: '#228b22' }),
+                              : { backgroundColor: '#00ff80', color: '#000' }), // Vert plus voyant avec texte noir
                           }}
                         />
                       ) : (
@@ -349,13 +349,13 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                             transition: 'all 0.3s',
                             ...(outboundCritical
                               ? {
-                                  backgroundColor: '#8b0000',
+                                  backgroundColor: '#ff5252', // Rouge plus visible
                                   fontFamily: '"Montserrat", sans-serif',
                                   animation: 'pulse-blue 2s infinite alternate',
                                 }
                               : getDurationColor(outboundSec) === 'warning'
                               ? { backgroundColor: '#ffaa00', color: '#000' }
-                              : { backgroundColor: '#228b22' }),
+                              : { backgroundColor: '#00ff80', color: '#000' }), // Vert plus voyant avec texte noir
                           }}
                         />
                       ) : (
@@ -376,23 +376,23 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 50% 50%, rgba(0,168,232,0.08), transparent 70%)',
+          background: 'radial-gradient(circle at 50% 50%, rgba(0,216,255,0.08), transparent 70%)', // Fond avec nouveau bleu
           animation: 'blue-glow 15s linear infinite',
           pointerEvents: 'none',
         }}
       />
       <style>{`
         @keyframes medal-glow {
-          0% { filter: drop-shadow(0 0 6px #00bfff); }
-          100% { filter: drop-shadow(0 0 12px #00bfff) drop-shadow(0 0 20px rgba(0,191,255,0.8)); }
+          0% { filter: drop-shadow(0 0 6px #00e6ff); } /* Couleur plus claire */
+          100% { filter: drop-shadow(0 0 12px #00e6ff) drop-shadow(0 0 20px rgba(0,230,255,0.8)); } /* Couleur plus claire */
         }
         @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(0, 168, 232, 0.7); }
-          50% { box-shadow: 0 0 0 8px rgba(0, 168, 232, 0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(0, 216, 255, 0.7); } /* Nouveau bleu */
+          50% { box-shadow: 0 0 0 8px rgba(0, 216, 255, 0); } /* Nouveau bleu */
         }
         @keyframes pulse-blue {
-          0% { transform: scale(1); box-shadow: 0 0 8px #00bfff; }
-          100% { transform: scale(1.04); box-shadow: 0 0 20px #00bfff; }
+          0% { transform: scale(1); box-shadow: 0 0 8px #00e6ff; } /* Couleur plus claire */
+          100% { transform: scale(1.04); box-shadow: 0 0 20px #00e6ff; } /* Couleur plus claire */
         }
         @keyframes blue-glow {
           0% { transform: translateX(0) translateY(0); }
