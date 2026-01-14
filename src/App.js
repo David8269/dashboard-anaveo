@@ -83,11 +83,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-<<<<<<< HEAD
 // === Clock (version Hiver – avec effet gel) ===
-=======
-// === Clock (version Nouvel An – avec flou) ===
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -104,13 +100,8 @@ function Clock() {
         fontFamily: '"Orbitron", sans-serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-<<<<<<< HEAD
         color: '#00a8e8',
         textShadow: '0 0 12px rgba(0, 168, 232, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
-=======
-        color: '#d4af37',
-        textShadow: '0 0 12px rgba(212, 175, 55, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
@@ -118,11 +109,7 @@ function Clock() {
         borderRadius: '16px',
         display: 'inline-block',
         margin: '0 auto',
-<<<<<<< HEAD
         border: '1px solid rgba(0, 168, 232, 0.6)',
-=======
-        border: '1px solid rgba(212, 175, 55, 0.6)',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
         boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
       }}
       role="status"
@@ -626,11 +613,7 @@ const App = () => {
       (a.inbound + a.outbound) > (top?.inbound + top?.outbound || 0) ? a : top, null
     );
     if (currentTop && (!prevTop || prevTop.name !== currentTop.name)) {
-<<<<<<< HEAD
       const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik','marina','gwen']);
-=======
-      const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik','marina']);
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
       const firstName = currentTop.name.split(' ')[0]?.toLowerCase() || '';
       const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
       playSound(soundToPlay, `Top agent : ${currentTop.name}`);
@@ -640,31 +623,19 @@ const App = () => {
 
   return (
     <>
-<<<<<<< HEAD
       {/* ✅ Polices pour le thème hiver */}
       <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap"
-=======
-      {/* ✅ Polices pour le Nouvel An */}
-      <link
-        href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap"
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
         rel="stylesheet"
       />
       <style>
         {`
-<<<<<<< HEAD
 /* ✨ Flocons de neige */
 @keyframes snowflake {
-=======
-/* ✨ Paillettes */
-@keyframes sparkle {
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
   0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
   20% { opacity: 1; }
   100% { transform: translateY(100vh) rotate(360deg); opacity: 0.7; }
 }
-<<<<<<< HEAD
 .snowflake {
   position: fixed;
   top: -20px;
@@ -689,39 +660,12 @@ const App = () => {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom, #00a8e8, #0077cc);
-=======
-.sparkle {
-  position: fixed;
-  top: -20px;
-  font-size: 1rem;
-  color: #d4af37;
-  z-index: 1;
-  opacity: 0;
-  animation: sparkle 8s linear forwards;
-  pointer-events: none;
-  text-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
-}
-.sparkle:nth-child(2n) { left: 10%; animation-duration: 10s; animation-delay: 1s; }
-.sparkle:nth-child(3n) { left: 20%; animation-duration: 12s; animation-delay: 2s; }
-.sparkle:nth-child(4n) { left: 35%; animation-duration: 9s; animation-delay: 0.5s; }
-.sparkle:nth-child(5n) { left: 50%; animation-duration: 11s; animation-delay: 3s; }
-.sparkle:nth-child(6n) { left: 65%; animation-duration: 8s; animation-delay: 1.5s; }
-.sparkle:nth-child(7n) { left: 80%; animation-duration: 13s; animation-delay: 4s; }
-.sparkle:nth-child(8n) { left: 90%; animation-duration: 10s; animation-delay: 2.5s; }
-
-/* Scrollbar dorée */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #d4af37, #b8860b);
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
   border-radius: 5px;
   border: 2px solid transparent;
   background-clip: padding-box;
   transition: all 0.3s ease;
 }
 body.show-scrollbar ::-webkit-scrollbar-thumb {
-<<<<<<< HEAD
   background: linear-gradient(to bottom, #00bfff, #00a8e8);
 }
 body.show-scrollbar ::-webkit-scrollbar-track {
@@ -733,19 +677,6 @@ body.show-scrollbar { scrollbar-color: #00a8e8 rgba(0, 168, 232, 0.1); }
       </style>
 
       {/* 🎿 Fond d’écran hiver */}
-=======
-  background: linear-gradient(to bottom, #ffd700, #d4af37);
-}
-body.show-scrollbar ::-webkit-scrollbar-track {
-  background: rgba(212, 175, 55, 0.1);
-}
-* { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-body.show-scrollbar { scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); }
-`}
-      </style>
-
-      {/* 🎉 Fond d’écran */}
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
       <Box
         sx={{
           position: 'fixed',
@@ -753,28 +684,17 @@ body.show-scrollbar { scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); }
           left: 0,
           width: '100%',
           height: '100%',
-<<<<<<< HEAD
           backgroundImage: `url('${process.env.PUBLIC_URL}/images/winter-bg.jpg')`,
           backgroundSize: 'cover',
-=======
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/newyear-bg.jpg')`,
-          backgroundSize: '100% auto',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           zIndex: 0,
         }}
       />
 
-<<<<<<< HEAD
       {/* ✨ Flocons de neige animés */}
       {[...Array(12)].map((_, i) => (
         <div key={i} className="snowflake">❄️</div>
-=======
-      {/* ✨ Paillettes */}
-      {[...Array(8)].map((_, i) => (
-        <div key={i} className="sparkle">✨</div>
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
       ))}
 
       {/* Conteneur principal */}
@@ -788,17 +708,10 @@ body.show-scrollbar { scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); }
           fontFamily: '"Roboto", sans-serif',
           px: { xs: 0.5, sm: 1, md: 2 },
         }}
-<<<<<<< HEAD
         aria-label="Tableau de bord des sports d'hiver en temps réel"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
           {/* Titre élégant avec effet gel */}
-=======
-        aria-label="Tableau de bord du Nouvel An en temps réel"
-      >
-        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {/* Titre élégant avec flou */}
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
           <Box
             sx={{
               mb: 2,
@@ -806,11 +719,7 @@ body.show-scrollbar { scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); }
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
               borderRadius: '18px',
-<<<<<<< HEAD
               border: '2px solid rgba(0, 168, 232, 0.7)',
-=======
-              border: '2px solid rgba(212, 175, 55, 0.7)',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
               boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
               display: 'inline-block',
@@ -822,28 +731,16 @@ body.show-scrollbar { scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); }
               variant="h1"
               align="center"
               sx={{
-<<<<<<< HEAD
                 fontFamily: '"Montserrat", sans-serif',
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
                 color: '#00a8e8',
                 textShadow: '0 0 14px rgba(0, 168, 232, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
-=======
-                fontFamily: '"Great Vibes", cursive',
-                fontWeight: 'bold',
-                fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#d4af37',
-                textShadow: '0 0 14px rgba(212, 175, 55, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
                 margin: 0,
                 letterSpacing: '0.02em',
               }}
             >
-<<<<<<< HEAD
               🏂 Anaveo - Winter Sports 2026 🏂
-=======
-              🥂 Anaveo - Bonne Année 2026 ! 🥂
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
             </Typography>
           </Box>
 
@@ -856,11 +753,7 @@ body.show-scrollbar { scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); }
               textAlign="center"
               mb={2}
               sx={{
-<<<<<<< HEAD
                 color: '#00bfff',
-=======
-                color: '#ffd700',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
                 fontWeight: 'bold',
                 textShadow: '0 1px 3px rgba(0,0,0,0.6)',
                 px: { xs: 2, sm: 3 },
@@ -872,13 +765,8 @@ body.show-scrollbar { scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); }
                 variant="outlined"
                 sx={{
                   ml: 1,
-<<<<<<< HEAD
                   borderColor: '#00a8e8',
                   color: '#00bfff',
-=======
-                  borderColor: '#d4af37',
-                  color: '#ffd700',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
                   borderRadius: '20px',
                   fontWeight: 600,
                   fontFamily: '"Orbitron", sans-serif',
@@ -944,41 +832,24 @@ body.show-scrollbar { scrollbar-color: #d4af37 rgba(212, 175, 55, 0.1); }
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
-<<<<<<< HEAD
                           background: 'linear-gradient(135deg, #000, #1a365d)',
                           color: '#00bfff',
-=======
-                          background: 'linear-gradient(135deg, #000, #333)',
-                          color: '#ffd700',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '10px 20px',
                           fontSize: '1rem',
                           borderRadius: '50px',
-<<<<<<< HEAD
                           border: '2px solid #00a8e8',
                           boxShadow: '0 0 14px rgba(0, 168, 232, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
                           '&:hover': {
                             background: 'linear-gradient(135deg, #2a4a7a, #000)',
                             boxShadow: '0 0 20px rgba(0, 191, 255, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
-=======
-                          border: '2px solid #d4af37',
-                          boxShadow: '0 0 14px rgba(212, 175, 55, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #222, #000)',
-                            boxShadow: '0 0 20px rgba(255, 215, 0, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
                             transform: 'scale(1.05)',
                           },
                           fontFamily: '"Orbitron", sans-serif',
                         }}
                       >
-<<<<<<< HEAD
                         🏂 Démarrer le ski dashboard
-=======
-                        🥂 Célébrer la nouvelle année !
->>>>>>> 861fb5a0d3729959038e5eb57b4a15dfa2298129
                       </Button>
                     </Box>
                   )}
