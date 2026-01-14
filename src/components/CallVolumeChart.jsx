@@ -222,7 +222,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               fontSize: '1.2rem',
             }}
           >
-            📊 Volume des pistes
+            📊 Call Volume
           </Typography>
           <Chip
             label={wsConnected ? '🟢 Live' : '🔴 Offline'}
