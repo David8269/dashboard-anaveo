@@ -613,7 +613,7 @@ const App = () => {
       (a.inbound + a.outbound) > (top?.inbound + top?.outbound || 0) ? a : top, null
     );
     if (currentTop && (!prevTop || prevTop.name !== currentTop.name)) {
-      const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik','marina','gwen']);
+      const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik','marina','gwenaelle']);
       const firstName = currentTop.name.split(' ')[0]?.toLowerCase() || '';
       const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
       playSound(soundToPlay, `Top agent : ${currentTop.name}`);
