@@ -2,29 +2,29 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="./favicon-winter.ico" />
+  <link rel="icon" href="./favicon-chandeleur.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Sports d'hiver 2026 ! Suivi en temps réel des performances sur les pistes." />
-  <title>ANAVEO - 🏂 Centre d'Opérations Hivernal 2026</title>
+  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Chandeleur 2026 ! Suivi en temps réel des performances en cuisine." />
+  <title>ANAVEO - 🥞 Centre d'Opérations de la Chandeleur 2026</title>
 
-  <!-- 🌨️ Polices élégantes pour le thème hiver -->
+  <!-- 🥞 Polices élégantes pour le thème Chandeleur -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- ❄️ Styles globaux + flocons tombants -->
+  <!-- 🥞 Styles globaux + crêpes tombantes -->
   <style>
     /* === Variables et styles de base === */
     :root {
-      --winter-bg: #000000;
-      --winter-paper: #000000;
-      --winter-primary: #00d8ff;   /* Bleu plus clair */
-      --winter-secondary: #00ff80; /* Vert plus voyant */
-      --winter-error: #8b0000;
-      --winter-success: #00ff80;   /* Vert plus voyant */
-      --winter-warning: #ffaa00;
-      --winter-text: #ffffff;
-      --winter-cyan: #00e6ff;      /* Cyan plus clair */
+      --crepe-bg: #000000;
+      --crepe-paper: #000000;
+      --crepe-primary: #FFD700;      /* Or doré */
+      --crepe-secondary: #FFA500;    /* Orange doré */
+      --crepe-error: #8b0000;
+      --crepe-success: #FFD700;      /* Or doré */
+      --crepe-warning: #ff9800;
+      --crepe-text: #ffffff;
+      --crepe-gold: #FFD700;         /* Or brillant */
     }
 
     html, body {
@@ -36,8 +36,8 @@
     }
 
     body {
-      background-color: var(--winter-bg);
-      color: var(--winter-text);
+      background-color: var(--crepe-bg);
+      color: var(--crepe-text);
       font-family: 'Roboto', sans-serif;
       min-height: 100vh;
       position: relative;
@@ -49,7 +49,7 @@
       display: none;
     }
 
-    /* === Arrière-plan décoratif subtil (effet neige) === */
+    /* === Arrière-plan décoratif subtil (effet doré) === */
     body::before {
       content: '';
       position: fixed;
@@ -58,8 +58,8 @@
       width: 100%;
       height: 100%;
       background: 
-        radial-gradient(circle at 20% 30%, rgba(0, 216, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(0, 255, 128, 0.04) 0%, transparent 60%);
+        radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 165, 0, 0.08) 0%, transparent 60%);
       pointer-events: none;
       z-index: 0;
     }
@@ -85,43 +85,43 @@
       padding: 2rem;
       background: rgba(0, 0, 0, 0.85);
       border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0, 216, 255, 0.6);
-      border: 2px solid #00d8ff;
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+      border: 2px solid #FFD700;
       max-width: 90vw;
       font-family: 'Montserrat', sans-serif;
-      color: #00e6ff;
-      text-shadow: 0 0 8px rgba(0, 216, 255, 0.8);
+      color: #FFD700;
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
     }
 
-    .ski-icon {
+    .crepe-icon {
       font-size: 3rem;
       margin-bottom: 1rem;
-      color: #00e6ff;
-      text-shadow: 0 0 12px rgba(0, 230, 255, 0.9);
-      animation: glide-gentle 3s ease-in-out infinite;
+      color: #FFD700;
+      text-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
+      animation: flip-crepe 3s ease-in-out infinite;
     }
 
-    @keyframes glide-gentle {
+    @keyframes flip-crepe {
       0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-8px) scale(1.05); }
+      50% { transform: translateY(-8px) scale(1.05) rotateY(180deg); }
     }
 
-    /* === Flocons de neige tombants – totalement opaques et brillants === */
-    .falling-snowflake {
+    /* === Crêpes tombantes – totalement opaques et brillantes === */
+    .falling-crepe {
       position: fixed;
       top: -100px;
       font-size: 24px;
       opacity: 1;
       pointer-events: none;
       z-index: 1;
-      animation: fall-snowflake linear infinite;
+      animation: fall-crepe linear infinite;
       text-shadow: 
-        0 0 8px var(--winter-cyan),
-        0 0 16px rgba(0, 230, 255, 0.8);
+        0 0 8px var(--crepe-gold),
+        0 0 16px rgba(255, 215, 0, 0.8);
       will-change: transform;
     }
 
-    @keyframes fall-snowflake {
+    @keyframes fall-crepe {
       0% {
         transform: translateY(-10vh) rotate(0deg);
       }
@@ -130,65 +130,65 @@
       }
     }
 
-    /* === Variations individuelles (flocons de différentes tailles et styles) === */
-    .falling-snowflake:nth-child(1)  { left: 5%;  animation-duration: 18s;  animation-delay: 0s;   font-size: 32px; color: #ffffff; }
-    .falling-snowflake:nth-child(2)  { left: 15%; animation-duration: 22s;  animation-delay: 1s;   font-size: 28px; color: #e0f7ff; }
-    .falling-snowflake:nth-child(3)  { left: 25%; animation-duration: 15s;  animation-delay: 0.5s; font-size: 30px; color: #00e6ff; }
-    .falling-snowflake:nth-child(4)  { left: 35%; animation-duration: 25s;  animation-delay: 2s;   font-size: 34px; color: #ffffff; }
-    .falling-snowflake:nth-child(5)  { left: 45%; animation-duration: 20s;  animation-delay: 1.2s; font-size: 26px; color: #a0e7ff; }
-    .falling-snowflake:nth-child(6)  { left: 55%; animation-duration: 23s;  animation-delay: 0.8s; font-size: 32px; color: #00d8ff; }
-    .falling-snowflake:nth-child(7)  { left: 65%; animation-duration: 17s;  animation-delay: 1.5s; font-size: 28px; color: #ffffff; }
-    .falling-snowflake:nth-child(8)  { left: 75%; animation-duration: 21s;  animation-delay: 0.3s; font-size: 30px; color: #e0f7ff; }
-    .falling-snowflake:nth-child(9)  { left: 85%; animation-duration: 24s;  animation-delay: 1.8s; font-size: 24px; color: #00e6ff; }
-    .falling-snowflake:nth-child(10) { left: 10%; animation-duration: 19s;  animation-delay: 0.7s; font-size: 26px; color: #ffffff; }
-    .falling-snowflake:nth-child(11) { left: 20%; animation-duration: 22s;  animation-delay: 1.1s; font-size: 32px; color: #a0e7ff; }
-    .falling-snowflake:nth-child(12) { left: 30%; animation-duration: 16s;  animation-delay: 0.9s; font-size: 28px; color: #00d8ff; }
-    .falling-snowflake:nth-child(13) { left: 40%; animation-duration: 20s;  animation-delay: 0.4s; font-size: 30px; color: #ffffff; }
-    .falling-snowflake:nth-child(14) { left: 50%; animation-duration: 23s;  animation-delay: 1.3s; font-size: 24px; color: #e0f7ff; }
-    .falling-snowflake:nth-child(15) { left: 60%; animation-duration: 18s;  animation-delay: 0.6s; font-size: 32px; color: #00e6ff; }
-    .falling-snowflake:nth-child(16) { left: 70%; animation-duration: 21s;  animation-delay: 1.7s; font-size: 26px; color: #ffffff; }
-    .falling-snowflake:nth-child(17) { left: 80%; animation-duration: 19s;  animation-delay: 0.2s; font-size: 28px; color: #a0e7ff; }
-    .falling-snowflake:nth-child(18) { left: 90%; animation-duration: 22s;  animation-delay: 1.4s; font-size: 30px; color: #00d8ff; }
-    .falling-snowflake:nth-child(19) { left: 5%;  animation-duration: 16s;  animation-delay: 0.1s; font-size: 24px; color: #ffffff; }
-    .falling-snowflake:nth-child(20) { left: 12%; animation-duration: 24s;  animation-delay: 1.9s; font-size: 32px; color: #e0f7ff; }
-    .falling-snowflake:nth-child(21) { left: 18%; animation-duration: 19s;  animation-delay: 0.5s; font-size: 28px; color: #00e6ff; }
-    .falling-snowflake:nth-child(22) { left: 28%; animation-duration: 23s;  animation-delay: 1.0s; font-size: 30px; color: #ffffff; }
-    .falling-snowflake:nth-child(23) { left: 38%; animation-duration: 17s;  animation-delay: 0.7s; font-size: 26px; color: #a0e7ff; }
-    .falling-snowflake:nth-child(24) { left: 48%; animation-duration: 21s;  animation-delay: 1.6s; font-size: 32px; color: #00d8ff; }
+    /* === Variations individuelles (crêpes de différentes tailles et styles) === */
+    .falling-crepe:nth-child(1)  { left: 5%;  animation-duration: 18s;  animation-delay: 0s;   font-size: 32px; color: #FFD700; }
+    .falling-crepe:nth-child(2)  { left: 15%; animation-duration: 22s;  animation-delay: 1s;   font-size: 28px; color: #FFA500; }
+    .falling-crepe:nth-child(3)  { left: 25%; animation-duration: 15s;  animation-delay: 0.5s; font-size: 30px; color: #FFD700; }
+    .falling-crepe:nth-child(4)  { left: 35%; animation-duration: 25s;  animation-delay: 2s;   font-size: 34px; color: #FF8C00; }
+    .falling-crepe:nth-child(5)  { left: 45%; animation-duration: 20s;  animation-delay: 1.2s; font-size: 26px; color: #FFD700; }
+    .falling-crepe:nth-child(6)  { left: 55%; animation-duration: 23s;  animation-delay: 0.8s; font-size: 32px; color: #FFA500; }
+    .falling-crepe:nth-child(7)  { left: 65%; animation-duration: 17s;  animation-delay: 1.5s; font-size: 28px; color: #FFD700; }
+    .falling-crepe:nth-child(8)  { left: 75%; animation-duration: 21s;  animation-delay: 0.3s; font-size: 30px; color: #FF8C00; }
+    .falling-crepe:nth-child(9)  { left: 85%; animation-duration: 24s;  animation-delay: 1.8s; font-size: 24px; color: #FFD700; }
+    .falling-crepe:nth-child(10) { left: 10%; animation-duration: 19s;  animation-delay: 0.7s; font-size: 26px; color: #FFA500; }
+    .falling-crepe:nth-child(11) { left: 20%; animation-duration: 22s;  animation-delay: 1.1s; font-size: 32px; color: #FFD700; }
+    .falling-crepe:nth-child(12) { left: 30%; animation-duration: 16s;  animation-delay: 0.9s; font-size: 28px; color: #FF8C00; }
+    .falling-crepe:nth-child(13) { left: 40%; animation-duration: 20s;  animation-delay: 0.4s; font-size: 30px; color: #FFD700; }
+    .falling-crepe:nth-child(14) { left: 50%; animation-duration: 23s;  animation-delay: 1.3s; font-size: 24px; color: #FFA500; }
+    .falling-crepe:nth-child(15) { left: 60%; animation-duration: 18s;  animation-delay: 0.6s; font-size: 32px; color: #FFD700; }
+    .falling-crepe:nth-child(16) { left: 70%; animation-duration: 21s;  animation-delay: 1.7s; font-size: 26px; color: #FF8C00; }
+    .falling-crepe:nth-child(17) { left: 80%; animation-duration: 19s;  animation-delay: 0.2s; font-size: 28px; color: #FFD700; }
+    .falling-crepe:nth-child(18) { left: 90%; animation-duration: 22s;  animation-delay: 1.4s; font-size: 30px; color: #FFA500; }
+    .falling-crepe:nth-child(19) { left: 5%;  animation-duration: 16s;  animation-delay: 0.1s; font-size: 24px; color: #FFD700; }
+    .falling-crepe:nth-child(20) { left: 12%; animation-duration: 24s;  animation-delay: 1.9s; font-size: 32px; color: #FF8C00; }
+    .falling-crepe:nth-child(21) { left: 18%; animation-duration: 19s;  animation-delay: 0.5s; font-size: 28px; color: #FFD700; }
+    .falling-crepe:nth-child(22) { left: 28%; animation-duration: 23s;  animation-delay: 1.0s; font-size: 30px; color: #FFA500; }
+    .falling-crepe:nth-child(23) { left: 38%; animation-duration: 17s;  animation-delay: 0.7s; font-size: 26px; color: #FFD700; }
+    .falling-crepe:nth-child(24) { left: 48%; animation-duration: 21s;  animation-delay: 1.6s; font-size: 32px; color: #FF8C00; }
   </style>
 </head>
 <body>
-  <!-- ❄️ 24 flocons de neige tombants – totalement opaques -->
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">🌨️</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">⛷️</div>
-  <div class="falling-snowflake">🏂</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">🌨️</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">⛷️</div>
-  <div class="falling-snowflake">🏂</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">🌨️</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">⛷️</div>
-  <div class="falling-snowflake">🏂</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">🌨️</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">⛷️</div>
-  <div class="falling-snowflake">🏂</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">🌨️</div>
-  <div class="falling-snowflake">❄️</div>
-  <div class="falling-snowflake">⛷️</div>
+  <!-- 🥞 24 crêpes tombantes – totalement opaques -->
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">🍳</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">👨‍🍳</div>
+  <div class="falling-crepe">🧈</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">🍳</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">👨‍🍳</div>
+  <div class="falling-crepe">🧈</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">🍳</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">👨‍🍳</div>
+  <div class="falling-crepe">🧈</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">🍳</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">👨‍🍳</div>
+  <div class="falling-crepe">🧈</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">🍳</div>
+  <div class="falling-crepe">🥞</div>
+  <div class="falling-crepe">👨‍🍳</div>
 
-  <!-- ❄️ Écran de chargement hivernal -->
+  <!-- 🥞 Écran de chargement Chandeleur -->
   <div id="loading-screen">
     <div class="loading-content">
-      <div class="ski-icon">🏂</div>
-      Préparation de la station de ski…
+      <div class="crepe-icon">🥞</div>
+      Préparation de la pâte à crêpes…
     </div>
   </div>
 

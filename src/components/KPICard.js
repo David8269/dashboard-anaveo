@@ -3,14 +3,14 @@ import { Card, CardContent, Typography } from '@mui/material';
 
 const getIconForTitle = (title) => {
   const lower = title.toLowerCase();
-  if (lower.includes('agent')) return '⛷️';
-  if (lower.includes('call') || lower.includes('appel') || lower.includes('descente')) return '🏂';
-  if (lower.includes('abandon') || lower.includes('dérapage')) return '❄️';
+  if (lower.includes('agent')) return '👨‍🍳';
+  if (lower.includes('call') || lower.includes('appel') || lower.includes('crêpe')) return '🥞';
+  if (lower.includes('abandon') || lower.includes('brûlée')) return '🔥';
   if (lower.includes('aht') || lower.includes('durée') || lower.includes('temps')) return '⏱️';
   if (lower.includes('missed')) return '⏱️';
   if (lower.includes('total') || lower.includes('nombre')) return '📊';
-  if (lower.includes('remontée')) return '🚠';
-  return '⛷️';
+  if (lower.includes('retourn')) return '🔄';
+  return '👨‍🍳';
 };
 
 export default function KPICard({ 
@@ -37,13 +37,13 @@ export default function KPICard({
 
   const isValueCritical = isCritical || valueColor === 'error';
   const getValueColor = () => {
-    if (isValueCritical) return '#00e6ff'; // Cyan plus clair
+    if (isValueCritical) return '#c62828'; // Rouge alerte
     switch (valueColor) {
-      case 'success': return '#00ff80'; // Vert plus voyant
-      case 'warning': return '#ffaa00';
-      case 'error':   return '#00e6ff'; // Cyan plus clair pour les erreurs
-      case 'info':    return '#4fc3f7';
-      default:        return '#ffffff';
+      case 'success': return '#FFD700'; // Or doré
+      case 'warning': return '#ff9800';
+      case 'error':   return '#c62828'; // Rouge alerte
+      case 'info':    return '#FFD700';
+      default:        return '#FFD700';
     }
   };
 
@@ -52,36 +52,36 @@ export default function KPICard({
   return (
     <>
       <style>{`
-        @keyframes kpi-highlight-winter-clair {
+        @keyframes kpi-highlight-crepe {
           0% { 
-            background-color: rgba(0, 216, 255, 0.15); 
-            box-shadow: 0 0 15px rgba(0, 216, 255, 0.5); 
+            background-color: rgba(255, 215, 0, 0.15); 
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); 
           }
           100% { 
             background-color: transparent; 
-            box-shadow: 0 0 0 rgba(0, 216, 255, 0); 
+            box-shadow: 0 0 0 rgba(255, 215, 0, 0); 
           }
         }
 
-        @keyframes pulse-critical-winter-clair {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(0, 230, 255, 0.7); }
-          50% { box-shadow: 0 0 0 10px rgba(0, 230, 255, 0); }
+        @keyframes pulse-critical-crepe {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.7); }
+          50% { box-shadow: 0 0 0 10px rgba(198, 40, 40, 0); }
         }
 
-        @keyframes shake-critical-winter-clair {
+        @keyframes shake-critical-crepe {
           0%, 100% { transform: translateX(0); }
           10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
           20%, 40%, 60%, 80% { transform: translateX(3px); }
         }
 
-        @keyframes twinkle-flicker-winter-clair {
+        @keyframes twinkle-flicker-crepe {
           0%, 100% { opacity: 1; filter: brightness(1); }
           25% { opacity: 0.95; filter: brightness(1.1); }
           50% { opacity: 1; filter: brightness(0.95); }
           75% { opacity: 0.98; filter: brightness(1.05); }
         }
 
-        @keyframes blue-drift-kpi-clair {
+        @keyframes crepe-drift-kpi {
           0% { transform: translateX(0) translateY(0); opacity: 0.6; }
           50% { transform: translateX(-5%) translateY(-3%); opacity: 0.8; }
           100% { transform: translateX(0) translateY(0); opacity: 0.6; }
@@ -90,31 +90,31 @@ export default function KPICard({
 
       <Card
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0.45)',
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.55)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
           height: `${height}px`,
           borderRadius: 3,
-          border: `1px solid ${isValueCritical ? '#00e6ff' : 'rgba(0, 216, 255, 0.7)'}`, // Bleu plus clair
+          border: `1px solid ${isValueCritical ? '#c62828' : 'rgba(255, 215, 0, 0.6)'}`,
           boxShadow: isValueCritical 
-            ? '0 0 20px rgba(0, 230, 255, 0.6)' 
-            : '0 0 12px rgba(0, 216, 255, 0.4)',
+            ? '0 0 20px rgba(198, 40, 40, 0.4)' 
+            : '0 4px 16px rgba(0,0,0,0.4)',
           transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.4, 1)',
           ...(animate && {
-            animation: `kpi-highlight-winter-clair 0.8s ease-out`,
+            animation: `kpi-highlight-crepe 0.8s ease-out`,
           }),
           ...(isValueCritical && {
-            animation: 'shake-critical-winter-clair 2.5s infinite, pulse-critical-winter-clair 2s infinite',
+            animation: 'shake-critical-crepe 2.5s infinite, pulse-critical-crepe 2s infinite',
             '&:hover': {
-              animation: 'pulse-critical-winter-clair 2s infinite',
+              animation: 'pulse-critical-crepe 2s infinite',
             },
           }),
           '&:hover': {
             transform: 'translateY(-6px)',
             boxShadow: isValueCritical
-              ? '0 8px 25px rgba(0, 230, 255, 0.8)'
-              : '0 6px 20px rgba(0, 216, 255, 0.6)',
-            border: `1px solid ${isValueCritical ? '#00e6ff' : '#00d8ff'}`, // Bleu plus clair
+              ? '0 8px 25px rgba(198, 40, 40, 0.5)'
+              : '0 6px 20px rgba(255, 215, 0, 0.4)',
+            border: `1px solid ${isValueCritical ? '#ff5252' : '#FFD700'}`,
           },
           position: 'relative',
           overflow: 'hidden',
@@ -126,8 +126,8 @@ export default function KPICard({
             right: 0,
             bottom: 0,
             background: isValueCritical
-              ? 'radial-gradient(circle at 50% 0%, rgba(0,230,255,0.2) 0%, transparent 70%)'
-              : 'radial-gradient(circle at 50% 0%, rgba(0,216,255,0.1) 0%, transparent 70%)',
+              ? 'radial-gradient(circle at 50% 0%, rgba(198, 40, 40, 0.15) 0%, transparent 70%)'
+              : 'radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.1) 0%, transparent 70%)',
             pointerEvents: 'none',
             zIndex: 0,
           },
@@ -139,11 +139,11 @@ export default function KPICard({
             width: '180%',
             height: '80%',
             background: isValueCritical
-              ? 'radial-gradient(circle at 60% 40%, rgba(0,230,255,0.15), transparent 75%)'
-              : 'radial-gradient(circle at 40% 60%, rgba(0,255,128,0.08), transparent 80%)', // Vert plus voyant
+              ? 'radial-gradient(circle at 60% 40%, rgba(198, 40, 40, 0.1), transparent 75%)'
+              : 'radial-gradient(circle at 40% 60%, rgba(93, 64, 55, 0.1), transparent 80%)',
             pointerEvents: 'none',
             zIndex: 0,
-            animation: 'blue-drift-kpi-clair 18s linear infinite',
+            animation: 'crepe-drift-kpi 18s linear infinite',
           },
         }}
       >
@@ -164,9 +164,9 @@ export default function KPICard({
             variant="overline"
             sx={{
               fontWeight: 'bold',
-              color: '#00e6ff', // Cyan plus clair
-              textShadow: '0 0 6px rgba(0,216,255,0.7)', // Ombre plus prononcée
-              fontFamily: '"Orbitron", sans-serif',
+              color: '#FFD700',
+              textShadow: '0 0 12px rgba(255, 215, 0, 0.8)',
+              fontFamily: '"Montserrat", sans-serif',
               fontSize: '1.2rem',
               display: 'flex',
               alignItems: 'center',
@@ -174,7 +174,7 @@ export default function KPICard({
               textAlign: 'center',
               lineHeight: 1.3,
               ...(isValueCritical && {
-                animation: 'twinkle-flicker-winter-clair 3s infinite alternate',
+                animation: 'twinkle-flicker-crepe 3s infinite alternate',
               }),
             }}
           >
@@ -185,7 +185,7 @@ export default function KPICard({
             <Typography 
               variant="caption" 
               sx={{ 
-                color: '#00d8ff', // Bleu plus clair
+                color: '#FFD700',
                 display: 'block', 
                 mb: 1,
                 fontSize: '0.95rem',
@@ -206,7 +206,7 @@ export default function KPICard({
               color: getValueColor(),
               textAlign: 'center',
               fontWeight: 'bold',
-              fontFamily: '"Orbitron", sans-serif',
+              fontFamily: '"Montserrat", sans-serif',
               transition: 'all 0.3s ease',
               willChange: 'transform',
               transformOrigin: 'center',
@@ -218,8 +218,8 @@ export default function KPICard({
                 transition: 'transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1)',
               }),
               ...(isValueCritical && {
-                textShadow: '0 0 8px rgba(0,230,255,0.9), 0 0 16px rgba(0,216,255,0.7)',
-                animation: 'twinkle-flicker-winter-clair 2.5s infinite alternate',
+                textShadow: '0 0 8px rgba(198, 40, 40, 0.6), 0 0 16px rgba(255, 82, 82, 0.4)',
+                animation: 'twinkle-flicker-crepe 2.5s infinite alternate',
               }),
             }}
             aria-live="polite"
@@ -230,7 +230,7 @@ export default function KPICard({
                 component="span"
                 variant="subtitle1"
                 sx={{
-                  color: '#00d8ff', // Bleu plus clair
+                  color: '#FFD700',
                   fontWeight: 'normal',
                   fontSize: '1rem',
                   fontFamily: 'inherit',

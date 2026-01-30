@@ -83,7 +83,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === Clock (version Hiver – avec effet gel) ===
+// === Clock (version Chandeleur – avec effet doré) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -100,8 +100,8 @@ function Clock() {
         fontFamily: '"Orbitron", sans-serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-        color: '#00d8ff',
-        textShadow: '0 0 12px rgba(0, 216, 255, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
+        color: '#FFD700', // Or doré
+        textShadow: '0 0 12px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
@@ -109,7 +109,7 @@ function Clock() {
         borderRadius: '16px',
         display: 'inline-block',
         margin: '0 auto',
-        border: '1px solid rgba(0, 216, 255, 0.6)',
+        border: '1px solid rgba(255, 215, 0, 0.6)', // Bordure dorée
         boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
       }}
       role="status"
@@ -462,7 +462,7 @@ const playSound = (filename, context = '', volume = 0.8) => {
 
 // === App principale ===
 const App = () => {
-  const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
+  const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/'; // ✅ URL WebSocket corrigée
   const prevEmployeesRef = useRef([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const scheduledTimeoutsRef = useRef([]);
@@ -554,46 +554,97 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
-  // 🔊 Sons horaires
+  // 🔊 Sons horaires - CORRIGÉ : Gestion spécifique vendredi + jours ouvrés
   useEffect(() => {
     if (!audioUnlocked) return;
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
     scheduledTimeoutsRef.current = [];
-    const scheduleSoundAt = (targetHour, targetMinute, soundFile, label) => {
+
+    // Fonction améliorée avec gestion des jours autorisés
+    const scheduleSoundAt = (targetHour, targetMinute, soundFile, label, allowedDays = null) => {
       const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), targetHour, targetMinute, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const scheduledTime = today > now ? today : tomorrow;
-      const delay = scheduledTime.getTime() - now.getTime();
+      let scheduledTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), targetHour, targetMinute, 0, 0);
+
+      if (Array.isArray(allowedDays) && allowedDays.length > 0) {
+        let attempts = 0;
+        let found = false;
+        // Cherche le prochain jour valide dans les 7 prochains jours
+        while (attempts < 7) {
+          if (allowedDays.includes(scheduledTime.getDay()) && scheduledTime > now) {
+            found = true;
+            break;
+          }
+          scheduledTime.setDate(scheduledTime.getDate() + 1);
+          attempts++;
+        }
+        if (!found) {
+          // Fallback sécurisé : prochain jour à l'heure cible
+          scheduledTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, targetHour, targetMinute, 0, 0);
+        }
+      } else {
+        // Comportement original si pas de restriction de jours
+        if (scheduledTime <= now) {
+          scheduledTime.setDate(scheduledTime.getDate() + 1);
+        }
+      }
+
+      const delay = Math.max(scheduledTime.getTime() - now.getTime(), 100); // Sécurité délai min
+
       const timeoutId = setTimeout(() => {
-        playSound(soundFile, label);
-        const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label);
+        const currentDate = new Date();
+        // Vérification finale au moment du déclenchement
+        const isAllowed = !allowedDays || 
+                         (Array.isArray(allowedDays) && allowedDays.includes(currentDate.getDay()));
+        
+        if (!isAllowed) {
+          console.log(`[Son] ⏰ ${label} ignoré - jour non autorisé (${currentDate.toLocaleDateString()})`);
+        } else {
+          playSound(soundFile, label);
+        }
+        
+        // Replanification récursive
+        const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label, allowedDays);
         scheduledTimeoutsRef.current.push(nextId);
       }, delay);
+
       return timeoutId;
     };
+
+    // Définition des plages horaires avec jours spécifiques
+    const WEEKDAY_DAYS = [1, 2, 3, 4, 5]; // Lundi (1) à Vendredi (5)
+    const MON_THU_DAYS = [1, 2, 3, 4];    // Lundi à Jeudi
+    const FRI_DAY = [5];                   // Vendredi uniquement
+
     const timeouts = [
-      scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée'),
-      scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner'),
-      scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause'),
-      scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
+      scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée', WEEKDAY_DAYS),
+      scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner', WEEKDAY_DAYS),
+      scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause', WEEKDAY_DAYS),
+      // CORRECTION CLÉ : 
+      scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée (Lun-Jeu)', MON_THU_DAYS), // Lundi à Jeudi à 18h
+      scheduleSoundAt(17, 0, 'fin.mp3', 'Fin journée (Vendredi)', FRI_DAY)      // Vendredi à 17h
     ];
+
     scheduledTimeoutsRef.current = timeouts;
+
+    // Gestion de la reprise après changement d'onglet
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
         scheduledTimeoutsRef.current = [];
+        
         const newTimeouts = [
-          scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée'),
-          scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner'),
-          scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause'),
-          scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée'),
+          scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée', WEEKDAY_DAYS),
+          scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner', WEEKDAY_DAYS),
+          scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause', WEEKDAY_DAYS),
+          scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée (Lun-Jeu)', MON_THU_DAYS),
+          scheduleSoundAt(17, 0, 'fin.mp3', 'Fin journée (Vendredi)', FRI_DAY)
         ];
         scheduledTimeoutsRef.current = newTimeouts;
       }
     };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
@@ -623,29 +674,43 @@ const App = () => {
 
   return (
     <>
-      {/* ✅ Polices pour le thème hiver */}
+      {/* ✅ Polices pour le thème Chandeleur */}
       <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap"
         rel="stylesheet"
       />
       <style>
         {`
-/* ✨ Flocons de neige */
+/* ✨ Crêpes qui tombent - CORRECTION */
 @keyframes snowflake {
-  0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
-  20% { opacity: 1; }
-  100% { transform: translateY(100vh) rotate(360deg); opacity: 0.7; }
+  0% { 
+    transform: translateY(-50px) rotate(0deg); 
+    opacity: 0.2;
+  }
+  10% { 
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(100vh) rotate(360deg);
+  }
+  100% { 
+    transform: translateY(100vh) rotate(360deg); 
+    opacity: 0;
+  }
 }
 .snowflake {
   position: fixed;
   top: -20px;
-  font-size: 1.2rem;
-  color: #ffffff;
+  font-size: 1.5rem;
+  color: #FFD700; /* Or doré */
   z-index: 1;
   opacity: 0;
-  animation: snowflake 12s linear forwards;
+  animation: snowflake 12s linear infinite;
   pointer-events: none;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+  will-change: transform, opacity;
 }
 .snowflake:nth-child(2n) { left: 10%; animation-duration: 14s; animation-delay: 1s; }
 .snowflake:nth-child(3n) { left: 20%; animation-duration: 16s; animation-delay: 2s; }
@@ -655,28 +720,28 @@ const App = () => {
 .snowflake:nth-child(7n) { left: 80%; animation-duration: 15s; animation-delay: 4s; }
 .snowflake:nth-child(8n) { left: 90%; animation-duration: 12s; animation-delay: 2.5s; }
 
-/* Scrollbar enneigée - bleu plus clair */
+/* Scrollbar dorée - thème Chandeleur */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #00d8ff, #00a8e8);
+  background: linear-gradient(to bottom, #FFD700, #FFA500);
   border-radius: 5px;
   border: 2px solid transparent;
   background-clip: padding-box;
   transition: all 0.3s ease;
 }
 body.show-scrollbar ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #00e6ff, #00d8ff);
+  background: linear-gradient(to bottom, #FFD700, #FF8C00);
 }
 body.show-scrollbar ::-webkit-scrollbar-track {
-  background: rgba(0, 216, 255, 0.1);
+  background: rgba(255, 215, 0, 0.1);
 }
 * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
+body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
 `}
       </style>
 
-      {/* 🎿 Fond d'écran hiver */}
+      {/* 🥞 Fond d'écran Chandeleur */}
       <Box
         sx={{
           position: 'fixed',
@@ -684,7 +749,7 @@ body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/winter-bg.jpg')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/Chandeleur.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -692,9 +757,9 @@ body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
         }}
       />
 
-      {/* ✨ Flocons de neige animés */}
+      {/* ✨ Crêpes qui tombent animées */}
       {[...Array(12)].map((_, i) => (
-        <div key={i} className="snowflake">❄️</div>
+        <div key={i} className="snowflake">🥞</div>
       ))}
 
       {/* Conteneur principal */}
@@ -708,19 +773,19 @@ body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
           fontFamily: '"Roboto", sans-serif',
           px: { xs: 0.5, sm: 1, md: 2 },
         }}
-        aria-label="Tableau de bord des sports d'hiver en temps réel"
+        aria-label="Tableau de bord de la Chandeleur en temps réel"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {/* Titre élégant avec effet gel - couleurs plus claires */}
+          {/* Titre élégant avec effet doré - thème Chandeleur */}
           <Box
             sx={{
-              mb: 1, // ⬇️ Réduit de 2 à 1
+              mb: 1,
               backgroundColor: 'rgba(0, 0, 0, 0.55)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
               borderRadius: '18px',
-              border: '2px solid rgba(0, 216, 255, 0.7)',
-              boxShadow: '0 6px 20px rgba(0, 216, 255, 0.3)',
+              border: '2px solid rgba(255, 215, 0, 0.7)', // Bordure dorée
+              boxShadow: '0 6px 20px rgba(255, 215, 0, 0.3)',
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
               display: 'inline-block',
               margin: '0 auto',
@@ -734,17 +799,17 @@ body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
                 fontFamily: '"Montserrat", sans-serif',
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#00d8ff',
-                textShadow: '0 0 14px rgba(0, 216, 255, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
+                color: '#FFD700', // Or doré
+                textShadow: '0 0 14px rgba(255, 215, 0, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
                 margin: 0,
                 letterSpacing: '0.02em',
               }}
             >
-              🏂 Anaveo - Winter Sports 2026 🏂
+              🥞 Le CDS fête la Chandeleur !!! 🥞
             </Typography>
           </Box>
 
-          <Box textAlign="center" mb={0.5}> {/* ⬇️ Réduit de 2 à 0.5 */}
+          <Box textAlign="center" mb={0.5}>
             <Clock />
           </Box>
 
@@ -753,7 +818,7 @@ body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
               textAlign="center"
               mb={2}
               sx={{
-                color: '#00e6ff',
+                color: '#FFD700', // Or doré
                 fontWeight: 'bold',
                 textShadow: '0 1px 3px rgba(0,0,0,0.6)',
                 px: { xs: 2, sm: 3 },
@@ -765,8 +830,8 @@ body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
                 variant="outlined"
                 sx={{
                   ml: 1,
-                  borderColor: '#00d8ff',
-                  color: '#00e6ff',
+                  borderColor: '#FFD700', // Bordure dorée
+                  color: '#FFD700', // Texte doré
                   borderRadius: '20px',
                   fontWeight: 600,
                   fontFamily: '"Orbitron", sans-serif',
@@ -805,7 +870,7 @@ body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
             ))}
           </Grid>
 
-          <Box mt={2} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}> {/* ⬇️ Réduit de 3 à 2 */}
+          <Box mt={2} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
             <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
           </Box>
 
@@ -832,24 +897,24 @@ body.show-scrollbar { scrollbar-color: #00d8ff rgba(0, 216, 255, 0.1); }
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
-                          background: 'linear-gradient(135deg, #000, #005580)',
-                          color: '#00e6ff',
+                          background: 'linear-gradient(135deg, #5D4037, #FFD700)', // Dégradé marron-or
+                          color: '#FFD700',
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '10px 20px',
                           fontSize: '1rem',
                           borderRadius: '50px',
-                          border: '2px solid #00d8ff',
-                          boxShadow: '0 0 14px rgba(0, 216, 255, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
+                          border: '2px solid #FFD700',
+                          boxShadow: '0 0 14px rgba(255, 215, 0, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #003366, #000)',
-                            boxShadow: '0 0 20px rgba(0, 230, 255, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
+                            background: 'linear-gradient(135deg, #8B4513, #FFD700)',
+                            boxShadow: '0 0 20px rgba(255, 215, 0, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
                             transform: 'scale(1.05)',
                           },
                           fontFamily: '"Orbitron", sans-serif',
                         }}
                       >
-                        🏂 Démarrer le ski dashboard
+                        🥞 Activer les sons 🥞
                       </Button>
                     </Box>
                   )}
