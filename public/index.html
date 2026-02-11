@@ -2,29 +2,31 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="./favicon-chandeleur.ico" />
+  <link rel="icon" href="./favicon-saint-valentin.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Chandeleur 2026 ! Suivi en temps réel des performances en cuisine." />
-  <title>ANAVEO - 🥞 Centre d'Opérations de la Chandeleur 2026</title>
+  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Saint-Valentin 2026 ! Suivi en temps réel des performances avec amour ❤️" />
+  <title>ANAVEO - ❤️ Centre d'Opérations de la Saint-Valentin 2026</title>
 
-  <!-- 🥞 Polices élégantes pour le thème Chandeleur -->
+  <!-- ❤️ Polices élégantes pour le thème Saint-Valentin -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- 🥞 Styles globaux + crêpes tombantes -->
+  <!-- ❤️ Styles globaux + cœurs tombants -->
   <style>
     /* === Variables et styles de base === */
     :root {
-      --crepe-bg: #000000;
-      --crepe-paper: #000000;
-      --crepe-primary: #FFD700;      /* Or doré */
-      --crepe-secondary: #FFA500;    /* Orange doré */
-      --crepe-error: #8b0000;
-      --crepe-success: #FFD700;      /* Or doré */
-      --crepe-warning: #ff9800;
-      --crepe-text: #ffffff;
-      --crepe-gold: #FFD700;         /* Or brillant */
+      --val-bg: #1a1a2e;
+      --val-paper: #16213e;
+      --val-primary: #e74c3c;      /* Rouge passion */
+      --val-secondary: #ff6b6b;    /* Rose corail */
+      --val-error: #c0392b;
+      --val-success: #27ae60;
+      --val-warning: #f39c12;
+      --val-text: #ffffff;
+      --val-pink: #ff9ec9;         /* Rose tendre */
+      --val-light-pink: #ffe6e6;   /* Rose pâle */
+      --val-white: #ffffff;
     }
 
     html, body {
@@ -36,8 +38,8 @@
     }
 
     body {
-      background-color: var(--crepe-bg);
-      color: var(--crepe-text);
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: var(--val-text);
       font-family: 'Roboto', sans-serif;
       min-height: 100vh;
       position: relative;
@@ -49,7 +51,7 @@
       display: none;
     }
 
-    /* === Arrière-plan décoratif subtil (effet doré) === */
+    /* === Arrière-plan décoratif Saint-Valentin === */
     body::before {
       content: '';
       position: fixed;
@@ -58,13 +60,14 @@
       width: 100%;
       height: 100%;
       background: 
-        radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(255, 165, 0, 0.08) 0%, transparent 60%);
+        radial-gradient(circle at 20% 30%, rgba(231, 76, 60, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 107, 107, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 50% 50%, rgba(255, 158, 201, 0.08) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* === Écran de chargement élégant === */
+    /* === Écran de chargement romantique === */
     #loading-screen {
       position: fixed;
       top: 0;
@@ -75,7 +78,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: #000;
+      background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
       z-index: 1000;
       transition: opacity 0.5s;
     }
@@ -83,45 +86,47 @@
     .loading-content {
       text-align: center;
       padding: 2rem;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(22, 33, 62, 0.9);
       border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-      border: 2px solid #FFD700;
+      box-shadow: 0 6px 30px rgba(231, 76, 60, 0.6);
+      border: 2px solid #ff6b6b;
       max-width: 90vw;
-      font-family: 'Montserrat', sans-serif;
-      color: #FFD700;
-      text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+      font-family: 'Playfair Display', serif;
+      color: #ff6b6b;
+      text-shadow: 0 0 8px rgba(231, 76, 60, 0.8);
     }
 
-    .crepe-icon {
-      font-size: 3rem;
+    .heart-icon {
+      font-size: 3.5rem;
       margin-bottom: 1rem;
-      color: #FFD700;
-      text-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
-      animation: flip-crepe 3s ease-in-out infinite;
+      color: #e74c3c;
+      text-shadow: 0 0 12px rgba(231, 76, 60, 0.9);
+      animation: heartbeat 1.5s ease-in-out infinite;
     }
 
-    @keyframes flip-crepe {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-8px) scale(1.05) rotateY(180deg); }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      10%, 30% { transform: scale(1.1); }
+      20%, 40% { transform: scale(1); }
+      50% { transform: scale(1.2); }
     }
 
-    /* === Crêpes tombantes – totalement opaques et brillantes === */
-    .falling-crepe {
+    /* === Cœurs tombants – totalement opaques et brillants === */
+    .falling-heart {
       position: fixed;
       top: -100px;
       font-size: 24px;
       opacity: 1;
       pointer-events: none;
       z-index: 1;
-      animation: fall-crepe linear infinite;
+      animation: fall-heart linear infinite;
       text-shadow: 
-        0 0 8px var(--crepe-gold),
-        0 0 16px rgba(255, 215, 0, 0.8);
+        0 0 8px var(--val-pink),
+        0 0 16px rgba(231, 76, 60, 0.8);
       will-change: transform;
     }
 
-    @keyframes fall-crepe {
+    @keyframes fall-heart {
       0% {
         transform: translateY(-10vh) rotate(0deg);
       }
@@ -130,65 +135,65 @@
       }
     }
 
-    /* === Variations individuelles (crêpes de différentes tailles et styles) === */
-    .falling-crepe:nth-child(1)  { left: 5%;  animation-duration: 18s;  animation-delay: 0s;   font-size: 32px; color: #FFD700; }
-    .falling-crepe:nth-child(2)  { left: 15%; animation-duration: 22s;  animation-delay: 1s;   font-size: 28px; color: #FFA500; }
-    .falling-crepe:nth-child(3)  { left: 25%; animation-duration: 15s;  animation-delay: 0.5s; font-size: 30px; color: #FFD700; }
-    .falling-crepe:nth-child(4)  { left: 35%; animation-duration: 25s;  animation-delay: 2s;   font-size: 34px; color: #FF8C00; }
-    .falling-crepe:nth-child(5)  { left: 45%; animation-duration: 20s;  animation-delay: 1.2s; font-size: 26px; color: #FFD700; }
-    .falling-crepe:nth-child(6)  { left: 55%; animation-duration: 23s;  animation-delay: 0.8s; font-size: 32px; color: #FFA500; }
-    .falling-crepe:nth-child(7)  { left: 65%; animation-duration: 17s;  animation-delay: 1.5s; font-size: 28px; color: #FFD700; }
-    .falling-crepe:nth-child(8)  { left: 75%; animation-duration: 21s;  animation-delay: 0.3s; font-size: 30px; color: #FF8C00; }
-    .falling-crepe:nth-child(9)  { left: 85%; animation-duration: 24s;  animation-delay: 1.8s; font-size: 24px; color: #FFD700; }
-    .falling-crepe:nth-child(10) { left: 10%; animation-duration: 19s;  animation-delay: 0.7s; font-size: 26px; color: #FFA500; }
-    .falling-crepe:nth-child(11) { left: 20%; animation-duration: 22s;  animation-delay: 1.1s; font-size: 32px; color: #FFD700; }
-    .falling-crepe:nth-child(12) { left: 30%; animation-duration: 16s;  animation-delay: 0.9s; font-size: 28px; color: #FF8C00; }
-    .falling-crepe:nth-child(13) { left: 40%; animation-duration: 20s;  animation-delay: 0.4s; font-size: 30px; color: #FFD700; }
-    .falling-crepe:nth-child(14) { left: 50%; animation-duration: 23s;  animation-delay: 1.3s; font-size: 24px; color: #FFA500; }
-    .falling-crepe:nth-child(15) { left: 60%; animation-duration: 18s;  animation-delay: 0.6s; font-size: 32px; color: #FFD700; }
-    .falling-crepe:nth-child(16) { left: 70%; animation-duration: 21s;  animation-delay: 1.7s; font-size: 26px; color: #FF8C00; }
-    .falling-crepe:nth-child(17) { left: 80%; animation-duration: 19s;  animation-delay: 0.2s; font-size: 28px; color: #FFD700; }
-    .falling-crepe:nth-child(18) { left: 90%; animation-duration: 22s;  animation-delay: 1.4s; font-size: 30px; color: #FFA500; }
-    .falling-crepe:nth-child(19) { left: 5%;  animation-duration: 16s;  animation-delay: 0.1s; font-size: 24px; color: #FFD700; }
-    .falling-crepe:nth-child(20) { left: 12%; animation-duration: 24s;  animation-delay: 1.9s; font-size: 32px; color: #FF8C00; }
-    .falling-crepe:nth-child(21) { left: 18%; animation-duration: 19s;  animation-delay: 0.5s; font-size: 28px; color: #FFD700; }
-    .falling-crepe:nth-child(22) { left: 28%; animation-duration: 23s;  animation-delay: 1.0s; font-size: 30px; color: #FFA500; }
-    .falling-crepe:nth-child(23) { left: 38%; animation-duration: 17s;  animation-delay: 0.7s; font-size: 26px; color: #FFD700; }
-    .falling-crepe:nth-child(24) { left: 48%; animation-duration: 21s;  animation-delay: 1.6s; font-size: 32px; color: #FF8C00; }
+    /* === Variations individuelles (cœurs de différentes tailles et styles) === */
+    .falling-heart:nth-child(1)  { left: 5%;  animation-duration: 18s;  animation-delay: 0s;   font-size: 32px; color: #e74c3c; }
+    .falling-heart:nth-child(2)  { left: 15%; animation-duration: 22s;  animation-delay: 1s;   font-size: 28px; color: #ff6b6b; }
+    .falling-heart:nth-child(3)  { left: 25%; animation-duration: 15s;  animation-delay: 0.5s; font-size: 30px; color: #e74c3c; }
+    .falling-heart:nth-child(4)  { left: 35%; animation-duration: 25s;  animation-delay: 2s;   font-size: 34px; color: #ff9ec9; }
+    .falling-heart:nth-child(5)  { left: 45%; animation-duration: 20s;  animation-delay: 1.2s; font-size: 26px; color: #e74c3c; }
+    .falling-heart:nth-child(6)  { left: 55%; animation-duration: 23s;  animation-delay: 0.8s; font-size: 32px; color: #ff6b6b; }
+    .falling-heart:nth-child(7)  { left: 65%; animation-duration: 17s;  animation-delay: 1.5s; font-size: 28px; color: #e74c3c; }
+    .falling-heart:nth-child(8)  { left: 75%; animation-duration: 21s;  animation-delay: 0.3s; font-size: 30px; color: #ff9ec9; }
+    .falling-heart:nth-child(9)  { left: 85%; animation-duration: 24s;  animation-delay: 1.8s; font-size: 24px; color: #e74c3c; }
+    .falling-heart:nth-child(10) { left: 10%; animation-duration: 19s;  animation-delay: 0.7s; font-size: 26px; color: #ff6b6b; }
+    .falling-heart:nth-child(11) { left: 20%; animation-duration: 22s;  animation-delay: 1.1s; font-size: 32px; color: #e74c3c; }
+    .falling-heart:nth-child(12) { left: 30%; animation-duration: 16s;  animation-delay: 0.9s; font-size: 28px; color: #ff9ec9; }
+    .falling-heart:nth-child(13) { left: 40%; animation-duration: 20s;  animation-delay: 0.4s; font-size: 30px; color: #e74c3c; }
+    .falling-heart:nth-child(14) { left: 50%; animation-duration: 23s;  animation-delay: 1.3s; font-size: 24px; color: #ff6b6b; }
+    .falling-heart:nth-child(15) { left: 60%; animation-duration: 18s;  animation-delay: 0.6s; font-size: 32px; color: #e74c3c; }
+    .falling-heart:nth-child(16) { left: 70%; animation-duration: 21s;  animation-delay: 1.7s; font-size: 26px; color: #ff9ec9; }
+    .falling-heart:nth-child(17) { left: 80%; animation-duration: 19s;  animation-delay: 0.2s; font-size: 28px; color: #e74c3c; }
+    .falling-heart:nth-child(18) { left: 90%; animation-duration: 22s;  animation-delay: 1.4s; font-size: 30px; color: #ff6b6b; }
+    .falling-heart:nth-child(19) { left: 5%;  animation-duration: 16s;  animation-delay: 0.1s; font-size: 24px; color: #e74c3c; }
+    .falling-heart:nth-child(20) { left: 12%; animation-duration: 24s;  animation-delay: 1.9s; font-size: 32px; color: #ff9ec9; }
+    .falling-heart:nth-child(21) { left: 18%; animation-duration: 19s;  animation-delay: 0.5s; font-size: 28px; color: #e74c3c; }
+    .falling-heart:nth-child(22) { left: 28%; animation-duration: 23s;  animation-delay: 1.0s; font-size: 30px; color: #ff6b6b; }
+    .falling-heart:nth-child(23) { left: 38%; animation-duration: 17s;  animation-delay: 0.7s; font-size: 26px; color: #e74c3c; }
+    .falling-heart:nth-child(24) { left: 48%; animation-duration: 21s;  animation-delay: 1.6s; font-size: 32px; color: #ff9ec9; }
   </style>
 </head>
 <body>
-  <!-- 🥞 24 crêpes tombantes – totalement opaques -->
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">🍳</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">👨‍🍳</div>
-  <div class="falling-crepe">🧈</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">🍳</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">👨‍🍳</div>
-  <div class="falling-crepe">🧈</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">🍳</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">👨‍🍳</div>
-  <div class="falling-crepe">🧈</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">🍳</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">👨‍🍳</div>
-  <div class="falling-crepe">🧈</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">🍳</div>
-  <div class="falling-crepe">🥞</div>
-  <div class="falling-crepe">👨‍🍳</div>
+  <!-- ❤️ 24 cœurs tombants – totalement opaques -->
+  <div class="falling-heart">❤️</div>
+  <div class="falling-heart">💕</div>
+  <div class="falling-heart">💖</div>
+  <div class="falling-heart">💘</div>
+  <div class="falling-heart">💝</div>
+  <div class="falling-heart">❤️</div>
+  <div class="falling-heart">💕</div>
+  <div class="falling-heart">💖</div>
+  <div class="falling-heart">💘</div>
+  <div class="falling-heart">💝</div>
+  <div class="falling-heart">❤️</div>
+  <div class="falling-heart">💕</div>
+  <div class="falling-heart">💖</div>
+  <div class="falling-heart">💘</div>
+  <div class="falling-heart">💝</div>
+  <div class="falling-heart">❤️</div>
+  <div class="falling-heart">💕</div>
+  <div class="falling-heart">💖</div>
+  <div class="falling-heart">💘</div>
+  <div class="falling-heart">💝</div>
+  <div class="falling-heart">❤️</div>
+  <div class="falling-heart">💕</div>
+  <div class="falling-heart">💖</div>
+  <div class="falling-heart">💘</div>
 
-  <!-- 🥞 Écran de chargement Chandeleur -->
+  <!-- ❤️ Écran de chargement Saint-Valentin -->
   <div id="loading-screen">
     <div class="loading-content">
-      <div class="crepe-icon">🥞</div>
-      Préparation de la pâte à crêpes…
+      <div class="heart-icon">❤️</div>
+      Chargement avec amour…
     </div>
   </div>
 

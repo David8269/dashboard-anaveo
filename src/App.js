@@ -83,7 +83,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === Clock (version Chandeleur – avec effet doré) ===
+// === Clock (version Saint-Valentin optimisée) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -97,20 +97,27 @@ function Clock() {
     <Paper
       elevation={0}
       sx={{
-        fontFamily: '"Orbitron", sans-serif',
+        fontFamily: '"Playfair Display", serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-        color: '#FFD700', // Or doré
-        textShadow: '0 0 12px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        color: '#ffffff', // Blanc pour lisibilité
+        textShadow: '0 0 12px rgba(231, 76, 60, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
+        backgroundColor: 'rgba(25, 25, 45, 0.85)',
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
         padding: { xs: '0.5rem 1rem', md: '0.8rem 1.4rem' },
         borderRadius: '16px',
         display: 'inline-block',
         margin: '0 auto',
-        border: '1px solid rgba(255, 215, 0, 0.6)', // Bordure dorée
-        boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+        border: '1px solid rgba(231, 76, 60, 0.4)', // Bordure plus discrète
+        boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+        animation: 'heartbeat-clock 1.8s ease-in-out infinite',
+        '@keyframes heartbeat-clock': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '14%, 28%': { transform: 'scale(1.05)' },
+          '42%, 56%': { transform: 'scale(1)' },
+          '70%': { transform: 'scale(1.1)' },
+        },
       }}
       role="status"
       aria-live="polite"
@@ -462,7 +469,7 @@ const playSound = (filename, context = '', volume = 0.8) => {
 
 // === App principale ===
 const App = () => {
-  const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/'; // ✅ URL WebSocket corrigée
+  const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
   const prevEmployeesRef = useRef([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const scheduledTimeoutsRef = useRef([]);
@@ -554,13 +561,12 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
-  // 🔊 Sons horaires - CORRIGÉ : Gestion spécifique vendredi + jours ouvrés
+  // 🔊 Sons horaires
   useEffect(() => {
     if (!audioUnlocked) return;
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
     scheduledTimeoutsRef.current = [];
 
-    // Fonction améliorée avec gestion des jours autorisés
     const scheduleSoundAt = (targetHour, targetMinute, soundFile, label, allowedDays = null) => {
       const now = new Date();
       let scheduledTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), targetHour, targetMinute, 0, 0);
@@ -568,7 +574,6 @@ const App = () => {
       if (Array.isArray(allowedDays) && allowedDays.length > 0) {
         let attempts = 0;
         let found = false;
-        // Cherche le prochain jour valide dans les 7 prochains jours
         while (attempts < 7) {
           if (allowedDays.includes(scheduledTime.getDay()) && scheduledTime > now) {
             found = true;
@@ -578,21 +583,18 @@ const App = () => {
           attempts++;
         }
         if (!found) {
-          // Fallback sécurisé : prochain jour à l'heure cible
           scheduledTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, targetHour, targetMinute, 0, 0);
         }
       } else {
-        // Comportement original si pas de restriction de jours
         if (scheduledTime <= now) {
           scheduledTime.setDate(scheduledTime.getDate() + 1);
         }
       }
 
-      const delay = Math.max(scheduledTime.getTime() - now.getTime(), 100); // Sécurité délai min
+      const delay = Math.max(scheduledTime.getTime() - now.getTime(), 100);
 
       const timeoutId = setTimeout(() => {
         const currentDate = new Date();
-        // Vérification finale au moment du déclenchement
         const isAllowed = !allowedDays || 
                          (Array.isArray(allowedDays) && allowedDays.includes(currentDate.getDay()));
         
@@ -602,7 +604,6 @@ const App = () => {
           playSound(soundFile, label);
         }
         
-        // Replanification récursive
         const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label, allowedDays);
         scheduledTimeoutsRef.current.push(nextId);
       }, delay);
@@ -610,23 +611,20 @@ const App = () => {
       return timeoutId;
     };
 
-    // Définition des plages horaires avec jours spécifiques
-    const WEEKDAY_DAYS = [1, 2, 3, 4, 5]; // Lundi (1) à Vendredi (5)
-    const MON_THU_DAYS = [1, 2, 3, 4];    // Lundi à Jeudi
-    const FRI_DAY = [5];                   // Vendredi uniquement
+    const WEEKDAY_DAYS = [1, 2, 3, 4, 5];
+    const MON_THU_DAYS = [1, 2, 3, 4];
+    const FRI_DAY = [5];
 
     const timeouts = [
       scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée', WEEKDAY_DAYS),
       scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner', WEEKDAY_DAYS),
       scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause', WEEKDAY_DAYS),
-      // CORRECTION CLÉ : 
-      scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée (Lun-Jeu)', MON_THU_DAYS), // Lundi à Jeudi à 18h
-      scheduleSoundAt(17, 0, 'fin.mp3', 'Fin journée (Vendredi)', FRI_DAY)      // Vendredi à 17h
+      scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée (Lun-Jeu)', MON_THU_DAYS),
+      scheduleSoundAt(17, 0, 'fin.mp3', 'Fin journée (Vendredi)', FRI_DAY)
     ];
 
     scheduledTimeoutsRef.current = timeouts;
 
-    // Gestion de la reprise après changement d'onglet
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
@@ -674,18 +672,18 @@ const App = () => {
 
   return (
     <>
-      {/* ✅ Polices pour le thème Chandeleur */}
+      {/* ❤️ Polices pour le thème Saint-Valentin */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap"
         rel="stylesheet"
       />
       <style>
         {`
-/* ✨ Crêpes qui tombent - CORRECTION */
-@keyframes snowflake {
+/* ❤️ Cœurs qui tombent - Animation romantique optimisée */
+@keyframes falling-heart {
   0% { 
     transform: translateY(-50px) rotate(0deg); 
-    opacity: 0.2;
+    opacity: 0.3;
   }
   10% { 
     opacity: 1;
@@ -697,51 +695,66 @@ const App = () => {
   }
   100% { 
     transform: translateY(100vh) rotate(360deg); 
-    opacity: 0;
+    opacity: 0.2;
   }
 }
-.snowflake {
+.falling-heart {
   position: fixed;
   top: -20px;
-  font-size: 1.5rem;
-  color: #FFD700; /* Or doré */
+  font-size: 1.8rem;
   z-index: 1;
   opacity: 0;
-  animation: snowflake 12s linear infinite;
+  animation: falling-heart 14s linear infinite;
   pointer-events: none;
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+  text-shadow: 0 0 10px rgba(231, 76, 60, 0.9), 0 0 20px rgba(255, 107, 107, 0.7);
   will-change: transform, opacity;
 }
-.snowflake:nth-child(2n) { left: 10%; animation-duration: 14s; animation-delay: 1s; }
-.snowflake:nth-child(3n) { left: 20%; animation-duration: 16s; animation-delay: 2s; }
-.snowflake:nth-child(4n) { left: 35%; animation-duration: 11s; animation-delay: 0.5s; }
-.snowflake:nth-child(5n) { left: 50%; animation-duration: 13s; animation-delay: 3s; }
-.snowflake:nth-child(6n) { left: 65%; animation-duration: 10s; animation-delay: 1.5s; }
-.snowflake:nth-child(7n) { left: 80%; animation-duration: 15s; animation-delay: 4s; }
-.snowflake:nth-child(8n) { left: 90%; animation-duration: 12s; animation-delay: 2.5s; }
+.falling-heart:nth-child(1) { left: 5%; animation-duration: 16s; animation-delay: 0s; color: #e74c3c; }
+.falling-heart:nth-child(2) { left: 15%; animation-duration: 19s; animation-delay: 1.2s; color: #ff6b6b; }
+.falling-heart:nth-child(3) { left: 25%; animation-duration: 17s; animation-delay: 0.7s; color: #e74c3c; }
+.falling-heart:nth-child(4) { left: 35%; animation-duration: 21s; animation-delay: 2.1s; color: #ff9ec9; }
+.falling-heart:nth-child(5) { left: 45%; animation-duration: 18s; animation-delay: 1.5s; color: #e74c3c; }
+.falling-heart:nth-child(6) { left: 55%; animation-duration: 20s; animation-delay: 0.9s; color: #ff6b6b; }
+.falling-heart:nth-child(7) { left: 65%; animation-duration: 15s; animation-delay: 1.8s; color: #e74c3c; }
+.falling-heart:nth-child(8) { left: 75%; animation-duration: 22s; animation-delay: 0.4s; color: #ff9ec9; }
+.falling-heart:nth-child(9) { left: 85%; animation-duration: 19s; animation-delay: 2.3s; color: #e74c3c; }
+.falling-heart:nth-child(10) { left: 10%; animation-duration: 17s; animation-delay: 1.1s; color: #ff6b6b; }
+.falling-heart:nth-child(11) { left: 20%; animation-duration: 20s; animation-delay: 0.6s; color: #e74c3c; }
+.falling-heart:nth-child(12) { left: 30%; animation-duration: 16s; animation-delay: 1.9s; color: #ff9ec9; }
 
-/* Scrollbar dorée - thème Chandeleur */
+/* Scrollbar romantique optimisée */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #FFD700, #FFA500);
+  background: linear-gradient(to bottom, #e74c3c, #ff6b6b);
   border-radius: 5px;
   border: 2px solid transparent;
   background-clip: padding-box;
   transition: all 0.3s ease;
 }
 body.show-scrollbar ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #FFD700, #FF8C00);
+  background: linear-gradient(to bottom, #ff6b6b, #ff9ec9);
 }
 body.show-scrollbar ::-webkit-scrollbar-track {
-  background: rgba(255, 215, 0, 0.1);
+  background: rgba(231, 76, 60, 0.1);
 }
 * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
+body.show-scrollbar { scrollbar-color: #e74c3c rgba(231, 76, 60, 0.15); }
+
+/* Animation cœur battant pour le titre */
+@keyframes heartbeat-title {
+  0%, 100% { transform: scale(1); }
+  14%, 28% { transform: scale(1.03); }
+  42%, 56% { transform: scale(1); }
+  70% { transform: scale(1.05); }
+}
+.heart-beat {
+  animation: heartbeat-title 1.6s ease-in-out infinite;
+}
 `}
       </style>
 
-      {/* 🥞 Fond d'écran Chandeleur */}
+      {/* ❤️ Fond d'écran Saint-Valentin */}
       <Box
         sx={{
           position: 'fixed',
@@ -749,7 +762,7 @@ body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/Chandeleur.jpg')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/Saint-Valentin.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -757,9 +770,11 @@ body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
         }}
       />
 
-      {/* ✨ Crêpes qui tombent animées */}
+      {/* ❤️ Cœurs qui tombent animés */}
       {[...Array(12)].map((_, i) => (
-        <div key={i} className="snowflake">🥞</div>
+        <div key={i} className="falling-heart">
+          {i % 5 === 0 ? '❤️' : i % 5 === 1 ? '💕' : i % 5 === 2 ? '💖' : i % 5 === 3 ? '💘' : '💝'}
+        </div>
       ))}
 
       {/* Conteneur principal */}
@@ -773,19 +788,19 @@ body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
           fontFamily: '"Roboto", sans-serif',
           px: { xs: 0.5, sm: 1, md: 2 },
         }}
-        aria-label="Tableau de bord de la Chandeleur en temps réel"
+        aria-label="Tableau de bord de la Saint-Valentin en temps réel"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {/* Titre élégant avec effet doré - thème Chandeleur */}
+          {/* Titre élégant optimisé pour la lisibilité */}
           <Box
             sx={{
               mb: 1,
-              backgroundColor: 'rgba(0, 0, 0, 0.55)',
+              backgroundColor: 'rgba(25, 25, 45, 0.85)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
               borderRadius: '18px',
-              border: '2px solid rgba(255, 215, 0, 0.7)', // Bordure dorée
-              boxShadow: '0 6px 20px rgba(255, 215, 0, 0.3)',
+              border: '2px solid rgba(231, 76, 60, 0.4)',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
               display: 'inline-block',
               margin: '0 auto',
@@ -796,16 +811,17 @@ body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
               variant="h1"
               align="center"
               sx={{
-                fontFamily: '"Montserrat", sans-serif',
+                fontFamily: '"Playfair Display", serif',
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#FFD700', // Or doré
-                textShadow: '0 0 14px rgba(255, 215, 0, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
+                color: '#ffffff', // Blanc pour excellente lisibilité
+                textShadow: '0 0 14px rgba(231, 76, 60, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
                 margin: 0,
                 letterSpacing: '0.02em',
               }}
+              className="heart-beat"
             >
-              🥞 Le CDS fête la Chandeleur !!! 🥞
+              ❤️ ANAVEO - CDS - Valentine's Day ❤️
             </Typography>
           </Box>
 
@@ -818,7 +834,7 @@ body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
               textAlign="center"
               mb={2}
               sx={{
-                color: '#FFD700', // Or doré
+                color: '#ffffff', // Blanc pour lisibilité
                 fontWeight: 'bold',
                 textShadow: '0 1px 3px rgba(0,0,0,0.6)',
                 px: { xs: 2, sm: 3 },
@@ -830,11 +846,15 @@ body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
                 variant="outlined"
                 sx={{
                   ml: 1,
-                  borderColor: '#FFD700', // Bordure dorée
-                  color: '#FFD700', // Texte doré
+                  borderColor: '#ff6b6b',
+                  color: '#ffffff', // Blanc pour lisibilité
                   borderRadius: '20px',
                   fontWeight: 600,
-                  fontFamily: '"Orbitron", sans-serif',
+                  fontFamily: '"Playfair Display", serif',
+                  '&:hover': {
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    borderColor: '#e74c3c',
+                  },
                 }}
                 onClick={reconnect}
               >
@@ -897,24 +917,31 @@ body.show-scrollbar { scrollbar-color: #FFD700 rgba(255, 215, 0, 0.1); }
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
-                          background: 'linear-gradient(135deg, #5D4037, #FFD700)', // Dégradé marron-or
-                          color: '#FFD700',
+                          background: 'linear-gradient(135deg, #8B0000, #e74c3c)',
+                          color: '#ffffff',
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '10px 20px',
                           fontSize: '1rem',
                           borderRadius: '50px',
-                          border: '2px solid #FFD700',
-                          boxShadow: '0 0 14px rgba(255, 215, 0, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
+                          border: '2px solid #ff6b6b',
+                          boxShadow: '0 0 14px rgba(231, 76, 60, 0.7), 0 4px 8px rgba(0,0,0,0.3)',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #8B4513, #FFD700)',
-                            boxShadow: '0 0 20px rgba(255, 215, 0, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
+                            background: 'linear-gradient(135deg, #c0392b, #e74c3c)',
+                            boxShadow: '0 0 20px rgba(231, 76, 60, 0.9), 0 6px 12px rgba(0,0,0,0.4)',
                             transform: 'scale(1.05)',
                           },
-                          fontFamily: '"Orbitron", sans-serif',
+                          fontFamily: '"Playfair Display", serif',
+                          animation: 'heartbeat 1.8s ease-in-out infinite',
+                          '@keyframes heartbeat': {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '14%, 28%': { transform: 'scale(1.08)' },
+                            '42%, 56%': { transform: 'scale(1)' },
+                            '70%': { transform: 'scale(1.12)' },
+                          },
                         }}
                       >
-                        🥞 Activer les sons 🥞
+                        ❤️ Activer les sons ❤️
                       </Button>
                     </Box>
                   )}
