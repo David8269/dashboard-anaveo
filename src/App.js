@@ -100,7 +100,7 @@ function Clock() {
         fontFamily: '"Playfair Display", serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-        color: '#ffffff', // Blanc pour lisibilité
+        color: '#ffffff',
         textShadow: '0 0 12px rgba(231, 76, 60, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
         backgroundColor: 'rgba(25, 25, 45, 0.85)',
         backdropFilter: 'blur(4px)',
@@ -109,7 +109,7 @@ function Clock() {
         borderRadius: '16px',
         display: 'inline-block',
         margin: '0 auto',
-        border: '1px solid rgba(231, 76, 60, 0.4)', // Bordure plus discrète
+        border: '1px solid rgba(231, 76, 60, 0.4)',
         boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
         animation: 'heartbeat-clock 1.8s ease-in-out infinite',
         '@keyframes heartbeat-clock': {
@@ -245,7 +245,7 @@ const useWebSocketData = (url, onLostCall) => {
         console.warn(`[Storage] ⚠️ Chargement échoué pour ${key}`, e);
         localStorage.removeItem(key);
       }
-    };
+    }
     console.log(`[Storage] ✅ ${calls.length} appels chargés depuis localStorage`);
     return calls;
   };
@@ -570,7 +570,6 @@ const App = () => {
     const scheduleSoundAt = (targetHour, targetMinute, soundFile, label, allowedDays = null) => {
       const now = new Date();
       let scheduledTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), targetHour, targetMinute, 0, 0);
-
       if (Array.isArray(allowedDays) && allowedDays.length > 0) {
         let attempts = 0;
         let found = false;
@@ -590,24 +589,19 @@ const App = () => {
           scheduledTime.setDate(scheduledTime.getDate() + 1);
         }
       }
-
       const delay = Math.max(scheduledTime.getTime() - now.getTime(), 100);
-
       const timeoutId = setTimeout(() => {
         const currentDate = new Date();
-        const isAllowed = !allowedDays || 
-                         (Array.isArray(allowedDays) && allowedDays.includes(currentDate.getDay()));
-        
+        const isAllowed = !allowedDays ||
+          (Array.isArray(allowedDays) && allowedDays.includes(currentDate.getDay()));
         if (!isAllowed) {
           console.log(`[Son] ⏰ ${label} ignoré - jour non autorisé (${currentDate.toLocaleDateString()})`);
         } else {
           playSound(soundFile, label);
         }
-        
         const nextId = scheduleSoundAt(targetHour, targetMinute, soundFile, label, allowedDays);
         scheduledTimeoutsRef.current.push(nextId);
       }, delay);
-
       return timeoutId;
     };
 
@@ -629,7 +623,6 @@ const App = () => {
       if (!document.hidden) {
         scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
         scheduledTimeoutsRef.current = [];
-        
         const newTimeouts = [
           scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée', WEEKDAY_DAYS),
           scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner', WEEKDAY_DAYS),
@@ -642,7 +635,6 @@ const App = () => {
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
@@ -679,79 +671,79 @@ const App = () => {
       />
       <style>
         {`
-/* ❤️ Cœurs qui tombent - Animation romantique optimisée */
-@keyframes falling-heart {
-  0% { 
-    transform: translateY(-50px) rotate(0deg); 
-    opacity: 0.3;
-  }
-  10% { 
-    opacity: 1;
-    transform: translateY(0) rotate(0deg);
-  }
-  90% {
-    opacity: 1;
-    transform: translateY(100vh) rotate(360deg);
-  }
-  100% { 
-    transform: translateY(100vh) rotate(360deg); 
-    opacity: 0.2;
-  }
-}
-.falling-heart {
-  position: fixed;
-  top: -20px;
-  font-size: 1.8rem;
-  z-index: 1;
-  opacity: 0;
-  animation: falling-heart 14s linear infinite;
-  pointer-events: none;
-  text-shadow: 0 0 10px rgba(231, 76, 60, 0.9), 0 0 20px rgba(255, 107, 107, 0.7);
-  will-change: transform, opacity;
-}
-.falling-heart:nth-child(1) { left: 5%; animation-duration: 16s; animation-delay: 0s; color: #e74c3c; }
-.falling-heart:nth-child(2) { left: 15%; animation-duration: 19s; animation-delay: 1.2s; color: #ff6b6b; }
-.falling-heart:nth-child(3) { left: 25%; animation-duration: 17s; animation-delay: 0.7s; color: #e74c3c; }
-.falling-heart:nth-child(4) { left: 35%; animation-duration: 21s; animation-delay: 2.1s; color: #ff9ec9; }
-.falling-heart:nth-child(5) { left: 45%; animation-duration: 18s; animation-delay: 1.5s; color: #e74c3c; }
-.falling-heart:nth-child(6) { left: 55%; animation-duration: 20s; animation-delay: 0.9s; color: #ff6b6b; }
-.falling-heart:nth-child(7) { left: 65%; animation-duration: 15s; animation-delay: 1.8s; color: #e74c3c; }
-.falling-heart:nth-child(8) { left: 75%; animation-duration: 22s; animation-delay: 0.4s; color: #ff9ec9; }
-.falling-heart:nth-child(9) { left: 85%; animation-duration: 19s; animation-delay: 2.3s; color: #e74c3c; }
-.falling-heart:nth-child(10) { left: 10%; animation-duration: 17s; animation-delay: 1.1s; color: #ff6b6b; }
-.falling-heart:nth-child(11) { left: 20%; animation-duration: 20s; animation-delay: 0.6s; color: #e74c3c; }
-.falling-heart:nth-child(12) { left: 30%; animation-duration: 16s; animation-delay: 1.9s; color: #ff9ec9; }
+          /* ❤️ Cœurs qui tombent - Animation romantique optimisée */
+          @keyframes falling-heart {
+            0% {
+              transform: translateY(-50px) rotate(0deg);
+              opacity: 0.3;
+            }
+            10% {
+              opacity: 1;
+              transform: translateY(0) rotate(0deg);
+            }
+            90% {
+              opacity: 1;
+              transform: translateY(100vh) rotate(720deg);
+            }
+            100% {
+              transform: translateY(100vh) rotate(360deg);
+              opacity: 0.2;
+            }
+          }
+          .falling-heart {
+            position: fixed;
+            top: -20px;
+            font-size: 1.8rem;
+            z-index: 1;
+            opacity: 0;
+            animation: falling-heart 14s linear infinite;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.9), 0 0 20px rgba(255, 107, 107, 0.7);
+            will-change: transform, opacity;
+          }
+          .falling-heart:nth-child(1) { left: 5%; animation-duration: 16s; animation-delay: 0s; color: #e74c3c; }
+          .falling-heart:nth-child(2) { left: 15%; animation-duration: 19s; animation-delay: 1.2s; color: #ff6b6b; }
+          .falling-heart:nth-child(3) { left: 25%; animation-duration: 17s; animation-delay: 0.7s; color: #e74c3c; }
+          .falling-heart:nth-child(4) { left: 35%; animation-duration: 21s; animation-delay: 2.1s; color: #ff9ec9; }
+          .falling-heart:nth-child(5) { left: 45%; animation-duration: 18s; animation-delay: 1.5s; color: #e74c3c; }
+          .falling-heart:nth-child(6) { left: 55%; animation-duration: 20s; animation-delay: 0.9s; color: #ff6b6b; }
+          .falling-heart:nth-child(7) { left: 65%; animation-duration: 15s; animation-delay: 1.8s; color: #e74c3c; }
+          .falling-heart:nth-child(8) { left: 75%; animation-duration: 22s; animation-delay: 0.4s; color: #ff9ec9; }
+          .falling-heart:nth-child(9) { left: 85%; animation-duration: 19s; animation-delay: 2.3s; color: #e74c3c; }
+          .falling-heart:nth-child(10) { left: 10%; animation-duration: 17s; animation-delay: 1.1s; color: #ff6b6b; }
+          .falling-heart:nth-child(11) { left: 20%; animation-duration: 20s; animation-delay: 0.6s; color: #e74c3c; }
+          .falling-heart:nth-child(12) { left: 30%; animation-duration: 16s; animation-delay: 1.9s; color: #ff9ec9; }
 
-/* Scrollbar romantique optimisée */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #e74c3c, #ff6b6b);
-  border-radius: 5px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-  transition: all 0.3s ease;
-}
-body.show-scrollbar ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #ff6b6b, #ff9ec9);
-}
-body.show-scrollbar ::-webkit-scrollbar-track {
-  background: rgba(231, 76, 60, 0.1);
-}
-* { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-body.show-scrollbar { scrollbar-color: #e74c3c rgba(231, 76, 60, 0.15); }
+          /* Scrollbar romantique optimisée */
+          ::-webkit-scrollbar { width: 8px; }
+          ::-webkit-scrollbar-track { background: transparent; }
+          ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #e74c3c, #ff6b6b);
+            border-radius: 5px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: all 0.3s ease;
+          }
+          body.show-scrollbar ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #ff6b6b, #ff9ec9);
+          }
+          body.show-scrollbar ::-webkit-scrollbar-track {
+            background: rgba(231, 76, 60, 0.1);
+          }
+          * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+          body.show-scrollbar { scrollbar-color: #e74c3c rgba(231, 76, 60, 0.15); }
 
-/* Animation cœur battant pour le titre */
-@keyframes heartbeat-title {
-  0%, 100% { transform: scale(1); }
-  14%, 28% { transform: scale(1.03); }
-  42%, 56% { transform: scale(1); }
-  70% { transform: scale(1.05); }
-}
-.heart-beat {
-  animation: heartbeat-title 1.6s ease-in-out infinite;
-}
-`}
+          /* Animation cœur battant pour le titre */
+          @keyframes heartbeat-title {
+            0%, 100% { transform: scale(1); }
+            14%, 28% { transform: scale(1.03); }
+            42%, 56% { transform: scale(1); }
+            70% { transform: scale(1.05); }
+          }
+          .heart-beat {
+            animation: heartbeat-title 1.6s ease-in-out infinite;
+          }
+        `}
       </style>
 
       {/* ❤️ Fond d'écran Saint-Valentin */}
@@ -814,10 +806,10 @@ body.show-scrollbar { scrollbar-color: #e74c3c rgba(231, 76, 60, 0.15); }
                 fontFamily: '"Playfair Display", serif',
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#ffffff', // Blanc pour excellente lisibilité
+                color: '#ffffff',
                 textShadow: '0 0 14px rgba(231, 76, 60, 0.9), 2px 2px 6px rgba(0,0,0,0.4)',
                 margin: 0,
-                letterSpacing: '0.02em',
+                letterSpacing: '0.03em',
               }}
               className="heart-beat"
             >
@@ -834,9 +826,9 @@ body.show-scrollbar { scrollbar-color: #e74c3c rgba(231, 76, 60, 0.15); }
               textAlign="center"
               mb={2}
               sx={{
-                color: '#ffffff', // Blanc pour lisibilité
+                color: '#ffffff',
                 fontWeight: 'bold',
-                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                textShadow: '0 0 10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.7)',
                 px: { xs: 2, sm: 3 },
               }}
             >
@@ -847,7 +839,7 @@ body.show-scrollbar { scrollbar-color: #e74c3c rgba(231, 76, 60, 0.15); }
                 sx={{
                   ml: 1,
                   borderColor: '#ff6b6b',
-                  color: '#ffffff', // Blanc pour lisibilité
+                  color: '#ffffff',
                   borderRadius: '20px',
                   fontWeight: 600,
                   fontFamily: '"Playfair Display", serif',
@@ -921,8 +913,8 @@ body.show-scrollbar { scrollbar-color: #e74c3c rgba(231, 76, 60, 0.15); }
                           color: '#ffffff',
                           fontWeight: 'bold',
                           textTransform: 'none',
-                          padding: '10px 20px',
-                          fontSize: '1rem',
+                          padding: '12px 24px',
+                          fontSize: '1.1rem',
                           borderRadius: '50px',
                           border: '2px solid #ff6b6b',
                           boxShadow: '0 0 14px rgba(231, 76, 60, 0.7), 0 4px 8px rgba(0,0,0,0.3)',

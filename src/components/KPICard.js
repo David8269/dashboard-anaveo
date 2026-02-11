@@ -70,20 +70,20 @@ export default function KPICard({
 
         @keyframes shake-critical-heart {
           0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-          20%, 40%, 60%, 80% { transform: translateX(3px); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
         }
 
         @keyframes twinkle-flicker-heart {
           0%, 100% { opacity: 1; filter: brightness(1); }
-          25% { opacity: 0.95; filter: brightness(1.1); }
-          50% { opacity: 1; filter: brightness(0.95); }
-          75% { opacity: 0.98; filter: brightness(1.05); }
+          25% { opacity: 0.95; filter: brightness(1.2); }
+          50% { opacity: 1; filter: brightness(0.9); }
+          75% { opacity: 0.98; filter: brightness(1.1); }
         }
 
         @keyframes heart-drift-kpi {
           0% { transform: translateX(0) translateY(0); opacity: 0.6; }
-          50% { transform: translateX(-5%) translateY(-3%); opacity: 0.8; }
+          50% { transform: translateX(-6%) translateY(-4%); opacity: 0.8; }
           100% { transform: translateX(0) translateY(0); opacity: 0.6; }
         }
       `}</style>
@@ -116,8 +116,6 @@ export default function KPICard({
               : '0 6px 20px rgba(231, 76, 60, 0.3)',
             border: `1px solid ${isValueCritical ? '#e74c3c' : '#ff6b6b'}`,
           },
-          position: 'relative',
-          overflow: 'hidden',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -125,6 +123,8 @@ export default function KPICard({
             left: 0,
             right: 0,
             bottom: 0,
+            borderRadius: '10px',
+            padding: '2px',
             background: isValueCritical
               ? 'radial-gradient(circle at 50% 0%, rgba(192, 57, 43, 0.15) 0%, transparent 70%)'
               : 'radial-gradient(circle at 50% 0%, rgba(231, 76, 60, 0.1) 0%, transparent 70%)',
@@ -214,7 +214,7 @@ export default function KPICard({
               alignItems: 'flex-end',
               gap: 0.5,
               ...(animate && {
-                transform: 'scale(1.15)',
+                transform: 'scale(1.2)',
                 transition: 'transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1)',
               }),
               ...(isValueCritical && {

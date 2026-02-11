@@ -115,8 +115,8 @@
     .falling-heart {
       position: fixed;
       top: -100px;
-      font-size: 24px;
-      opacity: 1;
+      font-size: 40px;
+      opacity: 0.9;
       pointer-events: none;
       z-index: 1;
       animation: fall-heart linear infinite;
@@ -128,10 +128,10 @@
 
     @keyframes fall-heart {
       0% {
-        transform: translateY(-10vh) rotate(0deg);
+        transform: translateY(-10vh) rotate(0deg) scale(0.8);
       }
       100% {
-        transform: translateY(110vh) rotate(360deg);
+        transform: translateY(110vh) rotate(720deg) scale(1);
       }
     }
 

@@ -136,7 +136,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
 
           @keyframes bar-rise-heart {
             0% { 
-              opacity: 0.6; 
+              opacity: 0.5; 
               transform: scaleY(0); 
               transform-origin: bottom;
             }
@@ -153,7 +153,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
 
           @keyframes heart-drift-chart {
             0% { transform: translateX(0) translateY(0); opacity: 0.5; }
-            50% { transform: translateX(-6%) translateY(-3%); opacity: 0.7; }
+            50% { transform: translateX(-6%) translateY(-3%); opacity: 0.8; }
             100% { transform: translateX(0) translateY(0); opacity: 0.5; }
           }
         `}
@@ -321,7 +321,16 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           {/* ✅ Textes parfaitement lisibles */}
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 6, pt: 2, pb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ width: 16, height: 16, bgcolor: INBOUND_COLOR, borderRadius: '2px', boxShadow: `0 0 6px ${INBOUND_COLOR}` }} />
+              <Box 
+                sx={{ 
+                  width: 16, 
+                  height: 16, 
+                  bgcolor: INBOUND_COLOR, 
+                  borderRadius: '2px', 
+                  boxShadow: `0 0 10px ${INBOUND_COLOR}, 0 0 15px rgba(255, 20, 147, 0.6)`,
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                }} 
+              />
               <Typography
                 variant="body1"
                 sx={{
@@ -335,7 +344,16 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ width: 16, height: 16, bgcolor: OUTBOUND_COLOR, borderRadius: '2px', boxShadow: `0 0 6px ${OUTBOUND_COLOR}` }} />
+              <Box 
+                sx={{ 
+                  width: 16, 
+                  height: 16, 
+                  bgcolor: OUTBOUND_COLOR, 
+                  borderRadius: '2px', 
+                  boxShadow: `0 0 10px ${OUTBOUND_COLOR}, 0 0 15px rgba(255, 69, 0, 0.6)`,
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                }} 
+              />
               <Typography
                 variant="body1"
                 sx={{

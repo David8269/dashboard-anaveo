@@ -19,8 +19,8 @@ import {
   ReferenceLine,
 } from 'recharts';
 
-const lunchStartIndex = 8;  // Correspond à 12:30
-const lunchEndIndex = 11;   // Correspond à 14:00
+const lunchStartIndex = 8;
+const lunchEndIndex = 11;
 
 function CustomLabel({ fill }) {
   return (
