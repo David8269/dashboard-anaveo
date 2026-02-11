@@ -102,9 +102,7 @@ function Clock() {
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
         color: '#ffffff',
         textShadow: '0 0 12px rgba(231, 76, 60, 0.8), 0 2px 4px rgba(0,0,0,0.3)',
-        backgroundColor: 'rgba(25, 25, 45, 0.85)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(25, 25, 45, 0.7)',
         padding: { xs: '0.5rem 1rem', md: '0.8rem 1.4rem' },
         borderRadius: '16px',
         display: 'inline-block',
@@ -666,7 +664,7 @@ const App = () => {
     <>
       {/* ❤️ Polices pour le thème Saint-Valentin */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Montserrat  :wght@400;700&family=Playfair+Display:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap"
         rel="stylesheet"
       />
       <style>
@@ -787,9 +785,7 @@ const App = () => {
           <Box
             sx={{
               mb: 1,
-              backgroundColor: 'rgba(25, 25, 45, 0.85)',
-              backdropFilter: 'blur(4px)',
-              WebkitBackdropFilter: 'blur(4px)',
+              backgroundColor: 'rgba(25, 25, 45, 0.7)',
               borderRadius: '18px',
               border: '2px solid rgba(231, 76, 60, 0.4)',
               boxShadow: '0 6px 20px rgba(0,0,0,0.5)',

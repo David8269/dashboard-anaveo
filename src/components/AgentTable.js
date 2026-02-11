@@ -52,9 +52,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
       <Card sx={{
         position: 'relative',
         overflow: 'hidden',
-        backgroundColor: 'rgba(25, 25, 45, 0.85)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(25, 25, 45, 0.7)',
         borderRadius: 3,
         border: '1px solid rgba(231, 76, 60, 0.4)',
         boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
@@ -113,9 +111,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
       <Card sx={{
         position: 'relative',
         overflow: 'hidden',
-        backgroundColor: 'rgba(25, 25, 45, 0.85)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(25, 25, 45, 0.7)',
         borderRadius: 3,
         border: '1px solid rgba(231, 76, 60, 0.4)',
         boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
@@ -168,9 +164,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
     <Card sx={{
       position: 'relative',
       overflow: 'hidden',
-      backgroundColor: 'rgba(25, 25, 45, 0.85)',
-      backdropFilter: 'blur(4px)',
-      WebkitBackdropFilter: 'blur(4px)',
+      backgroundColor: 'rgba(25, 25, 45, 0.7)',
       borderRadius: 3,
       border: '1px solid rgba(231, 76, 60, 0.4)',
       boxShadow: '0 4px 16px rgba(0,0,0,0.5)',

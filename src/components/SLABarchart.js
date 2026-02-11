@@ -50,9 +50,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     return (
       <Card
         sx={{
-          backgroundColor: 'rgba(25, 25, 45, 0.85)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(25, 25, 45, 0.7)',
           width: '100%',
           borderRadius: 3,
           border: '1px solid rgba(231, 76, 60, 0.4)',
@@ -161,9 +159,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
 
       <Card
         sx={{
-          backgroundColor: 'rgba(25, 25, 45, 0.85)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(25, 25, 45, 0.7)',
           width: '100%',
           borderRadius: 3,
           border: '1px solid rgba(231, 76, 60, 0.4)',
