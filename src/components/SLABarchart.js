@@ -18,8 +18,8 @@ import {
   Tooltip,
 } from 'recharts';
 
-const INBOUND_COLOR = '#FFD700';   // Or doré
-const OUTBOUND_COLOR = '#5D4037'; // Marron chocolat
+const INBOUND_COLOR = '#7CFC00';
+const OUTBOUND_COLOR = '#90EE90';
 
 const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString());
 
@@ -50,13 +50,13 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     return (
       <Card
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0.55)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.65)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           width: '100%',
           borderRadius: 3,
-          border: '1px solid rgba(255, 215, 0, 0.6)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          border: '1px solid rgba(144, 238, 144, 0.6)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -67,8 +67,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 40% 50%, rgba(255, 215, 0, 0.1), transparent 70%)',
-          animation: 'crepe-drift 22s linear infinite',
+          background: 'radial-gradient(circle at 40% 50%, rgba(144, 238, 144, 0.1), transparent 70%)',
+          animation: 'spring-drift 22s linear infinite',
           pointerEvents: 'none',
           zIndex: 0,
         }} />
@@ -77,43 +77,43 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             variant="overline"
             sx={{
               fontFamily: '"Montserrat", sans-serif',
-              color: '#FFD700',
-              textShadow: '0 0 12px rgba(255, 215, 0, 0.8)',
+              color: '#2F4F4F',
+              textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
               fontSize: '1.3rem',
             }}
           >
-            📊 Volume hebdomadaire des crêpes
+            📊 Volume hebdomadaire des appels
           </Typography>
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Chip
-              label={wsConnected ? '🥞 Aucune crêpe enregistrée' : '🍳 Connexion à la cuisine...'}
+              label={wsConnected ? '🌸 Aucun appel enregistré' : '🦋 Connexion au jardin...'}
               size="small"
               sx={{
                 mb: 2,
                 background: wsConnected
-                  ? 'linear-gradient(135deg, #5D4037, #FFD700)'
-                  : 'linear-gradient(135deg, #5D4037, #f9a825)',
-                color: '#FFD700',
+                  ? 'linear-gradient(135deg, #87CEEB, #90EE90)'
+                  : 'linear-gradient(135deg, #87CEEB, #7CFC00)',
+                color: '#2F4F4F',
                 fontFamily: '"Montserrat", sans-serif',
-                animation: wsConnected ? 'none' : 'pulse-crepe 1.5s infinite alternate',
-                border: '1px solid rgba(255, 215, 0, 0.6)',
+                animation: wsConnected ? 'none' : 'pulse-spring 1.5s infinite alternate',
+                border: '1px solid rgba(144, 238, 144, 0.6)',
               }}
             />
             <Skeleton 
               variant="rectangular" 
               width="100%" 
               height={350} 
-              sx={{ backgroundColor: 'rgba(255, 215, 0, 0.1)' }} 
+              sx={{ backgroundColor: 'rgba(144, 238, 144, 0.1)' }} 
             />
           </Box>
         </CardContent>
         <style>{`
-          @keyframes pulse-crepe {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
-            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(255, 215, 0, 0.7); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+          @keyframes pulse-spring {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(144, 238, 144, 0.45); }
+            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(144, 238, 144, 0.55); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(144, 238, 144, 0.45); }
           }
-          @keyframes crepe-drift {
+          @keyframes spring-drift {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-8%) translateY(-4%); }
             100% { transform: translateX(0) translateY(0); }
@@ -127,13 +127,13 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     <>
       <style>
         {`
-          @keyframes pulse-crepe {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
-            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(255, 215, 0, 0.7); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+          @keyframes pulse-spring {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(144, 238, 144, 0.45); }
+            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(144, 238, 144, 0.55); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(144, 238, 144, 0.45); }
           }
 
-          @keyframes bar-rise-crepe {
+          @keyframes bar-rise-spring {
             0% { 
               opacity: 0.6; 
               transform: scaleY(0); 
@@ -145,12 +145,12 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             }
           }
 
-          @keyframes twinkle-crepe {
-            0%, 100% { text-shadow: 0 0 6px rgba(255, 215, 0, 0.6); }
-            50% { text-shadow: 0 0 12px rgba(255, 215, 0, 0.7); }
+          @keyframes twinkle-spring {
+            0%, 100% { text-shadow: 0 0 6px rgba(144, 238, 144, 0.45); }
+            50% { text-shadow: 0 0 12px rgba(144, 238, 144, 0.55); }
           }
 
-          @keyframes crepe-drift-chart {
+          @keyframes spring-drift-chart {
             0% { transform: translateX(0) translateY(0); opacity: 0.5; }
             50% { transform: translateX(-6%) translateY(-3%); opacity: 0.7; }
             100% { transform: translateX(0) translateY(0); opacity: 0.5; }
@@ -160,17 +160,17 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
 
       <Card
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0.55)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.65)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           width: '100%',
           borderRadius: 3,
-          border: '1px solid rgba(255, 215, 0, 0.6)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          border: '1px solid rgba(144, 238, 144, 0.6)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
           position: 'relative',
           overflow: 'hidden',
           ...(animate && {
-            animation: 'pulse-crepe 0.6s ease-in-out',
+            animation: 'pulse-spring 0.6s ease-in-out',
           }),
           '&::before': {
             content: '""',
@@ -179,8 +179,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, transparent, #FFD700, rgba(255, 215, 0, 0.6), #FFD700, transparent)',
-            animation: 'twinkle-crepe 3s infinite',
+            background: 'linear-gradient(90deg, transparent, #90EE90, rgba(144, 238, 144, 0.55), #7CFC00, transparent)',
+            animation: 'twinkle-spring 3s infinite',
             zIndex: 2,
           },
           '&::after': {
@@ -190,10 +190,10 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             left: '-60%',
             width: '220%',
             height: '70%',
-            background: 'radial-gradient(circle at 50% 40%, rgba(93, 64, 55, 0.1), transparent 80%)',
+            background: 'radial-gradient(circle at 50% 40%, rgba(127, 255, 0, 0.08), transparent 80%)',
             pointerEvents: 'none',
             zIndex: 0,
-            animation: 'crepe-drift-chart 25s linear infinite',
+            animation: 'spring-drift-chart 25s linear infinite',
           },
         }}
       >
@@ -203,23 +203,23 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               variant="overline"
               sx={{
                 fontFamily: '"Montserrat", sans-serif',
-                color: '#FFD700',
-                textShadow: '0 0 12px rgba(255, 215, 0, 0.8)',
+                color: '#2F4F4F',
+                textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
                 fontSize: '1.3rem',
               }}
             >
-              📊 Volume des crêpes
+              📊 Volume des appels
             </Typography>
             <Chip
               label="🟢 En direct"
               size="small"
               sx={{
-                background: 'linear-gradient(135deg, #FFD700, #e6a85b)',
-                color: '#000',
+                background: 'linear-gradient(135deg, #90EE90, #7CFC00)',
+                color: '#2F4F4F',
                 fontWeight: 'bold',
                 fontFamily: '"Montserrat", sans-serif',
-                animation: 'pulse-crepe 2s infinite',
-                border: '1px solid rgba(255, 215, 0, 0.6)',
+                animation: 'pulse-spring 2s infinite',
+                border: '1px solid rgba(144, 238, 144, 0.6)',
               }}
             />
           </Box>
@@ -230,24 +230,24 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               margin={{ top: 30, right: 20, left: 10, bottom: 20 }}
               barSize={100}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 215, 0, 0.3)" opacity={0.3} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(144, 238, 144, 0.35)" opacity={0.35} />
 
               <XAxis
                 dataKey="dayLabel"
-                stroke="#FFD700"
+                stroke="#2F4F4F"
                 tick={{
-                  fill: '#FFD700',
+                  fill: '#2F4F4F',
                   fontSize: 22,
                   fontWeight: 'bold',
                   fontFamily: '"Montserrat", sans-serif',
-                  textShadow: '0 0 4px rgba(255, 215, 0, 0.4)',
+                  textShadow: '0 0 4px rgba(255, 255, 255, 0.6)',
                 }}
               />
 
               <YAxis
-                stroke="#FFD700"
+                stroke="#2F4F4F"
                 tick={{
-                  fill: '#FFD700',
+                  fill: '#2F4F4F',
                   fontSize: 22,
                   fontWeight: 'bold',
                   fontFamily: '"Montserrat", sans-serif',
@@ -257,68 +257,67 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
 
               <Tooltip
                 formatter={(value, name) => {
-                  const labels = { inbound: '🥞 Crêpes dorées', outbound: '🔄 Crêpes retournées' };
+                  const labels = { inbound: '🌸 Fleurs cueillies', outbound: '🦋 Papillons libérés' };
                   return [formatNumber(value), labels[name] || name];
                 }}
                 labelFormatter={(label) => `Jour : ${label}`}
                 contentStyle={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  border: '1px solid rgba(255, 215, 0, 0.6)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  border: '1px solid rgba(144, 238, 144, 0.6)',
                   borderRadius: 6,
-                  color: '#FFD700',
+                  color: '#2F4F4F',
                   fontSize: 12,
                   fontFamily: '"Roboto", sans-serif',
-                  boxShadow: '0 0 12px rgba(255, 215, 0, 0.4)',
+                  boxShadow: '0 0 12px rgba(144, 238, 144, 0.3)',
                 }}
               />
 
               <Bar
                 dataKey="inbound"
-                name="Crêpes dorées"
+                name="Fleurs cueillies"
                 fill={INBOUND_COLOR}
                 animationDuration={1200}
-                style={{ animation: 'bar-rise-crepe 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
+                style={{ animation: 'bar-rise-spring 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
               >
                 <LabelList
                   dataKey="inbound"
                   position="top"
-                  fill="#FFD700"
+                  fill="#2F4F4F"
                   fontWeight="bold"
                   fontSize={22}
                   formatter={hideZeroLabels}
                   style={{
-                    textShadow: '0 0 6px rgba(255, 215, 0, 0.6)',
+                    textShadow: '0 0 6px rgba(127, 255, 0, 0.45)',
                     fontFamily: '"Montserrat", sans-serif',
-                    animation: 'twinkle-crepe 3s infinite alternate',
+                    animation: 'twinkle-spring 3s infinite alternate',
                   }}
                 />
               </Bar>
 
               <Bar
                 dataKey="outbound"
-                name="Crêpes retournées"
+                name="Papillons libérés"
                 fill={OUTBOUND_COLOR}
                 animationDuration={1200}
-                style={{ animation: 'bar-rise-crepe 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
+                style={{ animation: 'bar-rise-spring 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
               >
                 <LabelList
                   dataKey="outbound"
                   position="top"
-                  fill="#FFD700"
+                  fill="#2F4F4F"
                   fontWeight="bold"
                   fontSize={22}
                   formatter={hideZeroLabels}
                   style={{
-                    textShadow: '0 0 6px rgba(93, 64, 55, 0.7)',
+                    textShadow: '0 0 6px rgba(144, 238, 144, 0.45)',
                     fontFamily: '"Montserrat", sans-serif',
-                    animation: 'twinkle-crepe 3s infinite alternate',
+                    animation: 'twinkle-spring 3s infinite alternate',
                   }}
                 />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
 
-          {/* ✅ CORRECTION : Textes parfaitement lisibles */}
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 6, pt: 2, pb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ width: 16, height: 16, bgcolor: INBOUND_COLOR, borderRadius: '2px', boxShadow: `0 0 6px ${INBOUND_COLOR}` }} />
@@ -328,11 +327,11 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   fontFamily: '"Montserrat", sans-serif',
                   fontWeight: 'bold',
                   fontSize: 22,
-                  color: '#FFD700',
-                  textShadow: '0 0 4px rgba(255, 215, 0, 0.3)',
+                  color: '#2F4F4F',
+                  textShadow: '0 0 4px rgba(255, 255, 255, 0.6)',
                 }}
               >
-                🥞 Crêpes dorées
+                🌸 Fleurs cueillies
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -343,11 +342,11 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   fontFamily: '"Montserrat", sans-serif',
                   fontWeight: 'bold',
                   fontSize: 22,
-                  color: '#FFD700',
-                  textShadow: '0 0 4px rgba(93, 64, 55, 0.3)',
+                  color: '#2F4F4F',
+                  textShadow: '0 0 4px rgba(255, 255, 255, 0.6)',
                 }}
               >
-                🔄 Crêpes retournées
+                🦋 Papillons libérés
               </Typography>
             </Box>
           </Box>
