@@ -21,6 +21,13 @@ const isLunchBreak = (date) => {
   return totalMinutes >= 750 && totalMinutes < 840;
 };
 
+const isAfterHours = (date) => {
+  // À partir de 18h00, les appels basculent vers ABSYS et ne sont pas considérés comme perdus
+  if (!date) return false;
+  const h = date.getHours();
+  return h >= 18;
+};
+
 const formatSecondsToMMSS = (totalSeconds) => {
   if (!totalSeconds || isNaN(totalSeconds) || totalSeconds <= 0) return '00:00';
   const minutes = Math.floor(totalSeconds / 60);
@@ -83,7 +90,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === Clock (version Printemps – avec effet floral doux) ===
+// === Clock (version Poisson d'Avril – avec effet farceur) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -100,22 +107,22 @@ function Clock() {
         fontFamily: '"Orbitron", sans-serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-        color: '#2F4F4F',
+        color: '#8B0000',
         textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0,0,0,0.2)',
-        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         padding: { xs: '0.5rem 1rem', md: '0.8rem 1.4rem' },
         borderRadius: '16px',
         display: 'inline-block',
         margin: '0 auto',
-        border: '1px solid rgba(144, 238, 144, 0.6)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+        border: '3px solid #DC143C',
+        boxShadow: '0 4px 16px rgba(220, 20, 60, 0.3)',
       }}
       role="status"
       aria-live="polite"
     >
-      {hours}:{minutes}:{seconds}
+      🐟 {hours}:{minutes}:{seconds} 🐟
     </Paper>
   );
 }
@@ -342,9 +349,12 @@ const useWebSocketData = (url, onLostCall) => {
           }
           const callWithSec = { ...cdr, receivedAt: new Date() };
           let isLostCall = false;
-          if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime)) {
+          
+          // 🔊 MODIFICATION: Les appels ABSYS après 18h00 ne sont pas considérés comme perdus
+          if (cdr.callType === 'ABSYS' && !isLunchBreak(cdr.startTime) && !isAfterHours(cdr.startTime)) {
             isLostCall = cdr.durationSec >= 59;
           }
+          
           if (isInBusinessHours(cdr.startTime)) {
             setAllCalls(prev => {
               const exists = prev.some(call => call.id === callWithSec.id);
@@ -604,16 +614,19 @@ const App = () => {
       return timeoutId;
     };
 
-    const WEEKDAY_DAYS = [1, 2, 3, 4, 5];
-    const MON_THU_DAYS = [1, 2, 3, 4];
-    const FRI_DAY = [5];
+    const WEEKDAY_DAYS = [1, 2, 3, 4, 5];  // Lun, Mar, Mer, Jeu, Ven
+    const MON_THU_DAYS = [1, 2, 3, 4];      // Lun, Mar, Mer, Jeu
+    const FRI_DAY = [5];                     // Vendredi
+    // 🔊 CORRECTION: Pas de son "fin" le samedi (6) et dimanche (0)
 
     const timeouts = [
       scheduleSoundAt(8, 30, 'debut.mp3', 'Début journée', WEEKDAY_DAYS),
       scheduleSoundAt(12, 30, 'pause.mp3', 'Pause déjeuner', WEEKDAY_DAYS),
       scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause', WEEKDAY_DAYS),
+      // 🔊 CORRECTION: Fin à 18h00 Lundi-Jeudi SEULEMENT
       scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée (Lun-Jeu)', MON_THU_DAYS),
       scheduleSoundAt(17, 0, 'fin.mp3', 'Fin journée (Vendredi)', FRI_DAY)
+      // ❌ Pas de son "fin" le samedi et dimanche
     ];
 
     scheduledTimeoutsRef.current = timeouts;
@@ -629,6 +642,7 @@ const App = () => {
           scheduleSoundAt(14, 0, 'reprise.mp3', 'Reprise après pause', WEEKDAY_DAYS),
           scheduleSoundAt(18, 0, 'fin.mp3', 'Fin journée (Lun-Jeu)', MON_THU_DAYS),
           scheduleSoundAt(17, 0, 'fin.mp3', 'Fin journée (Vendredi)', FRI_DAY)
+          // ❌ Pas de son "fin" le samedi et dimanche
         ];
         scheduledTimeoutsRef.current = newTimeouts;
       }
@@ -671,8 +685,8 @@ const App = () => {
       />
       <style>
         {`
-/* ✨ Fleurs et papillons qui tombent - Thème Printemps */
-@keyframes spring-fall {
+/* 🐟 Éléments de farce qui tombent - Thème Poisson d'Avril */
+@keyframes april-fall {
   0% { 
     transform: translateY(-50px) rotate(0deg); 
     opacity: 0.2;
@@ -690,48 +704,47 @@ const App = () => {
     opacity: 0;
   }
 }
-.spring-element {
+.april-element {
   position: fixed;
   top: -20px;
-  font-size: 1.5rem;
-  color: #FF69B4;
+  font-size: 1.8rem;
   z-index: 1;
   opacity: 0;
-  animation: spring-fall 12s linear infinite;
+  animation: april-fall 12s linear infinite;
   pointer-events: none;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
   will-change: transform, opacity;
 }
-.spring-element:nth-child(2n) { left: 10%; animation-duration: 14s; animation-delay: 1s; color: #8A2BE2; }
-.spring-element:nth-child(3n) { left: 20%; animation-duration: 16s; animation-delay: 2s; color: #90EE90; }
-.spring-element:nth-child(4n) { left: 35%; animation-duration: 11s; animation-delay: 0.5s; color: #FFD700; }
-.spring-element:nth-child(5n) { left: 50%; animation-duration: 13s; animation-delay: 3s; color: #FF69B4; }
-.spring-element:nth-child(6n) { left: 65%; animation-duration: 10s; animation-delay: 1.5s; color: #90EE90; }
-.spring-element:nth-child(7n) { left: 80%; animation-duration: 15s; animation-delay: 4s; color: #8A2BE2; }
-.spring-element:nth-child(8n) { left: 90%; animation-duration: 12s; animation-delay: 2.5s; color: #FFD700; }
+.april-element:nth-child(2n) { left: 10%; animation-duration: 14s; animation-delay: 1s; }
+.april-element:nth-child(3n) { left: 20%; animation-duration: 16s; animation-delay: 2s; }
+.april-element:nth-child(4n) { left: 35%; animation-duration: 11s; animation-delay: 0.5s; }
+.april-element:nth-child(5n) { left: 50%; animation-duration: 13s; animation-delay: 3s; }
+.april-element:nth-child(6n) { left: 65%; animation-duration: 10s; animation-delay: 1.5s; }
+.april-element:nth-child(7n) { left: 80%; animation-duration: 15s; animation-delay: 4s; }
+.april-element:nth-child(8n) { left: 90%; animation-duration: 12s; animation-delay: 2.5s; }
 
-/* Scrollbar printanière */
+/* Scrollbar Poisson d'Avril */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #90EE90, #FF69B4);
+  background: linear-gradient(to bottom, #DC143C, #4169E1, #32CD32, #FFD700);
   border-radius: 5px;
   border: 2px solid transparent;
   background-clip: padding-box;
   transition: all 0.3s ease;
 }
 body.show-scrollbar ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #7CFC00, #FF69B4);
+  background: linear-gradient(to bottom, #FF4500, #4169E1, #32CD32, #FFD700);
 }
 body.show-scrollbar ::-webkit-scrollbar-track {
-  background: rgba(144, 238, 144, 0.1);
+  background: rgba(220, 20, 60, 0.1);
 }
 * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
+body.show-scrollbar { scrollbar-color: #DC143C rgba(220, 20, 60, 0.1); }
 `}
       </style>
 
-      {/* 🌸 Fond d'écran Printemps */}
+      {/* 🐟 Fond d'écran Poisson d'Avril */}
       <Box
         sx={{
           position: 'fixed',
@@ -739,7 +752,7 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/Spring.png')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/AprilFools.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -747,39 +760,39 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
         }}
       />
 
-      {/* ✨ Fleurs et papillons qui tombent animés */}
+      {/* 🐟 Éléments de farce qui tombent animés */}
       {[...Array(16)].map((_, i) => (
-        <div key={i} className="spring-element">
-          {['🌸', '🦋', '🌼', '🐝', '🌺', '🐦', '🌷'][i % 7]}
+        <div key={i} className="april-element">
+          {['🐟', '🐟', '🐟', '', '', '🐟', ''][i % 7]}
         </div>
       ))}
 
-      {/* Conteneur principal - PLUS DE TRANSPARENCE */}
+      {/* Conteneur principal */}
       <Box
         sx={{
           minHeight: '100vh',
           py: { xs: 2, md: 4 },
           position: 'relative',
           zIndex: 2,
-          color: '#2F4F4F',
+          color: '#8B0000',
           fontFamily: '"Roboto", sans-serif',
           px: { xs: 0.5, sm: 1, md: 2 },
           backdropFilter: 'blur(0px)',
           WebkitBackdropFilter: 'blur(0px)',
         }}
-        aria-label="Tableau de bord du Printemps en temps réel"
+        aria-label="Tableau de bord du Poisson d'Avril en temps réel"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {/* Titre élégant avec effet floral - PLUS DE TRANSPARENCE */}
+          {/* Titre farceur - PLUS DE TRANSPARENCE */}
           <Box
             sx={{
               mb: 1,
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
               backdropFilter: 'blur(10px)',
               WebkitBackdropFilter: 'blur(10px)',
               borderRadius: '18px',
-              border: '2px solid rgba(144, 238, 144, 0.6)',
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)',
+              border: '3px solid #DC143C',
+              boxShadow: '0 6px 20px rgba(220, 20, 60, 0.3)',
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
               display: 'inline-block',
               margin: '0 auto',
@@ -793,13 +806,28 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
                 fontFamily: '"Montserrat", sans-serif',
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#2F4F4F',
+                color: '#8B0000',
                 textShadow: '0 2px 6px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0,0,0,0.15)',
                 margin: 0,
                 letterSpacing: '0.02em',
               }}
             >
-              🌸 Bienvenue au CDS ! 🌸
+              🐟 Bienvenue au CDS ! 🐟
+            </Typography>
+            <Typography
+              variant="h4"
+              align="center"
+              sx={{
+                fontFamily: '"Montserrat", sans-serif',
+                fontWeight: 'bold',
+                fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.8rem' },
+                color: '#4169E1',
+                textShadow: '0 1px 4px rgba(255, 255, 255, 0.8)',
+                margin: 0,
+                letterSpacing: '0.05em',
+              }}
+            >
+              🃏 POISSON D'AVRIL 2026 🃏
             </Typography>
           </Box>
 
@@ -812,37 +840,42 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
               textAlign="center"
               mb={2}
               sx={{
-                color: '#2F4F4F',
+                color: '#8B0000',
                 fontWeight: 'bold',
                 textShadow: '0 1px 3px rgba(255,255,255,0.8)',
                 px: { xs: 2, sm: 3 },
-                backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
                 backdropFilter: 'blur(8px)',
                 WebkitBackdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 py: 1,
-                border: '1px solid rgba(144, 238, 144, 0.5)',
+                border: '2px solid #DC143C',
               }}
             >
-              ⚠️ Connexion WebSocket perdue. Tentative de reconnexion...
+              🐟 Connexion WebSocket perdue. Tentative de reconnexion...
               <Button
                 size="small"
                 variant="outlined"
                 sx={{
                   ml: 1,
-                  borderColor: '#90EE90',
-                  color: '#2F4F4F',
+                  borderColor: '#DC143C',
+                  color: '#8B0000',
                   borderRadius: '20px',
                   fontWeight: 600,
                   fontFamily: '"Orbitron", sans-serif',
+                  '&:hover': {
+                    borderColor: '#FF4500',
+                    backgroundColor: 'rgba(220, 20, 60, 0.1)',
+                  },
                 }}
                 onClick={reconnect}
               >
-                Reconnecter
+                🔄 Reconnecter
               </Button>
             </Box>
           )}
 
+          {/* ✅ CORRECTION: Titres SANS émojis (KPICard les ajoute automatiquement) */}
           <Grid container spacing={2.5} justifyContent="center" sx={{ mt: 0.5, px: { xs: 1.5, sm: 2.5, md: 3.5 } }} aria-label="KPI Principaux">
             {[
               { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
@@ -856,6 +889,7 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
             ))}
           </Grid>
 
+          {/* ✅ CORRECTION: Titres SANS émojis (KPICard les ajoute automatiquement) */}
           <Grid container spacing={2.5} justifyContent="center" sx={{ mt: 1, px: { xs: 1.5, sm: 2.5, md: 3.5 } }} aria-label="KPI Détail Appels">
             {[
               { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default", critical: false },
@@ -897,24 +931,24 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
-                          background: 'linear-gradient(135deg, #87CEEB, #90EE90)',
-                          color: '#2F4F4F',
+                          background: 'linear-gradient(135deg, #DC143C, #4169E1, #32CD32, #FFD700)',
+                          color: '#FFFFFF',
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '10px 20px',
                           fontSize: '1rem',
                           borderRadius: '50px',
-                          border: '2px solid #90EE90',
-                          boxShadow: '0 0 14px rgba(144, 238, 144, 0.5), 0 4px 8px rgba(0,0,0,0.15)',
+                          border: '3px solid #FFD700',
+                          boxShadow: '0 0 14px rgba(220, 20, 60, 0.5), 0 4px 8px rgba(0,0,0,0.15)',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #87CEFA, #7CFC00)',
-                            boxShadow: '0 0 20px rgba(144, 238, 144, 0.7), 0 6px 12px rgba(0,0,0,0.2)',
+                            background: 'linear-gradient(135deg, #FF4500, #4169E1, #32CD32, #FFD700)',
+                            boxShadow: '0 0 20px rgba(220, 20, 60, 0.7), 0 6px 12px rgba(0,0,0,0.2)',
                             transform: 'scale(1.05)',
                           },
                           fontFamily: '"Orbitron", sans-serif',
                         }}
                       >
-                        🌸 Activer les sons 🌸
+                        🐟 Activer les sons 🐟
                       </Button>
                     </Box>
                   )}

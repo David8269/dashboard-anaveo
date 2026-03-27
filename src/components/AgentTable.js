@@ -17,11 +17,11 @@ import {
 } from '@mui/material';
 
 const getStatusConfig = (status) => {
-  if (!status) return { color: 'default', icon: '❓' };
+  if (!status) return { color: 'default', icon: '🎭' };
   const lower = status.toLowerCase();
-  if (lower === 'available' || lower === 'online') return { color: 'success', icon: '🌸' };
-  if (lower === 'unavailable') return { color: 'warning', icon: '🦋' };
-  return { color: 'default', icon: '🌼' };
+  if (lower === 'available' || lower === 'online') return { color: 'success', icon: '🤡' };
+  if (lower === 'unavailable') return { color: 'warning', icon: '🎪' };
+  return { color: 'default', icon: '🎈' };
 };
 
 const getDurationColor = (seconds) => {
@@ -52,33 +52,33 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
       <Card sx={{
         position: 'relative',
         overflow: 'hidden',
-        backgroundColor: 'rgba(255, 255, 255, 0.65)',
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         borderRadius: 3,
-        border: '1px solid rgba(144, 238, 144, 0.6)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+        border: '3px solid #DC143C',
+        boxShadow: '0 4px 16px rgba(220, 20, 60, 0.3)',
       }}>
         <CardContent>
           <Typography variant="overline" sx={{
             fontFamily: '"Montserrat", sans-serif',
-            color: '#2F4F4F',
+            color: '#8B0000',
             textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
             fontSize: '1.2rem',
             fontWeight: 'bold',
           }}>
-            🌸 Équipe Printanière 2026
+            🎭 Équipe Poisson d'Avril 2026
           </Typography>
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Chip label="Éveil du printemps..." size="small" sx={{
+            <Chip label="Préparation des farces..." size="small" sx={{
               mb: 2,
-              background: 'linear-gradient(135deg, #87CEEB, #90EE90)',
-              color: '#2F4F4F',
+              background: 'linear-gradient(135deg, #DC143C, #4169E1, #FFD700)',
+              color: '#FFFFFF',
               fontFamily: '"Montserrat", sans-serif',
-              animation: 'pulse-spring 2s infinite alternate',
-              border: '1px solid rgba(144, 238, 144, 0.6)',
+              animation: 'pulse-april 2s infinite alternate',
+              border: '2px solid #FFD700',
             }} />
-            <Skeleton variant="rectangular" width="100%" height={400} sx={{ backgroundColor: 'rgba(144, 238, 144, 0.1)' }} />
+            <Skeleton variant="rectangular" width="100%" height={400} sx={{ backgroundColor: 'rgba(220, 20, 60, 0.1)' }} />
           </Box>
         </CardContent>
         <Box sx={{
@@ -87,16 +87,16 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 50% 50%, rgba(144, 238, 144, 0.1), transparent 70%)',
-          animation: 'spring-glow 15s linear infinite',
+          background: 'radial-gradient(circle at 50% 50%, rgba(220, 20, 60, 0.1), transparent 70%)',
+          animation: 'april-glow 15s linear infinite',
           pointerEvents: 'none',
         }} />
         <style>{`
-          @keyframes pulse-spring {
-            0% { transform: scale(1); box-shadow: 0 0 8px rgba(144, 238, 144, 0.4); }
-            100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(144, 238, 144, 0.6); }
+          @keyframes pulse-april {
+            0% { transform: scale(1); box-shadow: 0 0 8px rgba(220, 20, 60, 0.4); }
+            100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(65, 105, 225, 0.6); }
           }
-          @keyframes spring-glow {
+          @keyframes april-glow {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-6%) translateY(-3%); }
             100% { transform: translateX(0) translateY(0); }
@@ -111,37 +111,37 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
       <Card sx={{
         position: 'relative',
         overflow: 'hidden',
-        backgroundColor: 'rgba(255, 255, 255, 0.65)',
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         borderRadius: 3,
-        border: '1px solid rgba(144, 238, 144, 0.6)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+        border: '3px solid #DC143C',
+        boxShadow: '0 4px 16px rgba(220, 20, 60, 0.3)',
       }}>
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
             <Typography variant="overline" sx={{
               fontFamily: '"Montserrat", sans-serif',
-              color: '#2F4F4F',
+              color: '#8B0000',
               textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
               fontSize: '1.2rem',
               fontWeight: 'bold',
             }}>
-              🌸 Équipe Printanière 2026
+              🎭 Équipe Poisson d'Avril 2026
             </Typography>
-            <Tooltip title={isConnected ? "Connecté au jardin" : "Déconnecté"}>
+            <Tooltip title={isConnected ? "Connecté au cirque" : "Déconnecté"}>
               <Box sx={{
                 width: 12,
                 height: 12,
                 borderRadius: '50%',
-                bgcolor: isConnected ? '#90EE90' : '#c62828',
+                bgcolor: isConnected ? '#32CD32' : '#c62828',
                 animation: isConnected ? 'pulse-glow 2s infinite' : 'none',
               }} />
             </Tooltip>
           </Box>
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="#2F4F4F" sx={{ fontStyle: 'italic' }}>
-              🌼 Aucun agent disponible...
+            <Typography variant="body2" color="#8B0000" sx={{ fontStyle: 'italic' }}>
+              🐟 Aucun farceur disponible...
             </Typography>
           </Box>
         </CardContent>
@@ -151,8 +151,8 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 50% 50%, rgba(144, 238, 144, 0.1), transparent 70%)',
-          animation: 'spring-glow 15s linear infinite',
+          background: 'radial-gradient(circle at 50% 50%, rgba(220, 20, 60, 0.1), transparent 70%)',
+          animation: 'april-glow 15s linear infinite',
           pointerEvents: 'none',
         }} />
       </Card>
@@ -160,42 +160,42 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
   }
 
   const sortedEmployees = useMemo(() => [...employees].sort((a, b) => ((b.inbound || 0) + (b.outbound || 0)) - ((a.inbound || 0) + (a.outbound || 0))), [employees]);
-  const getMedalEmoji = (rank) => rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '🌸';
+  const getMedalEmoji = (rank) => rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '🐟';
 
   return (
     <Card sx={{
       position: 'relative',
       overflow: 'hidden',
-      backgroundColor: 'rgba(255, 255, 255, 0.65)',
+      backgroundColor: 'rgba(255, 255, 255, 0.75)',
       backdropFilter: 'blur(10px)',
       WebkitBackdropFilter: 'blur(10px)',
       borderRadius: 3,
-      border: '1px solid rgba(144, 238, 144, 0.6)',
-      boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+      border: '3px solid #DC143C',
+      boxShadow: '0 4px 16px rgba(220, 20, 60, 0.3)',
     }}>
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
           <Typography variant="overline" sx={{
             fontFamily: '"Montserrat", sans-serif',
-            color: '#2F4F4F',
+            color: '#8B0000',
             textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
             fontSize: '1.2rem',
             fontWeight: 'bold',
           }}>
-            🌸 Équipe Printanière 2026
+            🐟 Équipe Poisson d'Avril 2026
           </Typography>
           <Box display="flex" alignItems="center" gap={1}>
-            <Tooltip title={isConnected ? "Connecté au jardin" : "Déconnecté"}>
+            <Tooltip title={isConnected ? "Connecté au cirque" : "Déconnecté"}>
               <Box sx={{
                 width: 12,
                 height: 12,
                 borderRadius: '50%',
-                bgcolor: isConnected ? '#90EE90' : '#c62828',
+                bgcolor: isConnected ? '#32CD32' : '#c62828',
                 animation: isConnected ? 'pulse-glow 2s infinite' : 'none',
               }} />
             </Tooltip>
             {lastUpdate && (
-              <Typography variant="caption" color="#2F4F4F" sx={{ fontStyle: 'italic' }}>
+              <Typography variant="caption" color="#8B0000" sx={{ fontStyle: 'italic' }}>
                 {`MàJ : ${lastUpdate.toLocaleTimeString()}`}
               </Typography>
             )}
@@ -203,19 +203,19 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
         </Box>
 
         <TableContainer component={Box}>
-          <Table size="small" aria-label="tableau des performances des agents">
+          <Table size="small" aria-label="tableau des performances des farceurs">
             <TableHead>
               <TableRow>
-                {['#', 'Agent', 'Statut', 'Fleurs cueillies', 'Temps moyen (entrant)', 'Papillons libérés', 'Temps moyen (sortant)'].map((label, i) => (
+                {['#', 'Farceur', 'Statut', '🐟 Poissons pris', 'Temps moyen (entrant)', '🐟 Poissons rappelés', 'Temps moyen (sortant)'].map((label, i) => (
                   <TableCell
                     key={i}
                     scope="col"
                     sx={{
                       fontWeight: 'bold',
-                      color: '#2F4F4F',
+                      color: '#8B0000',
                       fontFamily: '"Montserrat", sans-serif',
                       fontSize: '0.85rem',
-                      borderBottom: '2px solid rgba(144, 238, 144, 0.6)',
+                      borderBottom: '2px solid rgba(220, 20, 60, 0.6)',
                     }}
                     align={i >= 3 ? 'right' : 'left'}
                   >
@@ -239,13 +239,13 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     hover
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(144, 238, 144, 0.15)',
-                        boxShadow: 'inset 0 0 12px rgba(144, 238, 144, 0.25)',
+                        backgroundColor: 'rgba(220, 20, 60, 0.1)',
+                        boxShadow: 'inset 0 0 12px rgba(65, 105, 225, 0.25)',
                         transform: 'scale(1.02)',
                       },
                       transition: 'all 0.25s ease-in-out',
                       '&:not(:last-child)': {
-                        borderBottom: '1px dashed rgba(144, 238, 144, 0.25)',
+                        borderBottom: '1px dashed rgba(220, 20, 60, 0.25)',
                       },
                     }}
                   >
@@ -255,34 +255,34 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           <span
                             style={{
                               fontSize: '18px',
-                              filter: 'drop-shadow(0 0 6px rgba(144, 238, 144, 0.5))',
+                              filter: 'drop-shadow(0 0 6px rgba(220, 20, 60, 0.5))',
                               animation: 'medal-glow 2.5s infinite alternate',
                             }}
                           >
                             {medal}
                           </span>
                         )}
-                        <Typography sx={{ color: '#2F4F4F', fontWeight: 'bold' }}>{index + 1}</Typography>
+                        <Typography sx={{ color: '#8B0000', fontWeight: 'bold' }}>{index + 1}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center">
                         <Avatar
                           sx={{
-                            bgcolor: '#90EE90',
-                            color: '#2F4F4F',
+                            bgcolor: '#DC143C',
+                            color: '#FFFFFF',
                             width: 28,
                             height: 28,
                             fontSize: 12,
                             mr: 1,
-                            border: '1px solid rgba(144, 238, 144, 0.6)',
+                            border: '2px solid #FFD700',
                             transition: 'all 0.3s',
                             '&:hover': { transform: 'rotate(5deg) scale(1.1)' },
                           }}
                         >
                           {getInitials(emp.name) || '?'}
                         </Avatar>
-                        <Typography sx={{ color: '#2F4F4F', fontWeight: 'bold' }}>{emp.name || '-'}</Typography>
+                        <Typography sx={{ color: '#8B0000', fontWeight: 'bold' }}>{emp.name || '-'}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -300,18 +300,18 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           transition: 'all 0.3s ease',
                           '&:hover': {
                             transform: 'scale(1.1)',
-                            boxShadow: '0 0 10px rgba(144, 238, 144, 0.4)',
+                            boxShadow: '0 0 10px rgba(220, 20, 60, 0.4)',
                           },
                           ...(statusConfig.color === 'success'
-                            ? { backgroundColor: '#7CFC00', color: '#2F4F4F', border: '1px solid rgba(144, 238, 144, 0.6)' }
+                            ? { backgroundColor: '#32CD32', color: '#FFFFFF', border: '2px solid #FFD700' }
                             : statusConfig.color === 'warning'
-                            ? { backgroundColor: '#FFD700', color: '#2F4F4F', border: '1px solid rgba(255, 215, 0, 0.5)' }
-                            : { backgroundColor: '#FFB6C1', color: '#2F4F4F', border: '1px solid rgba(255, 182, 193, 0.5)' }),
+                            ? { backgroundColor: '#FFD700', color: '#8B0000', border: '2px solid #DC143C' }
+                            : { backgroundColor: '#4169E1', color: '#FFFFFF', border: '2px solid #32CD32' }),
                         }}
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <Typography sx={{ color: '#2F4F4F', fontWeight: 500 }}>{emp.inbound != null ? emp.inbound : '-'}</Typography>
+                      <Typography sx={{ color: '#8B0000', fontWeight: 500 }}>{emp.inbound != null ? emp.inbound : '-'}</Typography>
                     </TableCell>
                     <TableCell align="right">
                       {emp.avgInboundAHT ? (
@@ -321,7 +321,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           sx={{
                             fontWeight: 'bold',
                             minWidth: 60,
-                            border: '1px solid rgba(144, 238, 144, 0.6)',
+                            border: '2px solid #FFD700',
                             ...(inboundCritical
                               ? {
                                   backgroundColor: '#c62828',
@@ -330,16 +330,16 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                                   animation: 'pulse-critical 2s infinite alternate',
                                 }
                               : getDurationColor(inboundSec) === 'warning'
-                              ? { backgroundColor: '#FFD700', color: '#2F4F4F' }
-                              : { backgroundColor: '#7CFC00', color: '#2F4F4F' }),
+                              ? { backgroundColor: '#FFD700', color: '#8B0000' }
+                              : { backgroundColor: '#32CD32', color: '#FFFFFF' }),
                           }}
                         />
                       ) : (
-                        <Typography sx={{ color: '#2F4F4F' }}>-</Typography>
+                        <Typography sx={{ color: '#8B0000' }}>-</Typography>
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      <Typography sx={{ color: '#2F4F4F', fontWeight: 500 }}>{emp.outbound != null ? emp.outbound : '-'}</Typography>
+                      <Typography sx={{ color: '#8B0000', fontWeight: 500 }}>{emp.outbound != null ? emp.outbound : '-'}</Typography>
                     </TableCell>
                     <TableCell align="right">
                       {emp.avgOutboundAHT ? (
@@ -349,7 +349,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           sx={{
                             fontWeight: 'bold',
                             minWidth: 60,
-                            border: '1px solid rgba(144, 238, 144, 0.6)',
+                            border: '2px solid #FFD700',
                             ...(outboundCritical
                               ? {
                                   backgroundColor: '#c62828',
@@ -358,12 +358,12 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                                   animation: 'pulse-critical 2s infinite alternate',
                                 }
                               : getDurationColor(outboundSec) === 'warning'
-                              ? { backgroundColor: '#FFD700', color: '#2F4F4F' }
-                              : { backgroundColor: '#7CFC00', color: '#2F4F4F' }),
+                              ? { backgroundColor: '#FFD700', color: '#8B0000' }
+                              : { backgroundColor: '#32CD32', color: '#FFFFFF' }),
                           }}
                         />
                       ) : (
-                        <Typography sx={{ color: '#2F4F4F' }}>-</Typography>
+                        <Typography sx={{ color: '#8B0000' }}>-</Typography>
                       )}
                     </TableCell>
                   </TableRow>
@@ -380,26 +380,26 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 50% 50%, rgba(144, 238, 144, 0.1), transparent 70%)',
-          animation: 'spring-glow 15s linear infinite',
+          background: 'radial-gradient(circle at 50% 50%, rgba(220, 20, 60, 0.1), transparent 70%)',
+          animation: 'april-glow 15s linear infinite',
           pointerEvents: 'none',
           zIndex: 0,
         }}
       />
       <style>{`
         @keyframes medal-glow {
-          0% { filter: drop-shadow(0 0 4px rgba(144, 238, 144, 0.4)); }
-          100% { filter: drop-shadow(0 0 10px rgba(144, 238, 144, 0.6)) drop-shadow(0 0 16px rgba(144, 238, 144, 0.4)); }
+          0% { filter: drop-shadow(0 0 4px rgba(220, 20, 60, 0.4)); }
+          100% { filter: drop-shadow(0 0 10px rgba(65, 105, 225, 0.6)) drop-shadow(0 0 16px rgba(255, 215, 0, 0.4)); }
         }
         @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(144, 238, 144, 0.5); }
-          50% { box-shadow: 0 0 0 8px rgba(144, 238, 144, 0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.5); }
+          50% { box-shadow: 0 0 0 8px rgba(220, 20, 60, 0); }
         }
-        @keyframes pulse-spring {
-          0% { transform: scale(1); box-shadow: 0 0 8px rgba(144, 238, 144, 0.4); }
-          100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(144, 238, 144, 0.6); }
+        @keyframes pulse-april {
+          0% { transform: scale(1); box-shadow: 0 0 8px rgba(220, 20, 60, 0.4); }
+          100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(65, 105, 225, 0.6); }
         }
-        @keyframes spring-glow {
+        @keyframes april-glow {
           0% { transform: translateX(0) translateY(0); }
           50% { transform: translateX(-6%) translateY(-3%); }
           100% { transform: translateX(0) translateY(0); }

@@ -3,14 +3,15 @@ import { Card, CardContent, Typography } from '@mui/material';
 
 const getIconForTitle = (title) => {
   const lower = title.toLowerCase();
-  if (lower.includes('agent')) return '🌸';
-  if (lower.includes('call') || lower.includes('appel') || lower.includes('fleur')) return '🌸';
+  if (lower.includes('agent')) return '🐟';
+  if (lower.includes('call') || lower.includes('appel')) return '📞';
   if (lower.includes('abandon') || lower.includes('perdu')) return '🔴';
   if (lower.includes('aht') || lower.includes('durée') || lower.includes('temps')) return '⏱️';
-  if (lower.includes('missed')) return '⏱️';
+  if (lower.includes('missed')) return '❌';
   if (lower.includes('total') || lower.includes('nombre')) return '📊';
-  if (lower.includes('papillon') || lower.includes('libéré')) return '🦋';
-  return '🌸';
+  if (lower.includes('inbound') || lower.includes('entrant')) return '📥';
+  if (lower.includes('outbound') || lower.includes('sortant')) return '📤';
+  return '🐟';
 };
 
 export default function KPICard({ 
@@ -39,11 +40,11 @@ export default function KPICard({
   const getValueColor = () => {
     if (isValueCritical) return '#c62828';
     switch (valueColor) {
-      case 'success': return '#7CFC00';
+      case 'success': return '#32CD32';
       case 'warning': return '#FFD700';
       case 'error':   return '#c62828';
-      case 'info':    return '#90EE90';
-      default:        return '#2F4F4F';
+      case 'info':    return '#4169E1';
+      default:        return '#8B0000';
     }
   };
 
@@ -52,14 +53,14 @@ export default function KPICard({
   return (
     <>
       <style>{`
-        @keyframes kpi-highlight-spring {
+        @keyframes kpi-highlight-april {
           0% { 
-            background-color: rgba(144, 238, 144, 0.18); 
-            box-shadow: 0 0 15px rgba(144, 238, 144, 0.45); 
+            background-color: rgba(220, 20, 60, 0.18); 
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.45); 
           }
           100% { 
             background-color: transparent; 
-            box-shadow: 0 0 0 rgba(144, 238, 144, 0); 
+            box-shadow: 0 0 0 rgba(220, 20, 60, 0); 
           }
         }
 
@@ -81,7 +82,7 @@ export default function KPICard({
           75% { opacity: 0.98; filter: brightness(1.05); }
         }
 
-        @keyframes spring-drift-kpi {
+        @keyframes april-drift-kpi {
           0% { transform: translateX(0) translateY(0); opacity: 0.6; }
           50% { transform: translateX(-5%) translateY(-3%); opacity: 0.8; }
           100% { transform: translateX(0) translateY(0); opacity: 0.6; }
@@ -90,18 +91,18 @@ export default function KPICard({
 
       <Card
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.68)',
+          backgroundColor: 'rgba(255, 255, 255, 0.78)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           height: `${height}px`,
           borderRadius: 3,
-          border: `1px solid ${isValueCritical ? '#c62828' : 'rgba(144, 238, 144, 0.6)'}`,
+          border: `3px solid ${isValueCritical ? '#c62828' : '#DC143C'}`,
           boxShadow: isValueCritical 
             ? '0 0 20px rgba(198, 40, 40, 0.35)' 
-            : '0 4px 16px rgba(0,0,0,0.1)',
+            : '0 4px 16px rgba(220, 20, 60, 0.2)',
           transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.4, 1)',
           ...(animate && {
-            animation: `kpi-highlight-spring 0.8s ease-out`,
+            animation: `kpi-highlight-april 0.8s ease-out`,
           }),
           ...(isValueCritical && {
             animation: 'shake-critical 2.5s infinite, pulse-critical 2s infinite',
@@ -113,8 +114,8 @@ export default function KPICard({
             transform: 'translateY(-6px)',
             boxShadow: isValueCritical
               ? '0 8px 25px rgba(198, 40, 40, 0.45)'
-              : '0 6px 20px rgba(144, 238, 144, 0.35)',
-            border: `1px solid ${isValueCritical ? '#ff5252' : '#90EE90'}`,
+              : '0 6px 20px rgba(65, 105, 225, 0.35)',
+            border: `3px solid ${isValueCritical ? '#ff5252' : '#FFD700'}`,
           },
           position: 'relative',
           overflow: 'hidden',
@@ -127,7 +128,7 @@ export default function KPICard({
             bottom: 0,
             background: isValueCritical
               ? 'radial-gradient(circle at 50% 0%, rgba(198, 40, 40, 0.12) 0%, transparent 70%)'
-              : 'radial-gradient(circle at 50% 0%, rgba(144, 238, 144, 0.12) 0%, transparent 70%)',
+              : 'radial-gradient(circle at 50% 0%, rgba(220, 20, 60, 0.12) 0%, transparent 70%)',
             pointerEvents: 'none',
             zIndex: 0,
           },
@@ -140,10 +141,10 @@ export default function KPICard({
             height: '80%',
             background: isValueCritical
               ? 'radial-gradient(circle at 60% 40%, rgba(198, 40, 40, 0.08), transparent 75%)'
-              : 'radial-gradient(circle at 40% 60%, rgba(127, 255, 0, 0.08), transparent 80%)',
+              : 'radial-gradient(circle at 40% 60%, rgba(65, 105, 225, 0.08), transparent 80%)',
             pointerEvents: 'none',
             zIndex: 0,
-            animation: 'spring-drift-kpi 18s linear infinite',
+            animation: 'april-drift-kpi 18s linear infinite',
           },
         }}
       >
@@ -164,7 +165,7 @@ export default function KPICard({
             variant="overline"
             sx={{
               fontWeight: 'bold',
-              color: '#2F4F4F',
+              color: '#8B0000',
               textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
               fontFamily: '"Montserrat", sans-serif',
               fontSize: '1.2rem',
@@ -185,7 +186,7 @@ export default function KPICard({
             <Typography 
               variant="caption" 
               sx={{ 
-                color: '#2F4F4F',
+                color: '#8B0000',
                 display: 'block', 
                 mb: 1,
                 fontSize: '0.95rem',
@@ -230,7 +231,7 @@ export default function KPICard({
                 component="span"
                 variant="subtitle1"
                 sx={{
-                  color: '#2F4F4F',
+                  color: '#8B0000',
                   fontWeight: 'normal',
                   fontSize: '1rem',
                   fontFamily: 'inherit',
