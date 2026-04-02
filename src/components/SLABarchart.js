@@ -18,8 +18,8 @@ import {
   Tooltip,
 } from 'recharts';
 
-const INBOUND_COLOR = '#DC143C';
-const OUTBOUND_COLOR = '#4169E1';
+const INBOUND_COLOR = '#FFB6C1'; // Rose pastel
+const OUTBOUND_COLOR = '#98D8C8'; // Vert menthe pastel
 
 const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString());
 
@@ -50,13 +50,13 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     return (
       <Card
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.75)',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           width: '100%',
           borderRadius: 3,
-          border: '3px solid #DC143C',
-          boxShadow: '0 4px 16px rgba(220, 20, 60, 0.2)',
+          border: '3px solid #DDA0DD',
+          boxShadow: '0 4px 16px rgba(221, 160, 221, 0.2)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -67,8 +67,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 40% 50%, rgba(220, 20, 60, 0.1), transparent 70%)',
-          animation: 'april-drift 22s linear infinite',
+          background: 'radial-gradient(circle at 40% 50%, rgba(221, 160, 221, 0.1), transparent 70%)',
+          animation: 'easter-drift 22s linear infinite',
           pointerEvents: 'none',
           zIndex: 0,
         }} />
@@ -77,7 +77,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             variant="overline"
             sx={{
               fontFamily: '"Montserrat", sans-serif',
-              color: '#8B0000',
+              color: '#5D4E60',
               textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
               fontSize: '1.3rem',
             }}
@@ -86,16 +86,16 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           </Typography>
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Chip
-              label={wsConnected ? '🐟 Aucun appel enregistré' : '🎭 Connexion au cirque...'}
+              label={wsConnected ? '🥚 Aucun œuf collecté' : '🐰 Connexion au jardin...'}
               size="small"
               sx={{
                 mb: 2,
                 background: wsConnected
-                  ? 'linear-gradient(135deg, #DC143C, #4169E1)'
-                  : 'linear-gradient(135deg, #4169E1, #FFD700)',
-                color: '#FFFFFF',
+                  ? 'linear-gradient(135deg, #FFB6C1, #98D8C8)'
+                  : 'linear-gradient(135deg, #DDA0DD, #FFD700)',
+                color: '#5D4E60',
                 fontFamily: '"Montserrat", sans-serif',
-                animation: wsConnected ? 'none' : 'pulse-april 1.5s infinite alternate',
+                animation: wsConnected ? 'none' : 'pulse-easter 1.5s infinite alternate',
                 border: '2px solid #FFD700',
               }}
             />
@@ -103,17 +103,17 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               variant="rectangular" 
               width="100%" 
               height={350} 
-              sx={{ backgroundColor: 'rgba(220, 20, 60, 0.1)' }} 
+              sx={{ backgroundColor: 'rgba(221, 160, 221, 0.1)' }} 
             />
           </Box>
         </CardContent>
         <style>{`
-          @keyframes pulse-april {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(220, 20, 60, 0.45); }
-            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(65, 105, 225, 0.55); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(220, 20, 60, 0.45); }
+          @keyframes pulse-easter {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(221, 160, 221, 0.45); }
+            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(152, 216, 200, 0.55); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(221, 160, 221, 0.45); }
           }
-          @keyframes april-drift {
+          @keyframes easter-drift {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-8%) translateY(-4%); }
             100% { transform: translateX(0) translateY(0); }
@@ -127,13 +127,13 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     <>
       <style>
         {`
-          @keyframes pulse-april {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(220, 20, 60, 0.45); }
-            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(65, 105, 225, 0.55); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(220, 20, 60, 0.45); }
+          @keyframes pulse-easter {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(221, 160, 221, 0.45); }
+            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(152, 216, 200, 0.55); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(221, 160, 221, 0.45); }
           }
 
-          @keyframes bar-rise-april {
+          @keyframes bar-rise-easter {
             0% { 
               opacity: 0.6; 
               transform: scaleY(0); 
@@ -145,12 +145,12 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             }
           }
 
-          @keyframes twinkle-april {
-            0%, 100% { text-shadow: 0 0 6px rgba(220, 20, 60, 0.45); }
-            50% { text-shadow: 0 0 12px rgba(65, 105, 225, 0.55); }
+          @keyframes twinkle-easter {
+            0%, 100% { text-shadow: 0 0 6px rgba(221, 160, 221, 0.45); }
+            50% { text-shadow: 0 0 12px rgba(152, 216, 200, 0.55); }
           }
 
-          @keyframes april-drift-chart {
+          @keyframes easter-drift-chart {
             0% { transform: translateX(0) translateY(0); opacity: 0.5; }
             50% { transform: translateX(-6%) translateY(-3%); opacity: 0.7; }
             100% { transform: translateX(0) translateY(0); opacity: 0.5; }
@@ -160,17 +160,17 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
 
       <Card
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.75)',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           width: '100%',
           borderRadius: 3,
-          border: '3px solid #DC143C',
-          boxShadow: '0 4px 16px rgba(220, 20, 60, 0.2)',
+          border: '3px solid #DDA0DD',
+          boxShadow: '0 4px 16px rgba(221, 160, 221, 0.2)',
           position: 'relative',
           overflow: 'hidden',
           ...(animate && {
-            animation: 'pulse-april 0.6s ease-in-out',
+            animation: 'pulse-easter 0.6s ease-in-out',
           }),
           '&::before': {
             content: '""',
@@ -179,8 +179,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, transparent, #DC143C, rgba(220, 20, 60, 0.55), #FFD700, transparent)',
-            animation: 'twinkle-april 3s infinite',
+            background: 'linear-gradient(90deg, transparent, #DDA0DD, rgba(255, 182, 193, 0.55), #FFD700, transparent)',
+            animation: 'twinkle-easter 3s infinite',
             zIndex: 2,
           },
           '&::after': {
@@ -190,10 +190,10 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             left: '-60%',
             width: '220%',
             height: '70%',
-            background: 'radial-gradient(circle at 50% 40%, rgba(65, 105, 225, 0.08), transparent 80%)',
+            background: 'radial-gradient(circle at 50% 40%, rgba(152, 216, 200, 0.08), transparent 80%)',
             pointerEvents: 'none',
             zIndex: 0,
-            animation: 'april-drift-chart 25s linear infinite',
+            animation: 'easter-drift-chart 25s linear infinite',
           },
         }}
       >
@@ -203,7 +203,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               variant="overline"
               sx={{
                 fontFamily: '"Montserrat", sans-serif',
-                color: '#8B0000',
+                color: '#5D4E60',
                 textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
                 fontSize: '1.3rem',
               }}
@@ -214,11 +214,11 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               label="🟢 En direct"
               size="small"
               sx={{
-                background: 'linear-gradient(135deg, #32CD32, #FFD700)',
-                color: '#8B0000',
+                background: 'linear-gradient(135deg, #a5d6a7, #FFD700)',
+                color: '#5D4E60',
                 fontWeight: 'bold',
                 fontFamily: '"Montserrat", sans-serif',
-                animation: 'pulse-april 2s infinite',
+                animation: 'pulse-easter 2s infinite',
                 border: '2px solid #FFD700',
               }}
             />
@@ -230,13 +230,13 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               margin={{ top: 30, right: 20, left: 10, bottom: 20 }}
               barSize={100}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(220, 20, 60, 0.35)" opacity={0.35} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(221, 160, 221, 0.35)" opacity={0.35} />
 
               <XAxis
                 dataKey="dayLabel"
-                stroke="#8B0000"
+                stroke="#5D4E60"
                 tick={{
-                  fill: '#8B0000',
+                  fill: '#5D4E60',
                   fontSize: 22,
                   fontWeight: 'bold',
                   fontFamily: '"Montserrat", sans-serif',
@@ -245,9 +245,9 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               />
 
               <YAxis
-                stroke="#8B0000"
+                stroke="#5D4E60"
                 tick={{
-                  fill: '#8B0000',
+                  fill: '#5D4E60',
                   fontSize: 22,
                   fontWeight: 'bold',
                   fontFamily: '"Montserrat", sans-serif',
@@ -257,61 +257,61 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
 
               <Tooltip
                 formatter={(value, name) => {
-                  const labels = { inbound: '🐟 Poissons attrapés', outbound: '🐟 Poissons relachés' };
+                  const labels = { inbound: '🥚 Œufs collectés', outbound: '🐰 Œufs livrés' };
                   return [formatNumber(value), labels[name] || name];
                 }}
                 labelFormatter={(label) => `Jour : ${label}`}
                 contentStyle={{
                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  border: '2px solid #DC143C',
+                  border: '2px solid #DDA0DD',
                   borderRadius: 6,
-                  color: '#8B0000',
+                  color: '#5D4E60',
                   fontSize: 12,
                   fontFamily: '"Roboto", sans-serif',
-                  boxShadow: '0 0 12px rgba(220, 20, 60, 0.3)',
+                  boxShadow: '0 0 12px rgba(221, 160, 221, 0.3)',
                 }}
               />
 
               <Bar
                 dataKey="inbound"
-                name="Poissons attrapés"
+                name="Œufs collectés"
                 fill={INBOUND_COLOR}
                 animationDuration={1200}
-                style={{ animation: 'bar-rise-april 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
+                style={{ animation: 'bar-rise-easter 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
               >
                 <LabelList
                   dataKey="inbound"
                   position="top"
-                  fill="#8B0000"
+                  fill="#5D4E60"
                   fontWeight="bold"
                   fontSize={22}
                   formatter={hideZeroLabels}
                   style={{
-                    textShadow: '0 0 6px rgba(220, 20, 60, 0.45)',
+                    textShadow: '0 0 6px rgba(255, 182, 193, 0.45)',
                     fontFamily: '"Montserrat", sans-serif',
-                    animation: 'twinkle-april 3s infinite alternate',
+                    animation: 'twinkle-easter 3s infinite alternate',
                   }}
                 />
               </Bar>
 
               <Bar
                 dataKey="outbound"
-                name="Ballons envoyés"
+                name="Œufs livrés"
                 fill={OUTBOUND_COLOR}
                 animationDuration={1200}
-                style={{ animation: 'bar-rise-april 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
+                style={{ animation: 'bar-rise-easter 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
               >
                 <LabelList
                   dataKey="outbound"
                   position="top"
-                  fill="#8B0000"
+                  fill="#5D4E60"
                   fontWeight="bold"
                   fontSize={22}
                   formatter={hideZeroLabels}
                   style={{
-                    textShadow: '0 0 6px rgba(65, 105, 225, 0.45)',
+                    textShadow: '0 0 6px rgba(152, 216, 200, 0.45)',
                     fontFamily: '"Montserrat", sans-serif',
-                    animation: 'twinkle-april 3s infinite alternate',
+                    animation: 'twinkle-easter 3s infinite alternate',
                   }}
                 />
               </Bar>
@@ -327,11 +327,11 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   fontFamily: '"Montserrat", sans-serif',
                   fontWeight: 'bold',
                   fontSize: 22,
-                  color: '#8B0000',
+                  color: '#5D4E60',
                   textShadow: '0 0 4px rgba(255, 255, 255, 0.6)',
                 }}
               >
-                🐟 Poissons attrapés
+                🥚 Œufs collectés
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -342,11 +342,11 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   fontFamily: '"Montserrat", sans-serif',
                   fontWeight: 'bold',
                   fontSize: 22,
-                  color: '#8B0000',
+                  color: '#5D4E60',
                   textShadow: '0 0 4px rgba(255, 255, 255, 0.6)',
                 }}
               >
-                🐟 Poissons relachés
+                🐰 Œufs livrés
               </Typography>
             </Box>
           </Box>
