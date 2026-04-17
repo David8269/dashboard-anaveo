@@ -25,7 +25,7 @@ const lunchEndIndex = 11;
 function CustomLabel({ fill }) {
   return (
     <text x="49.5%" y={25} fill={fill} fontSize={14} textAnchor="middle" fontWeight="bold" fontFamily='"Montserrat", sans-serif'>
-      🐰 Pause déjeuner 🥚
+      🌸 Pause déjeuner 🌸
     </text>
   );
 }
@@ -37,7 +37,7 @@ function LegendComponent() {
     gap: 6, 
     fontWeight: 'bold', 
     fontSize: 12,
-    color: '#5D4E60',
+    color: '#2F4F4F',
     textShadow: '0 0 4px rgba(255, 255, 255, 0.6)',
   };
   const squareStyle = (color) => ({ 
@@ -46,18 +46,18 @@ function LegendComponent() {
     backgroundColor: color, 
     borderRadius: 2,
     boxShadow: `0 0 4px ${color}`,
-    border: '1px solid #FFD700',
+    border: '1px solid rgba(144, 238, 144, 0.6)',
   });
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, py: 0.5 }}>
       <div style={itemStyle}>
-        <span style={squareStyle('#FFB6C1')}></span> 🥚 CDS_IN
+        <span style={squareStyle('#7CFC00')}></span> 🌸 CDS_IN
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#98D8C8')}></span> 🐰 CDS_OUT
+        <span style={squareStyle('#90EE90')}></span> 🦋 CDS_OUT
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#ef9a9a')}></span> 🔴 ABSYS
+        <span style={squareStyle('#c62828')}></span> 🔴 ABSYS
       </div>
     </Box>
   );
@@ -66,7 +66,7 @@ function LegendComponent() {
 const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
   if (!value || value <= 0) return null;
   const isAbsysCritical = dataKey === 'ABSYS' && value > 5;
-  const labelColor = isAbsysCritical ? '#ef9a9a' : '#5D4E60';
+  const labelColor = isAbsysCritical ? '#c62828' : '#2F4F4F';
 
   return (
     <text
@@ -98,12 +98,12 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
     return (
       <Card
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backgroundColor: 'rgba(255, 255, 255, 0.65)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           borderRadius: 3,
-          border: '3px solid #DDA0DD',
-          boxShadow: '0 4px 16px rgba(221, 160, 221, 0.3)',
+          border: '1px solid rgba(144, 238, 144, 0.6)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -114,8 +114,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           left: '-50%',
           width: '200%',
           height: '100%',
-          background: 'radial-gradient(circle at 40% 50%, rgba(221, 160, 221, 0.1), transparent 70%)',
-          animation: 'easter-drift 22s linear infinite',
+          background: 'radial-gradient(circle at 40% 50%, rgba(144, 238, 144, 0.1), transparent 70%)',
+          animation: 'spring-drift 22s linear infinite',
           pointerEvents: 'none',
           zIndex: 0,
         }} />
@@ -124,7 +124,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             variant="overline"
             sx={{
               fontFamily: '"Montserrat", sans-serif',
-              color: '#5D4E60',
+              color: '#2F4F4F',
               textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
               fontSize: '1.2rem',
             }}
@@ -133,33 +133,33 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           </Typography>
           <Box sx={{ textAlign: 'center', py: 1, mt: 2 }}>
             <Chip
-              label={wsConnected ? '🥚 Aucun œuf collecté' : '🐰 Connexion au jardin...'}
+              label={wsConnected ? '🌸 Aucun appel enregistré' : '🦋 Connexion au jardin...'}
               size="small"
               sx={{
                 mb: 1,
                 background: wsConnected 
-                  ? 'linear-gradient(135deg, #FFB6C1, #98D8C8)' 
-                  : 'linear-gradient(135deg, #DDA0DD, #FFD700)',
-                color: '#5D4E60',
+                  ? 'linear-gradient(135deg, #87CEEB, #90EE90)' 
+                  : 'linear-gradient(135deg, #87CEEB, #7CFC00)',
+                color: '#2F4F4F',
                 fontFamily: '"Montserrat", sans-serif',
-                animation: wsConnected ? 'none' : 'pulse-easter 2s infinite alternate',
-                border: '2px solid #FFD700',
+                animation: wsConnected ? 'none' : 'pulse-spring 2s infinite alternate',
+                border: '1px solid rgba(144, 238, 144, 0.6)',
               }}
             />
             <Skeleton 
               variant="rectangular" 
               width="100%" 
               height={200} 
-              sx={{ backgroundColor: 'rgba(221, 160, 221, 0.1)' }} 
+              sx={{ backgroundColor: 'rgba(144, 238, 144, 0.1)' }} 
             />
           </Box>
         </CardContent>
         <style>{`
-          @keyframes pulse-easter {
-            0% { transform: scale(1); box-shadow: 0 0 8px rgba(221, 160, 221, 0.4); }
-            100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(152, 216, 200, 0.6); }
+          @keyframes pulse-spring {
+            0% { transform: scale(1); box-shadow: 0 0 8px rgba(144, 238, 144, 0.4); }
+            100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(144, 238, 144, 0.6); }
           }
-          @keyframes easter-drift {
+          @keyframes spring-drift {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-8%) translateY(-4%); }
             100% { transform: translateX(0) translateY(0); }
@@ -181,12 +181,12 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
   return (
     <Card
       sx={{
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: 'rgba(255, 255, 255, 0.65)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         borderRadius: 3,
-        border: '3px solid #DDA0DD',
-        boxShadow: '0 4px 16px rgba(221, 160, 221, 0.3)',
+        border: '1px solid rgba(144, 238, 144, 0.6)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -197,8 +197,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
         left: '-60%',
         width: '220%',
         height: '100%',
-        background: 'radial-gradient(circle at 30% 40%, rgba(221, 160, 221, 0.1), transparent 80%)',
-        animation: 'easter-drift 20s linear infinite',
+        background: 'radial-gradient(circle at 30% 40%, rgba(144, 238, 144, 0.1), transparent 80%)',
+        animation: 'spring-drift 20s linear infinite',
         pointerEvents: 'none',
         zIndex: 0,
       }} />
@@ -208,8 +208,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
         right: '-70%',
         width: '240%',
         height: '60%',
-        background: 'radial-gradient(circle at 70% 30%, rgba(152, 216, 200, 0.08), transparent 85%)',
-        animation: 'easter-drift-reverse 28s linear infinite',
+        background: 'radial-gradient(circle at 70% 30%, rgba(127, 255, 0, 0.08), transparent 85%)',
+        animation: 'spring-drift-reverse 28s linear infinite',
         pointerEvents: 'none',
         zIndex: 0,
       }} />
@@ -220,7 +220,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             variant="overline"
             sx={{
               fontFamily: '"Montserrat", sans-serif',
-              color: '#5D4E60',
+              color: '#2F4F4F',
               textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
               fontSize: '1.2rem',
             }}
@@ -233,12 +233,12 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             sx={{
               fontSize: 12,
               background: wsConnected 
-                ? 'linear-gradient(135deg, #a5d6a7, #FFD700)'
-                : 'linear-gradient(135deg, #DDA0DD, #ef9a9a)',
-              color: wsConnected ? '#5D4E60' : '#fff',
+                ? 'linear-gradient(135deg, #90EE90, #7CFC00)'
+                : 'linear-gradient(135deg, #87CEEB, #c62828)',
+              color: wsConnected ? '#2F4F4F' : '#fff',
               fontWeight: 'bold',
               animation: wsConnected ? 'pulse-glow 2s infinite' : 'none',
-              border: '2px solid #FFD700',
+              border: '1px solid rgba(144, 238, 144, 0.6)',
             }}
           />
         </Box>
@@ -251,12 +251,12 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               barSize={18}
               stackOffset="none"
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(221, 160, 221, 0.35)" opacity={0.35} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(144, 238, 144, 0.35)" opacity={0.35} />
 
               <XAxis
                 dataKey="index"
                 tick={{
-                  fill: '#5D4E60',
+                  fill: '#2F4F4F',
                   fontSize: 22,
                   fontWeight: 'bold',
                   textShadow: '0 0 4px rgba(255, 255, 255, 0.6)',
@@ -276,9 +276,9 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               />
 
               <YAxis
-                stroke="#5D4E60"
+                stroke="#2F4F4F"
                 tick={{
-                  fill: '#5D4E60',
+                  fill: '#2F4F4F',
                   fontSize: 16,
                   fontWeight: 'bold',
                   fontFamily: '"Montserrat", sans-serif',
@@ -291,8 +291,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               <Tooltip
                 formatter={(value, name) => {
                   const labels = { 
-                    CDS_IN: '🥚 Œufs collectés', 
-                    CDS_OUT: '🐰 Œufs livrés', 
+                    CDS_IN: '🌸 Fleurs cueillies', 
+                    CDS_OUT: '🦋 Papillons libérés', 
                     ABSYS: '🔴 Appels perdus' 
                   };
                   return [value, labels[name] || name];
@@ -300,12 +300,12 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 labelFormatter={(index) => `Heure : ${halfHourSlots[index] || index}`}
                 contentStyle={{
                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  border: '2px solid #DDA0DD',
+                  border: '1px solid rgba(144, 238, 144, 0.6)',
                   borderRadius: 6,
-                  color: '#5D4E60',
+                  color: '#2F4F4F',
                   fontSize: 12,
                   fontFamily: '"Roboto", sans-serif',
-                  boxShadow: '0 0 12px rgba(221, 160, 221, 0.3)',
+                  boxShadow: '0 0 12px rgba(144, 238, 144, 0.3)',
                 }}
               />
 
@@ -314,39 +314,39 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 x2={lunchEndIndex}
                 y1={0}
                 y2="dataMax"
-                fill="#FFD700"
-                fillOpacity={0.15}
-                stroke="#DDA0DD"
+                fill="#90EE90"
+                fillOpacity={0.12}
+                stroke="rgba(144, 238, 144, 0.6)"
                 strokeOpacity={0.6}
                 strokeDasharray="4 4"
               />
-              <ReferenceLine x={lunchStartIndex} stroke="#DDA0DD" strokeWidth={2} strokeDasharray="6 4" />
-              <ReferenceLine x={lunchEndIndex} stroke="#DDA0DD" strokeWidth={2} strokeDasharray="6 4" />
-              <CustomLabel fill="#5D4E60" />
+              <ReferenceLine x={lunchStartIndex} stroke="#90EE90" strokeWidth={2} strokeDasharray="6 4" />
+              <ReferenceLine x={lunchEndIndex} stroke="#90EE90" strokeWidth={2} strokeDasharray="6 4" />
+              <CustomLabel fill="#2F4F4F" />
 
               <Bar 
                 dataKey="CDS_IN" 
-                name="Œufs collectés" 
-                fill="#FFB6C1"
+                name="Fleurs cueillies" 
+                fill="#7CFC00"
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-easter 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-spring 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
               <Bar 
                 dataKey="CDS_OUT" 
-                name="Œufs livrés" 
-                fill="#98D8C8"
+                name="Papillons libérés" 
+                fill="#90EE90"
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-easter 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-spring 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
               <Bar 
                 dataKey="ABSYS" 
                 name="Appels perdus" 
-                fill="#ef9a9a"
+                fill="#c62828"
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-easter 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-spring 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
             </BarChart>
           </ResponsiveContainer>
@@ -357,7 +357,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
       <style>
         {`
-          @keyframes bar-rise-easter {
+          @keyframes bar-rise-spring {
             0% { 
               transform: scaleY(0); 
               opacity: 0; 
@@ -369,29 +369,29 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             }
           }
 
-          @keyframes pulse-easter {
+          @keyframes pulse-spring {
             0% { 
               transform: scale(1); 
-              box-shadow: 0 0 8px rgba(221, 160, 221, 0.4); 
+              box-shadow: 0 0 8px rgba(144, 238, 144, 0.4); 
             }
             100% { 
               transform: scale(1.04); 
-              box-shadow: 0 0 20px rgba(152, 216, 200, 0.6); 
+              box-shadow: 0 0 20px rgba(144, 238, 144, 0.6); 
             }
           }
 
           @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(221, 160, 221, 0.5); }
-            50% { box-shadow: 0 0 0 8px rgba(221, 160, 221, 0); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(144, 238, 144, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(144, 238, 144, 0); }
           }
 
-          @keyframes easter-drift {
+          @keyframes spring-drift {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-10%) translateY(-5%); }
             100% { transform: translateX(0) translateY(0); }
           }
 
-          @keyframes easter-drift-reverse {
+          @keyframes spring-drift-reverse {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(12%) translateY(3%); }
             100% { transform: translateX(0) translateY(0); }

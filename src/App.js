@@ -89,7 +89,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === Clock (version Pâques – avec animation rebondissante) ===
+// === Clock (version Printemps – avec effet floral doux) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -106,22 +106,22 @@ function Clock() {
         fontFamily: '"Orbitron", sans-serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-        color: '#5D4E60',
+        color: '#2F4F4F',
         textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0,0,0,0.2)',
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         padding: { xs: '0.5rem 1rem', md: '0.8rem 1.4rem' },
         borderRadius: '16px',
         display: 'inline-block',
         margin: '0 auto',
-        border: '3px solid #DDA0DD',
-        boxShadow: '0 4px 16px rgba(221, 160, 221, 0.3)',
+        border: '1px solid rgba(144, 238, 144, 0.6)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
       }}
       role="status"
       aria-live="polite"
     >
-      🐰 {hours}:{minutes}:{seconds} 🐰
+      🌸 {hours}:{minutes}:{seconds} 🌸
     </Paper>
   );
 }
@@ -679,8 +679,8 @@ const App = () => {
       />
       <style>
         {`
-/* 🐰 Éléments de Pâques qui tombent - Animation rebondissante */
-@keyframes easter-fall {
+/* ✨ Fleurs et papillons qui tombent - Thème Printemps */
+@keyframes spring-fall {
   0% { 
     transform: translateY(-50px) rotate(0deg); 
     opacity: 0.2;
@@ -698,47 +698,48 @@ const App = () => {
     opacity: 0;
   }
 }
-.easter-element {
+.spring-element {
   position: fixed;
   top: -20px;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
+  color: #FF69B4;
   z-index: 1;
   opacity: 0;
-  animation: easter-fall 12s linear infinite;
+  animation: spring-fall 12s linear infinite;
   pointer-events: none;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
   will-change: transform, opacity;
 }
-.easter-element:nth-child(2n) { left: 10%; animation-duration: 14s; animation-delay: 1s; }
-.easter-element:nth-child(3n) { left: 20%; animation-duration: 16s; animation-delay: 2s; }
-.easter-element:nth-child(4n) { left: 35%; animation-duration: 11s; animation-delay: 0.5s; }
-.easter-element:nth-child(5n) { left: 50%; animation-duration: 13s; animation-delay: 3s; }
-.easter-element:nth-child(6n) { left: 65%; animation-duration: 10s; animation-delay: 1.5s; }
-.easter-element:nth-child(7n) { left: 80%; animation-duration: 15s; animation-delay: 4s; }
-.easter-element:nth-child(8n) { left: 90%; animation-duration: 12s; animation-delay: 2.5s; }
+.spring-element:nth-child(2n) { left: 10%; animation-duration: 14s; animation-delay: 1s; color: #8A2BE2; }
+.spring-element:nth-child(3n) { left: 20%; animation-duration: 16s; animation-delay: 2s; color: #90EE90; }
+.spring-element:nth-child(4n) { left: 35%; animation-duration: 11s; animation-delay: 0.5s; color: #FFD700; }
+.spring-element:nth-child(5n) { left: 50%; animation-duration: 13s; animation-delay: 3s; color: #FF69B4; }
+.spring-element:nth-child(6n) { left: 65%; animation-duration: 10s; animation-delay: 1.5s; color: #90EE90; }
+.spring-element:nth-child(7n) { left: 80%; animation-duration: 15s; animation-delay: 4s; color: #8A2BE2; }
+.spring-element:nth-child(8n) { left: 90%; animation-duration: 12s; animation-delay: 2.5s; color: #FFD700; }
 
-/* Scrollbar Pâques - couleurs pastel */
+/* Scrollbar printanière */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #FFB6C1, #DDA0DD, #98D8C8, #FFD700);
+  background: linear-gradient(to bottom, #90EE90, #FF69B4);
   border-radius: 5px;
   border: 2px solid transparent;
   background-clip: padding-box;
   transition: all 0.3s ease;
 }
 body.show-scrollbar ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #FFB6C1, #DDA0DD, #98D8C8, #FFF5BA);
+  background: linear-gradient(to bottom, #7CFC00, #FF69B4);
 }
 body.show-scrollbar ::-webkit-scrollbar-track {
-  background: rgba(221, 160, 221, 0.1);
+  background: rgba(144, 238, 144, 0.1);
 }
 * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-body.show-scrollbar { scrollbar-color: #DDA0DD rgba(221, 160, 221, 0.1); }
+body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
 `}
       </style>
 
-      {/* 🐰 Fond d'écran Pâques */}
+      {/* 🌸 Fond d'écran Printemps */}
       <Box
         sx={{
           position: 'fixed',
@@ -746,7 +747,7 @@ body.show-scrollbar { scrollbar-color: #DDA0DD rgba(221, 160, 221, 0.1); }
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/Easter.png')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/Spring.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -754,39 +755,39 @@ body.show-scrollbar { scrollbar-color: #DDA0DD rgba(221, 160, 221, 0.1); }
         }}
       />
 
-      {/* 🐰 Éléments de Pâques qui tombent animés */}
+      {/* ✨ Fleurs et papillons qui tombent animés */}
       {[...Array(16)].map((_, i) => (
-        <div key={i} className="easter-element">
-          {['🥚', '🐰', '🐣', '🌷', '🐇', '🌸', '🐤'][i % 7]}
+        <div key={i} className="spring-element">
+          {['🌸', '🦋', '🌼', '🐝', '🌺', '🐦', '🌷'][i % 7]}
         </div>
       ))}
 
-      {/* Conteneur principal */}
+      {/* Conteneur principal - PLUS DE TRANSPARENCE */}
       <Box
         sx={{
           minHeight: '100vh',
           py: { xs: 2, md: 4 },
           position: 'relative',
           zIndex: 2,
-          color: '#5D4E60',
+          color: '#2F4F4F',
           fontFamily: '"Roboto", sans-serif',
           px: { xs: 0.5, sm: 1, md: 2 },
           backdropFilter: 'blur(0px)',
           WebkitBackdropFilter: 'blur(0px)',
         }}
-        aria-label="Tableau de bord de Pâques en temps réel"
+        aria-label="Tableau de bord du Printemps en temps réel"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {/* Titre festif Pâques */}
+          {/* Titre élégant avec effet floral - PLUS DE TRANSPARENCE */}
           <Box
             sx={{
               mb: 1,
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
               backdropFilter: 'blur(10px)',
               WebkitBackdropFilter: 'blur(10px)',
               borderRadius: '18px',
-              border: '3px solid #DDA0DD',
-              boxShadow: '0 6px 20px rgba(221, 160, 221, 0.3)',
+              border: '2px solid rgba(144, 238, 144, 0.6)',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)',
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
               display: 'inline-block',
               margin: '0 auto',
@@ -800,28 +801,13 @@ body.show-scrollbar { scrollbar-color: #DDA0DD rgba(221, 160, 221, 0.1); }
                 fontFamily: '"Montserrat", sans-serif',
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#5D4E60',
+                color: '#2F4F4F',
                 textShadow: '0 2px 6px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0,0,0,0.15)',
                 margin: 0,
                 letterSpacing: '0.02em',
               }}
             >
-              🥚 Bienvenue au CDS ! 🥚
-            </Typography>
-            <Typography
-              variant="h4"
-              align="center"
-              sx={{
-                fontFamily: '"Montserrat", sans-serif',
-                fontWeight: 'bold',
-                fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.8rem' },
-                color: '#98D8C8',
-                textShadow: '0 1px 4px rgba(255, 255, 255, 0.8)',
-                margin: 0,
-                letterSpacing: '0.05em',
-              }}
-            >
-              🌷 PÂQUES 2026 🌸
+              🌸 Bienvenue au CDS ! 🌸
             </Typography>
           </Box>
 
@@ -834,32 +820,32 @@ body.show-scrollbar { scrollbar-color: #DDA0DD rgba(221, 160, 221, 0.1); }
               textAlign="center"
               mb={2}
               sx={{
-                color: '#5D4E60',
+                color: '#2F4F4F',
                 fontWeight: 'bold',
                 textShadow: '0 1px 3px rgba(255,255,255,0.8)',
                 px: { xs: 2, sm: 3 },
-                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                backgroundColor: 'rgba(255, 255, 255, 0.6)',
                 backdropFilter: 'blur(8px)',
                 WebkitBackdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 py: 1,
-                border: '2px solid #DDA0DD',
+                border: '1px solid rgba(144, 238, 144, 0.5)',
               }}
             >
-              🐰 Connexion WebSocket perdue. Tentative de reconnexion...
+              🌸 Connexion WebSocket perdue. Tentative de reconnexion...
               <Button
                 size="small"
                 variant="outlined"
                 sx={{
                   ml: 1,
-                  borderColor: '#DDA0DD',
-                  color: '#5D4E60',
+                  borderColor: '#90EE90',
+                  color: '#2F4F4F',
                   borderRadius: '20px',
                   fontWeight: 600,
                   fontFamily: '"Orbitron", sans-serif',
                   '&:hover': {
-                    borderColor: '#FFB6C1',
-                    backgroundColor: 'rgba(221, 160, 221, 0.1)',
+                    borderColor: '#7CFC00',
+                    backgroundColor: 'rgba(144, 238, 144, 0.1)',
                   },
                 }}
                 onClick={reconnect}
@@ -925,24 +911,24 @@ body.show-scrollbar { scrollbar-color: #DDA0DD rgba(221, 160, 221, 0.1); }
                         variant="contained"
                         onClick={unlockAudio}
                         sx={{
-                          background: 'linear-gradient(135deg, #FFB6C1, #DDA0DD, #98D8C8, #FFD700)',
-                          color: '#5D4E60',
+                          background: 'linear-gradient(135deg, #87CEEB, #90EE90)',
+                          color: '#2F4F4F',
                           fontWeight: 'bold',
                           textTransform: 'none',
                           padding: '10px 20px',
                           fontSize: '1rem',
                           borderRadius: '50px',
-                          border: '3px solid #FFD700',
-                          boxShadow: '0 0 14px rgba(221, 160, 221, 0.5), 0 4px 8px rgba(0,0,0,0.15)',
+                          border: '2px solid #90EE90',
+                          boxShadow: '0 0 14px rgba(144, 238, 144, 0.5), 0 4px 8px rgba(0,0,0,0.15)',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #FFB6C1, #DDA0DD, #98D8C8, #FFF5BA)',
-                            boxShadow: '0 0 20px rgba(221, 160, 221, 0.7), 0 6px 12px rgba(0,0,0,0.2)',
+                            background: 'linear-gradient(135deg, #87CEFA, #7CFC00)',
+                            boxShadow: '0 0 20px rgba(144, 238, 144, 0.7), 0 6px 12px rgba(0,0,0,0.2)',
                             transform: 'scale(1.05)',
                           },
                           fontFamily: '"Orbitron", sans-serif',
                         }}
                       >
-                        🐰 Activer les sons 🥚
+                        🌸 Activer les sons 🌸
                       </Button>
                     </Box>
                   )}

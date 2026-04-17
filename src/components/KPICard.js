@@ -3,15 +3,14 @@ import { Card, CardContent, Typography } from '@mui/material';
 
 const getIconForTitle = (title) => {
   const lower = title.toLowerCase();
-  if (lower.includes('agent')) return '🐰';
-  if (lower.includes('call') || lower.includes('appel')) return '📞';
+  if (lower.includes('agent')) return '🌸';
+  if (lower.includes('call') || lower.includes('appel') || lower.includes('fleur')) return '🌸';
   if (lower.includes('abandon') || lower.includes('perdu')) return '🔴';
   if (lower.includes('aht') || lower.includes('durée') || lower.includes('temps')) return '⏱️';
   if (lower.includes('missed')) return '❌';
   if (lower.includes('total') || lower.includes('nombre')) return '📊';
-  if (lower.includes('inbound') || lower.includes('entrant')) return '🥚';
-  if (lower.includes('outbound') || lower.includes('sortant')) return '🐣';
-  return '🐰';
+  if (lower.includes('papillon') || lower.includes('libéré')) return '🦋';
+  return '🌸';
 };
 
 export default function KPICard({ 
@@ -38,13 +37,13 @@ export default function KPICard({
 
   const isValueCritical = isCritical || valueColor === 'error';
   const getValueColor = () => {
-    if (isValueCritical) return '#E57373'; // Soft Red for errors
+    if (isValueCritical) return '#c62828';
     switch (valueColor) {
-      case 'success': return '#66BB6A'; // Softer Green
-      case 'warning': return '#FFB74D'; // Softer Orange
-      case 'error':   return '#E57373';
-      case 'info':    return '#4FC3F7'; // Softer Blue
-      default:        return '#5D4E60'; // Dark Violet Text
+      case 'success': return '#7CFC00';
+      case 'warning': return '#FFD700';
+      case 'error':   return '#c62828';
+      case 'info':    return '#90EE90';
+      default:        return '#2F4F4F';
     }
   };
 
@@ -53,20 +52,20 @@ export default function KPICard({
   return (
     <>
       <style>{`
-        @keyframes kpi-highlight-easter {
+        @keyframes kpi-highlight-spring {
           0% { 
-            background-color: rgba(221, 160, 221, 0.18); 
-            box-shadow: 0 0 15px rgba(221, 160, 221, 0.45); 
+            background-color: rgba(144, 238, 144, 0.18); 
+            box-shadow: 0 0 15px rgba(144, 238, 144, 0.45); 
           }
           100% { 
             background-color: transparent; 
-            box-shadow: 0 0 0 rgba(221, 160, 221, 0); 
+            box-shadow: 0 0 0 rgba(144, 238, 144, 0); 
           }
         }
 
         @keyframes pulse-critical {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(229, 115, 115, 0.7); }
-          50% { box-shadow: 0 0 0 10px rgba(229, 115, 115, 0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.7); }
+          50% { box-shadow: 0 0 0 10px rgba(198, 40, 40, 0); }
         }
 
         @keyframes shake-critical {
@@ -82,7 +81,7 @@ export default function KPICard({
           75% { opacity: 0.98; filter: brightness(1.05); }
         }
 
-        @keyframes easter-drift-kpi {
+        @keyframes spring-drift-kpi {
           0% { transform: translateX(0) translateY(0); opacity: 0.6; }
           50% { transform: translateX(-5%) translateY(-3%); opacity: 0.8; }
           100% { transform: translateX(0) translateY(0); opacity: 0.6; }
@@ -91,18 +90,18 @@ export default function KPICard({
 
       <Card
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: 'rgba(255, 255, 255, 0.68)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           height: `${height}px`,
           borderRadius: 3,
-          border: `3px solid ${isValueCritical ? '#E57373' : '#DDA0DD'}`,
+          border: `1px solid ${isValueCritical ? '#c62828' : 'rgba(144, 238, 144, 0.6)'}`,
           boxShadow: isValueCritical 
-            ? '0 0 20px rgba(229, 115, 115, 0.35)' 
-            : '0 4px 16px rgba(221, 160, 221, 0.2)',
+            ? '0 0 20px rgba(198, 40, 40, 0.35)' 
+            : '0 4px 16px rgba(0,0,0,0.1)',
           transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.4, 1)',
           ...(animate && {
-            animation: `kpi-highlight-easter 0.8s ease-out`,
+            animation: `kpi-highlight-spring 0.8s ease-out`,
           }),
           ...(isValueCritical && {
             animation: 'shake-critical 2.5s infinite, pulse-critical 2s infinite',
@@ -113,9 +112,9 @@ export default function KPICard({
           '&:hover': {
             transform: 'translateY(-6px)',
             boxShadow: isValueCritical
-              ? '0 8px 25px rgba(229, 115, 115, 0.45)'
-              : '0 6px 20px rgba(255, 182, 193, 0.35)',
-            border: `3px solid ${isValueCritical ? '#EF9A9A' : '#FFB6C1'}`,
+              ? '0 8px 25px rgba(198, 40, 40, 0.45)'
+              : '0 6px 20px rgba(144, 238, 144, 0.35)',
+            border: `1px solid ${isValueCritical ? '#ff5252' : '#90EE90'}`,
           },
           position: 'relative',
           overflow: 'hidden',
@@ -127,8 +126,8 @@ export default function KPICard({
             right: 0,
             bottom: 0,
             background: isValueCritical
-              ? 'radial-gradient(circle at 50% 0%, rgba(229, 115, 115, 0.12) 0%, transparent 70%)'
-              : 'radial-gradient(circle at 50% 0%, rgba(255, 182, 193, 0.15) 0%, transparent 70%)',
+              ? 'radial-gradient(circle at 50% 0%, rgba(198, 40, 40, 0.12) 0%, transparent 70%)'
+              : 'radial-gradient(circle at 50% 0%, rgba(144, 238, 144, 0.12) 0%, transparent 70%)',
             pointerEvents: 'none',
             zIndex: 0,
           },
@@ -140,11 +139,11 @@ export default function KPICard({
             width: '180%',
             height: '80%',
             background: isValueCritical
-              ? 'radial-gradient(circle at 60% 40%, rgba(229, 115, 115, 0.08), transparent 75%)'
-              : 'radial-gradient(circle at 40% 60%, rgba(152, 216, 200, 0.12), transparent 80%)',
+              ? 'radial-gradient(circle at 60% 40%, rgba(198, 40, 40, 0.08), transparent 75%)'
+              : 'radial-gradient(circle at 40% 60%, rgba(127, 255, 0, 0.08), transparent 80%)',
             pointerEvents: 'none',
             zIndex: 0,
-            animation: 'easter-drift-kpi 18s linear infinite',
+            animation: 'spring-drift-kpi 18s linear infinite',
           },
         }}
       >
@@ -165,7 +164,7 @@ export default function KPICard({
             variant="overline"
             sx={{
               fontWeight: 'bold',
-              color: '#5D4E60',
+              color: '#2F4F4F',
               textShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
               fontFamily: '"Montserrat", sans-serif',
               fontSize: '1.2rem',
@@ -186,7 +185,7 @@ export default function KPICard({
             <Typography 
               variant="caption" 
               sx={{ 
-                color: '#5D4E60',
+                color: '#2F4F4F',
                 display: 'block', 
                 mb: 1,
                 fontSize: '0.95rem',
@@ -219,7 +218,7 @@ export default function KPICard({
                 transition: 'transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1)',
               }),
               ...(isValueCritical && {
-                textShadow: '0 0 8px rgba(229, 115, 115, 0.6), 0 0 16px rgba(239, 154, 154, 0.4)',
+                textShadow: '0 0 8px rgba(198, 40, 40, 0.6), 0 0 16px rgba(255, 82, 82, 0.4)',
                 animation: 'twinkle-flicker 2.5s infinite alternate',
               }),
             }}
@@ -231,7 +230,7 @@ export default function KPICard({
                 component="span"
                 variant="subtitle1"
                 sx={{
-                  color: '#5D4E60',
+                  color: '#2F4F4F',
                   fontWeight: 'normal',
                   fontSize: '1rem',
                   fontFamily: 'inherit',
