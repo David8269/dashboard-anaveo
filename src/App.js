@@ -891,7 +891,7 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
                 letterSpacing: '0.02em',
               }}
             >
-              🦉 It's cloudy today !!! 🦉
+              🦉 It's sunny today !!! 🦉
             </Typography>
           </Box>
 
