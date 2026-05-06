@@ -14,7 +14,7 @@ import { useCallAggregates } from './hooks/useCallAggregates';
 import { parseCDRLine } from './utils/cdrParser';
 import { AUTHORIZED_AGENTS } from './config/agents';
 
-// === Helpers ===
+// === Helpers (inchangés - logique métier préservée) ===
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -89,7 +89,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === Clock (version Printemps – avec effet floral doux) ===
+// === 🦉 Clock – Version Pluie & Hibou (PLUS TRANSPARENT) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -99,6 +99,7 @@ function Clock() {
   const hours = time.getHours().toString().padStart(2, '0');
   const minutes = time.getMinutes().toString().padStart(2, '0');
   const seconds = time.getSeconds().toString().padStart(2, '0');
+  
   return (
     <Paper
       elevation={0}
@@ -106,28 +107,36 @@ function Clock() {
         fontFamily: '"Orbitron", sans-serif',
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-        color: '#2F4F4F',
-        textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0,0,0,0.2)',
-        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        color: '#ecf0f1',
+        textShadow: '0 0 15px rgba(243, 156, 18, 0.5)',
+        // Glassmorphism ULTRA-TRANSPARENT
+        background: 'rgba(10, 14, 23, 0.25)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         padding: { xs: '0.5rem 1rem', md: '0.8rem 1.4rem' },
-        borderRadius: '16px',
+        borderRadius: '24px',
         display: 'inline-block',
         margin: '0 auto',
-        border: '1px solid rgba(144, 238, 144, 0.6)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+        border: '1px solid rgba(243, 156, 18, 0.2)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          background: 'rgba(10, 14, 23, 0.35)',
+          borderColor: 'rgba(243, 156, 18, 0.4)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(243, 156, 18, 0.15)',
+          transform: 'translateY(-2px)',
+        }
       }}
       role="status"
       aria-live="polite"
     >
-      🌸 {hours}:{minutes}:{seconds} 🌸
+      🦉 {hours}:{minutes}:{seconds} 🦉
     </Paper>
   );
 }
 
-// === Schedulers & WebSocket ===
-const useDailyResetScheduler = (resetFn) => {
+// === Schedulers & WebSocket (inchangés - logique préservée) ===
+const useDailyResetScheduler = (resetFn) => { 
   useEffect(() => {
     const scheduleNextReset = () => {
       const now = new Date();
@@ -453,7 +462,7 @@ const useWebSocketData = (url, onLostCall) => {
   };
 };
 
-// === Gestion audio ===
+// === Gestion audio (inchangée) ===
 const playSound = (filename, context = '', volume = 0.8) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
@@ -468,7 +477,7 @@ const playSound = (filename, context = '', volume = 0.8) => {
   }
 };
 
-// === App principale ===
+// === 🦉 App principale – Thème Pluie & Hibou (TRANSPARENCE MAX) ===
 const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
   const prevEmployeesRef = useRef([]);
@@ -562,7 +571,7 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
-  // 🔊 Sons horaires
+  // 🔊 Sons horaires (inchangés)
   useEffect(() => {
     if (!audioUnlocked) return;
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
@@ -650,7 +659,7 @@ const App = () => {
     };
   }, [audioUnlocked]);
 
-  // 🔊 Top agent
+  // 🔊 Top agent (inchangé)
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
     const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
@@ -679,67 +688,121 @@ const App = () => {
       />
       <style>
         {`
-/* ✨ Fleurs et papillons qui tombent - Thème Printemps */
-@keyframes spring-fall {
+/* 🌧️ Gouttes de pluie – Animation réaliste */
+@keyframes rain-fall {
   0% { 
-    transform: translateY(-50px) rotate(0deg); 
-    opacity: 0.2;
+    transform: translateY(-20px) scaleY(0.3); 
+    opacity: 0;
   }
   10% { 
-    opacity: 1;
-    transform: translateY(0) rotate(0deg);
+    opacity: 0.9;
+    transform: translateY(0) scaleY(1);
   }
-  90% {
-    opacity: 1;
-    transform: translateY(100vh) rotate(360deg);
-  }
+  90% { opacity: 0.9; }
   100% { 
-    transform: translateY(100vh) rotate(360deg); 
+    transform: translateY(100vh) scaleY(0.5); 
     opacity: 0;
   }
 }
-.spring-element {
+.raindrop {
   position: fixed;
   top: -20px;
-  font-size: 1.5rem;
-  color: #FF69B4;
+  width: 2px;
+  height: 15px;
+  background: linear-gradient(180deg, transparent, rgba(174, 194, 224, 0.7), transparent);
+  border-radius: 0 0 2px 2px;
   z-index: 1;
   opacity: 0;
-  animation: spring-fall 12s linear infinite;
+  animation: rain-fall linear infinite;
   pointer-events: none;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 6px rgba(174, 194, 224, 0.4);
   will-change: transform, opacity;
 }
-.spring-element:nth-child(2n) { left: 10%; animation-duration: 14s; animation-delay: 1s; color: #8A2BE2; }
-.spring-element:nth-child(3n) { left: 20%; animation-duration: 16s; animation-delay: 2s; color: #90EE90; }
-.spring-element:nth-child(4n) { left: 35%; animation-duration: 11s; animation-delay: 0.5s; color: #FFD700; }
-.spring-element:nth-child(5n) { left: 50%; animation-duration: 13s; animation-delay: 3s; color: #FF69B4; }
-.spring-element:nth-child(6n) { left: 65%; animation-duration: 10s; animation-delay: 1.5s; color: #90EE90; }
-.spring-element:nth-child(7n) { left: 80%; animation-duration: 15s; animation-delay: 4s; color: #8A2BE2; }
-.spring-element:nth-child(8n) { left: 90%; animation-duration: 12s; animation-delay: 2.5s; color: #FFD700; }
+.raindrop:nth-child(odd) { animation-duration: 0.8s; }
+.raindrop:nth-child(even) { animation-duration: 1.2s; }
+.raindrop:nth-child(3n) { animation-duration: 1s; width: 1.5px; }
+.raindrop:nth-child(5n) { animation-duration: 1.4s; width: 2.5px; opacity: 0.95; }
 
-/* Scrollbar printanière */
-::-webkit-scrollbar { width: 8px; }
+/* === Glassmorphism ULTRA-TRANSPARENT === */
+.glass-panel {
+  background: rgba(10, 14, 23, 0.25) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(243, 156, 18, 0.2) !important;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+.glass-panel:hover {
+  background: rgba(10, 14, 23, 0.35) !important;
+  border-color: rgba(243, 156, 18, 0.4) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(243, 156, 18, 0.15);
+  transform: translateY(-2px);
+}
+
+/* === Effet goutte au survol === */
+.droplet-hover {
+  position: relative;
+  overflow: hidden;
+}
+.droplet-hover::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0.3);
+  transition: all 0.4s ease;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.droplet-hover:hover::before {
+  opacity: 1;
+  transform: scale(1);
+  animation: droplet-ripple 0.6s ease-out;
+}
+@keyframes droplet-ripple {
+  0% { transform: scale(0.3); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* === Scrollbar sombre discrète === */
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #90EE90, #FF69B4);
-  border-radius: 5px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: rgba(52, 73, 94, 0.4);
+  border-radius: 3px;
   transition: all 0.3s ease;
 }
 body.show-scrollbar ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #7CFC00, #FF69B4);
+  background: rgba(93, 109, 126, 0.6);
 }
-body.show-scrollbar ::-webkit-scrollbar-track {
-  background: rgba(144, 238, 144, 0.1);
+* { scrollbar-width: thin; scrollbar-color: rgba(52, 73, 94, 0.4) transparent; }
+
+/* === Boutons thème pluie === */
+.btn-rain {
+  background: linear-gradient(135deg, #d4a017, #e67e22) !important;
+  color: #0a0e17 !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: 50px !important;
+  border: 2px solid rgba(243, 156, 18, 0.4) !important;
+  box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3) !important;
+  transition: all 0.3s ease !important;
+  font-family: "Orbitron", sans-serif !important;
 }
-* { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
+.btn-rain:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 25px rgba(243, 156, 18, 0.5) !important;
+  border-color: rgba(243, 156, 18, 0.7) !important;
+}
 `}
       </style>
 
-      {/* 🌸 Fond d'écran Printemps */}
+      {/* 🦉🌧️ Fond d'écran – Hibou sous la pluie (OVERLAY TRÈS LÉGER) */}
       <Box
         sx={{
           position: 'fixed',
@@ -747,51 +810,72 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/Spring.png')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/OwlRain.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           zIndex: 0,
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'rgba(10, 14, 23, 0.15)', // Overlay très léger pour lisibilité
+            pointerEvents: 'none',
+          }
         }}
       />
 
-      {/* ✨ Fleurs et papillons qui tombent animés */}
-      {[...Array(16)].map((_, i) => (
-        <div key={i} className="spring-element">
-          {['🌸', '🦋', '🌼', '🐝', '🌺', '🐦', '🌷'][i % 7]}
-        </div>
+      {/* 🌧️ Gouttes de pluie animées */}
+      {[...Array(30)].map((_, i) => (
+        <div 
+          key={i} 
+          className="raindrop"
+          style={{ 
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 2}s`,
+            animationDuration: `${0.7 + Math.random() * 0.8}s`
+          }}
+        />
       ))}
 
-      {/* Conteneur principal - PLUS DE TRANSPARENCE */}
+      {/* Conteneur principal – Transparent */}
       <Box
         sx={{
           minHeight: '100vh',
           py: { xs: 2, md: 4 },
           position: 'relative',
           zIndex: 2,
-          color: '#2F4F4F',
+          color: '#ecf0f1',
           fontFamily: '"Roboto", sans-serif',
           px: { xs: 0.5, sm: 1, md: 2 },
-          backdropFilter: 'blur(0px)',
-          WebkitBackdropFilter: 'blur(0px)',
         }}
-        aria-label="Tableau de bord du Printemps en temps réel"
+        aria-label="Tableau de bord nocturne ANAVEO"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {/* Titre élégant avec effet floral - PLUS DE TRANSPARENCE */}
+          
+          {/* Titre – Glassmorphism ultra-transparent */}
           <Box
             sx={{
               mb: 1,
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              borderRadius: '18px',
-              border: '2px solid rgba(144, 238, 144, 0.6)',
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)',
+              background: 'rgba(10, 14, 23, 0.25)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              border: '1px solid rgba(243, 156, 18, 0.2)',
+              borderRadius: '24px',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
               display: 'inline-block',
               margin: '0 auto',
               textAlign: 'center',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'rgba(10, 14, 23, 0.35)',
+                borderColor: 'rgba(243, 156, 18, 0.4)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(243, 156, 18, 0.15)',
+              }
             }}
           >
             <Typography
@@ -801,13 +885,13 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
                 fontFamily: '"Montserrat", sans-serif',
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#2F4F4F',
-                textShadow: '0 2px 6px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0,0,0,0.15)',
+                color: '#ecf0f1',
+                textShadow: '0 2px 10px rgba(0,0,0,0.4), 0 0 20px rgba(243, 156, 18, 0.3)',
                 margin: 0,
                 letterSpacing: '0.02em',
               }}
             >
-              🌸 Bienvenue au CDS ! 🌸
+              🦉 It's raining today !!! 🦉
             </Typography>
           </Box>
 
@@ -820,34 +904,24 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
               textAlign="center"
               mb={2}
               sx={{
-                color: '#2F4F4F',
+                color: '#ecf0f1',
                 fontWeight: 'bold',
-                textShadow: '0 1px 3px rgba(255,255,255,0.8)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.5)',
                 px: { xs: 2, sm: 3 },
-                backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                background: 'rgba(10, 14, 23, 0.3)',
                 backdropFilter: 'blur(8px)',
                 WebkitBackdropFilter: 'blur(8px)',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 py: 1,
-                border: '1px solid rgba(144, 238, 144, 0.5)',
+                border: '1px solid rgba(231, 76, 60, 0.3)',
+                boxShadow: '0 4px 20px rgba(231, 76, 60, 0.1)',
               }}
             >
-              🌸 Connexion WebSocket perdue. Tentative de reconnexion...
+              🌧️ Connexion WebSocket perdue. Reconnexion en cours...
               <Button
                 size="small"
                 variant="outlined"
-                sx={{
-                  ml: 1,
-                  borderColor: '#90EE90',
-                  color: '#2F4F4F',
-                  borderRadius: '20px',
-                  fontWeight: 600,
-                  fontFamily: '"Orbitron", sans-serif',
-                  '&:hover': {
-                    borderColor: '#7CFC00',
-                    backgroundColor: 'rgba(144, 238, 144, 0.1)',
-                  },
-                }}
+                className="btn-rain"
                 onClick={reconnect}
               >
                 🔄 Reconnecter
@@ -855,7 +929,7 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
             </Box>
           )}
 
-          {/* KPI Principaux */}
+          {/* KPI Principaux – Ultra-transparents */}
           <Grid container spacing={2.5} justifyContent="center" sx={{ mt: 0.5, px: { xs: 1.5, sm: 2.5, md: 3.5 } }} aria-label="KPI Principaux">
             {[
               { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
@@ -864,12 +938,26 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
               { title: "Avg Outbound AHT", value: kpi.avgOutboundAHT, color: getOutboundAHTColor(mmssToSeconds(kpi.avgOutboundAHT)), critical: isOutboundAHTCritical },
             ].map((item, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
-                <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} isCritical={item.critical} />
+                <KPICard 
+                  title={item.title} 
+                  value={item.value.toString()} 
+                  valueColor={item.color} 
+                  isCritical={item.critical} 
+                  sx={{
+                    '& .MuiPaper-root': {
+                      background: 'rgba(10, 14, 23, 0.25) !important',
+                      backdropFilter: 'blur(8px) !important',
+                      border: '1px solid rgba(255, 255, 255, 0.1) !important',
+                      borderRadius: '20px !important',
+                      color: '#ecf0f1 !important',
+                    }
+                  }}
+                />
               </Grid>
             ))}
           </Grid>
 
-          {/* KPI Détail Appels */}
+          {/* KPI Détail Appels – Ultra-transparents */}
           <Grid container spacing={2.5} justifyContent="center" sx={{ mt: 1, px: { xs: 1.5, sm: 2.5, md: 3.5 } }} aria-label="KPI Détail Appels">
             {[
               { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default", critical: false },
@@ -879,13 +967,38 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
               { title: "Abandon Rate", value: kpi.abandonRate, color: getAbandonColor(kpi.abandonRate), critical: isAbandonRateCritical },
             ].map((item, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
-                <KPICard title={item.title} value={item.value.toString()} valueColor={item.color} isCritical={item.critical} />
+                <KPICard 
+                  title={item.title} 
+                  value={item.value.toString()} 
+                  valueColor={item.color} 
+                  isCritical={item.critical}
+                  sx={{
+                    '& .MuiPaper-root': {
+                      background: 'rgba(10, 14, 23, 0.25) !important',
+                      backdropFilter: 'blur(8px) !important',
+                      border: '1px solid rgba(255, 255, 255, 0.1) !important',
+                      borderRadius: '20px !important',
+                      color: '#ecf0f1 !important',
+                    }
+                  }}
+                />
               </Grid>
             ))}
           </Grid>
 
           <Box mt={2} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
-            <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
+            <CallVolumeChart 
+              callVolumes={callVolumes} 
+              wsConnected={isConnected} 
+              halfHourSlots={halfHourSlots} 
+              sx={{
+                '& .MuiPaper-root': {
+                  background: 'rgba(10, 14, 23, 0.25) !important',
+                  backdropFilter: 'blur(8px) !important',
+                  border: '1px solid rgba(255, 255, 255, 0.1) !important',
+                }
+              }}
+            />
           </Box>
 
           <Box mt={{ xs: 7, md: 9 }} pb={7} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
@@ -900,35 +1013,44 @@ body.show-scrollbar { scrollbar-color: #90EE90 rgba(144, 238, 144, 0.1); }
                   isLoading={!isConnected && employees.length === 0}
                   isConnected={isConnected}
                   lastUpdate={lastUpdate}
+                  sx={{
+                    '& .MuiPaper-root': {
+                      background: 'rgba(10, 14, 23, 0.25) !important',
+                      backdropFilter: 'blur(8px) !important',
+                      border: '1px solid rgba(255, 255, 255, 0.1) !important',
+                    },
+                    '& th': {
+                      color: '#f39c12 !important',
+                      fontWeight: 600,
+                    },
+                    '& td': {
+                      color: '#ecf0f1 !important',
+                      borderBottomColor: 'rgba(255, 255, 255, 0.1) !important',
+                    }
+                  }}
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <Box position="relative">
-                  <SLABarchart slaData={slaDataForChart} wsConnected={isConnected} />
+                  <SLABarchart 
+                    slaData={slaDataForChart} 
+                    wsConnected={isConnected}
+                    sx={{
+                      '& .MuiPaper-root': {
+                        background: 'rgba(10, 14, 23, 0.25) !important',
+                        backdropFilter: 'blur(8px) !important',
+                        border: '1px solid rgba(255, 255, 255, 0.1) !important',
+                      }
+                    }}
+                  />
                   {!audioUnlocked && (
                     <Box sx={{ position: 'absolute', bottom: 16, right: 16, zIndex: 2 }}>
                       <Button
                         variant="contained"
                         onClick={unlockAudio}
-                        sx={{
-                          background: 'linear-gradient(135deg, #87CEEB, #90EE90)',
-                          color: '#2F4F4F',
-                          fontWeight: 'bold',
-                          textTransform: 'none',
-                          padding: '10px 20px',
-                          fontSize: '1rem',
-                          borderRadius: '50px',
-                          border: '2px solid #90EE90',
-                          boxShadow: '0 0 14px rgba(144, 238, 144, 0.5), 0 4px 8px rgba(0,0,0,0.15)',
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #87CEFA, #7CFC00)',
-                            boxShadow: '0 0 20px rgba(144, 238, 144, 0.7), 0 6px 12px rgba(0,0,0,0.2)',
-                            transform: 'scale(1.05)',
-                          },
-                          fontFamily: '"Orbitron", sans-serif',
-                        }}
+                        className="btn-rain droplet-hover"
                       >
-                        🌸 Activer les sons 🌸
+                        🦉 Activer l'ambiance sonore 🌧️
                       </Button>
                     </Box>
                   )}

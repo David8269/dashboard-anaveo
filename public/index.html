@@ -2,31 +2,49 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="./favicon-spring.ico" />
+  <link rel="icon" href="./favicon-rain.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Printemps 2026 ! Suivi en temps réel des performances sous le soleil." />
-  <title>ANAVEO - 🌸 Centre d'Opérations du Printemps 2026</title>
+  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Ambiance pluvieuse & mystérieuse. Suivi en temps réel dans l'atmosphère du hibou." />
+  <title>ANAVEO - 🦉 Centre d'Opérations Nocturne</title>
 
-  <!-- 🌸 Polices élégantes pour le thème Printemps -->
+  <!-- 🦉 Polices élégantes pour le thème sombre -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- 🌸 Styles globaux + éléments printaniers tombants -->
+  <!-- 🦉 Styles globaux + ambiance pluie & verre mouillé -->
   <style>
-    /* === Variables et styles de base === */
+    /* === Variables thème Pluie & Hibou === */
     :root {
-      --spring-bg: #87CEEB;          /* Bleu ciel */
-      --spring-paper: #FFFFFF;       /* Blanc */
-      --spring-primary: #90EE90;     /* Vert clair */
-      --spring-secondary: #FFB6C1;   /* Rose clair */
-      --spring-error: #FF6B6B;
-      --spring-success: #7CFC00;     /* Vert printemps */
-      --spring-warning: #FFD700;
-      --spring-text: #2F4F4F;        /* Gris ardoise */
-      --spring-flower: #FF69B4;      /* Rose vif */
-      --spring-butterfly: #8A2BE2;   /* Violet papillon */
-      --spring-sun: #FFD700;         /* Jaune soleil */
+      /* Fonds : gris profonds, bleus ardoise, noir */
+      --rain-bg-primary: #0a0e17;
+      --rain-bg-secondary: #1a2332;
+      --rain-bg-tertiary: #2c3e50;
+      --rain-slate: #34495e;
+      --rain-umbrella: #1c2833;
+      
+      /* Accents : ambré, orangé, brun (plumes & yeux du hibou) */
+      --rain-amber: #d4a017;
+      --rain-orange: #e67e22;
+      --rain-brown: #8b6914;
+      --rain-eyes: #f39c12;
+      --rain-glow: rgba(243, 156, 18, 0.4);
+      
+      /* Texte & contrastes */
+      --rain-text: #ecf0f1;
+      --rain-text-muted: #bdc3c7;
+      --rain-text-dim: #7f8c8d;
+      
+      /* États */
+      --rain-error: #e74c3c;
+      --rain-success: #27ae60;
+      --rain-warning: #f39c12;
+      
+      /* Glassmorphism */
+      --glass-bg: rgba(26, 35, 50, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glass-highlight: rgba(255, 255, 255, 0.05);
     }
 
     html, body {
@@ -35,23 +53,34 @@
       height: 100%;
       overflow-x: hidden;
       overflow-y: auto;
+      background-color: var(--rain-bg-primary);
+      color: var(--rain-text);
+      font-family: 'Roboto', sans-serif;
     }
 
     body {
-      background-color: var(--spring-bg);
-      color: var(--spring-text);
-      font-family: 'Roboto', sans-serif;
       min-height: 100vh;
       position: relative;
       -ms-overflow-style: none;
-      scrollbar-width: none;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rain-slate) var(--rain-bg-secondary);
+      /* Dégradé ciel de pluie */
+      background: 
+        linear-gradient(180deg, var(--rain-bg-primary) 0%, var(--rain-bg-secondary) 50%, var(--rain-bg-tertiary) 100%);
     }
 
     body::-webkit-scrollbar {
-      display: none;
+      width: 8px;
+    }
+    body::-webkit-scrollbar-track {
+      background: var(--rain-bg-secondary);
+    }
+    body::-webkit-scrollbar-thumb {
+      background: var(--rain-slate);
+      border-radius: 4px;
     }
 
-    /* === Arrière-plan décoratif printanier (effet ciel et nuages) === */
+    /* === Arrière-plan : effet pluie subtile + lueur ambiante === */
     body::before {
       content: '';
       position: fixed;
@@ -60,14 +89,67 @@
       width: 100%;
       height: 100%;
       background: 
-        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 40%),
-        radial-gradient(circle at 70% 40%, rgba(255, 255, 255, 0.25) 0%, transparent 45%),
-        radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+        /* Lueur orangée diffuse (yeux du hibou) */
+        radial-gradient(ellipse at 20% 15%, rgba(243, 156, 18, 0.08) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 85%, rgba(212, 160, 23, 0.06) 0%, transparent 45%),
+        /* Texture de pluie très subtile */
+        repeating-linear-gradient(
+          110deg,
+          transparent,
+          transparent 2px,
+          rgba(255, 255, 255, 0.02) 2px,
+          rgba(255, 255, 255, 0.02) 4px
+        );
       pointer-events: none;
       z-index: 0;
+      animation: rain-shift 20s linear infinite;
     }
 
-    /* === Écran de chargement printanier === */
+    @keyframes rain-shift {
+      0% { background-position: 0 0, 0 0, 0 0; }
+      100% { background-position: 0 0, 0 0, 100px 100px; }
+    }
+
+    /* === Gouttes de pluie tombantes === */
+    .raindrop {
+      position: fixed;
+      top: -20px;
+      width: 2px;
+      height: 15px;
+      background: linear-gradient(180deg, transparent, rgba(174, 194, 224, 0.6), transparent);
+      border-radius: 0 0 2px 2px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+      animation: fall-rain linear infinite;
+      box-shadow: 0 0 6px rgba(174, 194, 224, 0.3);
+    }
+
+    @keyframes fall-rain {
+      0% {
+        transform: translateY(-10vh) scaleY(0.3);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.8;
+        transform: translateY(0) scaleY(1);
+      }
+      90% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(110vh) scaleY(0.5);
+        opacity: 0;
+      }
+    }
+
+    /* Variations des gouttes */
+    .raindrop:nth-child(odd) { animation-duration: 0.8s; }
+    .raindrop:nth-child(even) { animation-duration: 1.2s; }
+    .raindrop:nth-child(3n) { animation-duration: 1s; width: 1.5px; }
+    .raindrop:nth-child(5n) { animation-duration: 1.4s; width: 2.5px; opacity: 0.9; }
+
+    /* === Écran de chargement – Ambiance nocturne === */
     #loading-screen {
       position: fixed;
       top: 0;
@@ -78,127 +160,238 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #87CEEB 0%, #90EE90 100%);
+      background: radial-gradient(ellipse at center, var(--rain-bg-secondary) 0%, var(--rain-bg-primary) 70%);
       z-index: 1000;
-      transition: opacity 0.5s;
+      transition: opacity 0.5s ease;
     }
 
     .loading-content {
       text-align: center;
-      padding: 2rem;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-      border: 2px solid #90EE90;
+      padding: 2.5rem 3rem;
+      /* Glassmorphism */
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: var(--glass-shadow);
       max-width: 90vw;
       font-family: 'Montserrat', sans-serif;
-      color: #2F4F4F;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+      color: var(--rain-text);
+      position: relative;
+      overflow: hidden;
     }
 
-    .spring-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      color: #FF69B4;
-      text-shadow: 0 0 12px rgba(255, 105, 180, 0.6);
-      animation: bloom-flower 3s ease-in-out infinite;
-    }
-
-    @keyframes bloom-flower {
-      0%, 100% { transform: scale(1) rotate(0deg); }
-      50% { transform: scale(1.2) rotate(15deg); }
-    }
-
-    /* === Éléments printaniers tombants – totalement opaques et colorés === */
-    .falling-spring {
-      position: fixed;
-      top: -100px;
-      font-size: 24px;
-      opacity: 1;
+    /* Lueur interne subtile */
+    .loading-content::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(243, 156, 18, 0.08) 0%, transparent 60%);
       pointer-events: none;
-      z-index: 1;
-      animation: fall-spring linear infinite;
-      text-shadow: 
-        0 0 8px rgba(255, 255, 255, 0.8),
-        0 0 16px rgba(255, 255, 255, 0.6);
-      will-change: transform;
+      animation: pulse-glow 4s ease-in-out infinite;
     }
 
-    @keyframes fall-spring {
-      0% {
-        transform: translateY(-10vh) rotate(0deg);
-      }
-      100% {
-        transform: translateY(110vh) rotate(360deg);
-      }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
     }
 
-    /* === Variations individuelles (fleurs, papillons, oiseaux de différentes tailles et styles) === */
-    .falling-spring:nth-child(1)  { left: 5%;  animation-duration: 18s;  animation-delay: 0s;   font-size: 32px; color: #FF69B4; }
-    .falling-spring:nth-child(2)  { left: 15%; animation-duration: 22s;  animation-delay: 1s;   font-size: 28px; color: #8A2BE2; }
-    .falling-spring:nth-child(3)  { left: 25%; animation-duration: 15s;  animation-delay: 0.5s; font-size: 30px; color: #FFD700; }
-    .falling-spring:nth-child(4)  { left: 35%; animation-duration: 25s;  animation-delay: 2s;   font-size: 34px; color: #90EE90; }
-    .falling-spring:nth-child(5)  { left: 45%; animation-duration: 20s;  animation-delay: 1.2s; font-size: 26px; color: #FF69B4; }
-    .falling-spring:nth-child(6)  { left: 55%; animation-duration: 23s;  animation-delay: 0.8s; font-size: 32px; color: #8A2BE2; }
-    .falling-spring:nth-child(7)  { left: 65%; animation-duration: 17s;  animation-delay: 1.5s; font-size: 28px; color: #FFD700; }
-    .falling-spring:nth-child(8)  { left: 75%; animation-duration: 21s;  animation-delay: 0.3s; font-size: 30px; color: #90EE90; }
-    .falling-spring:nth-child(9)  { left: 85%; animation-duration: 24s;  animation-delay: 1.8s; font-size: 24px; color: #FF69B4; }
-    .falling-spring:nth-child(10) { left: 10%; animation-duration: 19s;  animation-delay: 0.7s; font-size: 26px; color: #8A2BE2; }
-    .falling-spring:nth-child(11) { left: 20%; animation-duration: 22s;  animation-delay: 1.1s; font-size: 32px; color: #FFD700; }
-    .falling-spring:nth-child(12) { left: 30%; animation-duration: 16s;  animation-delay: 0.9s; font-size: 28px; color: #90EE90; }
-    .falling-spring:nth-child(13) { left: 40%; animation-duration: 20s;  animation-delay: 0.4s; font-size: 30px; color: #FF69B4; }
-    .falling-spring:nth-child(14) { left: 50%; animation-duration: 23s;  animation-delay: 1.3s; font-size: 24px; color: #8A2BE2; }
-    .falling-spring:nth-child(15) { left: 60%; animation-duration: 18s;  animation-delay: 0.6s; font-size: 32px; color: #FFD700; }
-    .falling-spring:nth-child(16) { left: 70%; animation-duration: 21s;  animation-delay: 1.7s; font-size: 26px; color: #90EE90; }
-    .falling-spring:nth-child(17) { left: 80%; animation-duration: 19s;  animation-delay: 0.2s; font-size: 28px; color: #FF69B4; }
-    .falling-spring:nth-child(18) { left: 90%; animation-duration: 22s;  animation-delay: 1.4s; font-size: 30px; color: #8A2BE2; }
-    .falling-spring:nth-child(19) { left: 5%;  animation-duration: 16s;  animation-delay: 0.1s; font-size: 24px; color: #FFD700; }
-    .falling-spring:nth-child(20) { left: 12%; animation-duration: 24s;  animation-delay: 1.9s; font-size: 32px; color: #90EE90; }
-    .falling-spring:nth-child(21) { left: 18%; animation-duration: 19s;  animation-delay: 0.5s; font-size: 28px; color: #FF69B4; }
-    .falling-spring:nth-child(22) { left: 28%; animation-duration: 23s;  animation-delay: 1.0s; font-size: 30px; color: #8A2BE2; }
-    .falling-spring:nth-child(23) { left: 38%; animation-duration: 17s;  animation-delay: 0.7s; font-size: 26px; color: #FFD700; }
-    .falling-spring:nth-child(24) { left: 48%; animation-duration: 21s;  animation-delay: 1.6s; font-size: 32px; color: #90EE90; }
+    .owl-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1.2rem;
+      color: var(--rain-eyes);
+      text-shadow: 0 0 20px var(--rain-glow);
+      animation: owl-blink 4s ease-in-out infinite;
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes owl-blink {
+      0%, 48%, 52%, 100% { transform: scale(1); }
+      50% { transform: scale(0.98); }
+    }
+
+    .loading-text {
+      position: relative;
+      z-index: 2;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .loading-subtext {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--rain-text-muted);
+      font-weight: 300;
+    }
+
+    /* === Effets Glassmorphism réutilisables === */
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--glass-shadow);
+      transition: all 0.3s ease;
+    }
+
+    .glass-panel:hover {
+      border-color: rgba(243, 156, 18, 0.3);
+      box-shadow: 
+        var(--glass-shadow),
+        0 0 25px rgba(243, 156, 18, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* === Effet goutte au survol === */
+    .droplet-hover {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .droplet-hover::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+      opacity: 0;
+      transform: scale(0.3);
+      transition: all 0.4s ease;
+      pointer-events: none;
+      border-radius: 50%;
+    }
+
+    .droplet-hover:hover::before {
+      opacity: 1;
+      transform: scale(1);
+      animation: droplet-ripple 0.6s ease-out;
+    }
+
+    @keyframes droplet-ripple {
+      0% { transform: scale(0.3); opacity: 0.8; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    /* === Boutons avec accent ambré === */
+    .btn-rain {
+      background: linear-gradient(135deg, var(--rain-amber), var(--rain-orange));
+      color: var(--rain-bg-primary);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-rain:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(243, 156, 18, 0.5);
+    }
+
+    .btn-rain::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-rain:hover::after {
+      left: 100%;
+    }
+
+    /* === Typographie === */
+    h1, h2, h3 {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--rain-text);
+      margin: 0;
+    }
+
+    h1 {
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .text-amber { color: var(--rain-amber); }
+    .text-orange { color: var(--rain-orange); }
+    .text-muted { color: var(--rain-text-muted); }
+
+    /* === Utilitaires === */
+    .rounded-umbrella {
+      border-radius: 24px;
+    }
+
+    .shadow-owl {
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* === Conteneur principal React === */
+    #root {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      padding: 1rem;
+    }
   </style>
 </head>
 <body>
-  <!-- 🌸 24 éléments printaniers tombants – totalement opaques -->
-  <div class="falling-spring">🌸</div>
-  <div class="falling-spring">🦋</div>
-  <div class="falling-spring">🌼</div>
-  <div class="falling-spring">🐝</div>
-  <div class="falling-spring">🌺</div>
-  <div class="falling-spring">🐦</div>
-  <div class="falling-spring">🌷</div>
-  <div class="falling-spring">🦋</div>
-  <div class="falling-spring">🌸</div>
-  <div class="falling-spring">🐝</div>
-  <div class="falling-spring">🌼</div>
-  <div class="falling-spring">🐦</div>
-  <div class="falling-spring">🌺</div>
-  <div class="falling-spring">🦋</div>
-  <div class="falling-spring">🌷</div>
-  <div class="falling-spring">🐝</div>
-  <div class="falling-spring">🌸</div>
-  <div class="falling-spring">🐦</div>
-  <div class="falling-spring">🌼</div>
-  <div class="falling-spring">🦋</div>
-  <div class="falling-spring">🌺</div>
-  <div class="falling-spring">🐝</div>
-  <div class="falling-spring">🌷</div>
-  <div class="falling-spring">🐦</div>
+  <!-- 🌧️ Gouttes de pluie animées en arrière-plan -->
+  <div class="raindrop" style="left: 5%; animation-delay: 0.1s;"></div>
+  <div class="raindrop" style="left: 12%; animation-delay: 0.3s;"></div>
+  <div class="raindrop" style="left: 18%; animation-delay: 0.5s;"></div>
+  <div class="raindrop" style="left: 25%; animation-delay: 0.2s;"></div>
+  <div class="raindrop" style="left: 32%; animation-delay: 0.7s;"></div>
+  <div class="raindrop" style="left: 38%; animation-delay: 0.4s;"></div>
+  <div class="raindrop" style="left: 45%; animation-delay: 0.9s;"></div>
+  <div class="raindrop" style="left: 52%; animation-delay: 0.6s;"></div>
+  <div class="raindrop" style="left: 58%; animation-delay: 0.1s;"></div>
+  <div class="raindrop" style="left: 65%; animation-delay: 0.8s;"></div>
+  <div class="raindrop" style="left: 72%; animation-delay: 0.3s;"></div>
+  <div class="raindrop" style="left: 78%; animation-delay: 0.5s;"></div>
+  <div class="raindrop" style="left: 85%; animation-delay: 0.2s;"></div>
+  <div class="raindrop" style="left: 92%; animation-delay: 0.7s;"></div>
+  <div class="raindrop" style="left: 8%; animation-delay: 0.4s;"></div>
+  <div class="raindrop" style="left: 15%; animation-delay: 0.9s;"></div>
+  <div class="raindrop" style="left: 22%; animation-delay: 0.6s;"></div>
+  <div class="raindrop" style="left: 29%; animation-delay: 0.1s;"></div>
+  <div class="raindrop" style="left: 36%; animation-delay: 0.8s;"></div>
+  <div class="raindrop" style="left: 43%; animation-delay: 0.3s;"></div>
+  <div class="raindrop" style="left: 50%; animation-delay: 0.5s;"></div>
+  <div class="raindrop" style="left: 57%; animation-delay: 0.2s;"></div>
+  <div class="raindrop" style="left: 64%; animation-delay: 0.7s;"></div>
+  <div class="raindrop" style="left: 71%; animation-delay: 0.4s;"></div>
 
-  <!-- 🌸 Écran de chargement Printemps -->
+
+  <!-- 🦉 Écran de chargement – Ambiance nocturne -->
   <div id="loading-screen">
-    <div class="loading-content">
-      <div class="spring-icon">🌸</div>
-      Le printemps s'éveille…
+    <div class="loading-content glass-panel">
+      <div class="owl-icon">🦉</div>
+      <div class="loading-text">L'atmosphère se prépare…</div>
+      <span class="loading-subtext">Chargement du tableau de bord</span>
     </div>
   </div>
 
   <!-- ✅ Conteneur React -->
   <div id="root"></div>
 
-  <!-- Masquer l'écran de chargement après le chargement initial -->
+  <!-- Script de chargement -->
   <script>
     window.addEventListener('load', () => {
       setTimeout(() => {
@@ -207,7 +400,20 @@
           loader.style.opacity = '0';
           setTimeout(() => loader.remove(), 500);
         }
-      }, 800);
+      }, 1000);
+    });
+
+    // === Génération dynamique de gouttes supplémentaires ===
+    document.addEventListener('DOMContentLoaded', () => {
+      const body = document.body;
+      for (let i = 0; i < 30; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'raindrop';
+        drop.style.left = Math.random() * 100 + '%';
+        drop.style.animationDelay = Math.random() * 2 + 's';
+        drop.style.animationDuration = (0.7 + Math.random() * 0.8) + 's';
+        body.appendChild(drop);
+      }
     });
   </script>
 </body>
