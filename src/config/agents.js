@@ -15,6 +15,7 @@ export const AUTHORIZED_AGENTS = new Set([
   'cédric saniez',
   'nicolas fastrez',
   'gwenaelle valenti',
+  'willem andreze-louizon',
   'yann lhermelin',
   'maxime caye'
 ]);
