@@ -169,7 +169,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           </Box>
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Typography variant="body2" color="#ecf0f1" sx={{ fontStyle: 'italic', textShadow: '0 0 8px rgba(0,0,0,0.5)' }}>
-              🌧️ Aucun agent en veille...
+              ☀️ Aucun agent en veille...
             </Typography>
           </Box>
         </CardContent>
@@ -193,7 +193,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
     ), [employees]);
   
   const getMedalEmoji = (rank) => 
-    rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '🦉';
+    rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '☀️';
 
   return (
     <Card sx={{

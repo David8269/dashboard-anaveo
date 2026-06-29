@@ -35,7 +35,7 @@ function CustomLabel({ fill }) {
       fontFamily='"Montserrat", sans-serif'
       style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.5)' }} // Ajout d'une lueur blanche pour lisibilité
     >
-      🌧️ Lunch Break 🌧️
+      ☀️ Lunch Break ☀️
     </text>
   );
 }
