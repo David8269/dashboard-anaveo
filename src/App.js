@@ -89,7 +89,7 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === 🦉 Clock – Version Pluie & Hibou (PLUS TRANSPARENT) ===
+// === 🦉 Clock – Version Soleil & Hibou (PLUS TRANSPARENT) ===
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -108,7 +108,7 @@ function Clock() {
         fontWeight: 'bold',
         fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
         color: '#ecf0f1',
-        textShadow: '0 0 15px rgba(243, 156, 18, 0.5)',
+        textShadow: '0 0 15px rgba(255, 200, 0, 0.6)',
         // Glassmorphism ULTRA-TRANSPARENT
         background: 'rgba(10, 14, 23, 0.25)',
         backdropFilter: 'blur(8px)',
@@ -117,20 +117,20 @@ function Clock() {
         borderRadius: '24px',
         display: 'inline-block',
         margin: '0 auto',
-        border: '1px solid rgba(243, 156, 18, 0.2)',
+        border: '1px solid rgba(255, 200, 0, 0.3)',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
         transition: 'all 0.3s ease',
         '&:hover': {
           background: 'rgba(10, 14, 23, 0.35)',
-          borderColor: 'rgba(243, 156, 18, 0.4)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(243, 156, 18, 0.15)',
+          borderColor: 'rgba(255, 200, 0, 0.5)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 200, 0, 0.2)',
           transform: 'translateY(-2px)',
         }
       }}
       role="status"
       aria-live="polite"
     >
-      🦉 {hours}:{minutes}:{seconds} 🦉
+      ☀️ {hours}:{minutes}:{seconds} ☀️
     </Paper>
   );
 }
@@ -477,7 +477,7 @@ const playSound = (filename, context = '', volume = 0.8) => {
   }
 };
 
-// === 🦉 App principale – Thème Pluie & Hibou (TRANSPARENCE MAX) ===
+// === 🦉 App principale – Thème Soleil & Hibou (TRANSPARENCE MAX) ===
 const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
   const prevEmployeesRef = useRef([]);
@@ -688,83 +688,88 @@ const App = () => {
       />
       <style>
         {`
-/* 🌧️ Gouttes de pluie – Animation réaliste */
-@keyframes rain-fall {
+/* ☀️ Rayons de soleil – Animation lumineuse */
+@keyframes sun-float {
   0% { 
-    transform: translateY(-20px) scaleY(0.3); 
+    transform: translateY(0) translateX(0) scale(1); 
     opacity: 0;
   }
   10% { 
-    opacity: 0.9;
-    transform: translateY(0) scaleY(1);
+    opacity: 0.8;
   }
-  90% { opacity: 0.9; }
+  50% { 
+    transform: translateY(-30vh) translateX(20px) scale(1.2);
+    opacity: 0.9;
+  }
+  90% { 
+    opacity: 0.6;
+  }
   100% { 
-    transform: translateY(100vh) scaleY(0.5); 
+    transform: translateY(-100vh) translateX(-10px) scale(0.8); 
     opacity: 0;
   }
 }
-.raindrop {
+.sunray {
   position: fixed;
-  top: -20px;
-  width: 2px;
-  height: 15px;
-  background: linear-gradient(180deg, transparent, rgba(174, 194, 224, 0.7), transparent);
-  border-radius: 0 0 2px 2px;
+  bottom: -20px;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(255, 220, 0, 0.9), rgba(255, 180, 0, 0.5), transparent);
+  border-radius: 50%;
   z-index: 1;
   opacity: 0;
-  animation: rain-fall linear infinite;
+  animation: sun-float linear infinite;
   pointer-events: none;
-  box-shadow: 0 0 6px rgba(174, 194, 224, 0.4);
+  box-shadow: 0 0 10px rgba(255, 220, 0, 0.6), 0 0 20px rgba(255, 180, 0, 0.3);
   will-change: transform, opacity;
 }
-.raindrop:nth-child(odd) { animation-duration: 0.8s; }
-.raindrop:nth-child(even) { animation-duration: 1.2s; }
-.raindrop:nth-child(3n) { animation-duration: 1s; width: 1.5px; }
-.raindrop:nth-child(5n) { animation-duration: 1.4s; width: 2.5px; opacity: 0.95; }
+.sunray:nth-child(odd) { animation-duration: 4s; }
+.sunray:nth-child(even) { animation-duration: 6s; }
+.sunray:nth-child(3n) { animation-duration: 5s; width: 6px; height: 6px; }
+.sunray:nth-child(5n) { animation-duration: 7s; width: 8px; height: 8px; opacity: 0.95; }
 
 /* === Glassmorphism ULTRA-TRANSPARENT === */
 .glass-panel {
   background: rgba(10, 14, 23, 0.25) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(243, 156, 18, 0.2) !important;
+  border: 1px solid rgba(255, 200, 0, 0.25) !important;
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 .glass-panel:hover {
   background: rgba(10, 14, 23, 0.35) !important;
-  border-color: rgba(243, 156, 18, 0.4) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(243, 156, 18, 0.15);
+  border-color: rgba(255, 200, 0, 0.45) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 200, 0, 0.2);
   transform: translateY(-2px);
 }
 
-/* === Effet goutte au survol === */
-.droplet-hover {
+/* === Effet lumineux au survol === */
+.sunray-hover {
   position: relative;
   overflow: hidden;
 }
-.droplet-hover::before {
+.sunray-hover::before {
   content: '';
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 220, 0, 0.15) 0%, transparent 70%);
   opacity: 0;
   transform: scale(0.3);
   transition: all 0.4s ease;
   pointer-events: none;
   border-radius: 50%;
 }
-.droplet-hover:hover::before {
+.sunray-hover:hover::before {
   opacity: 1;
   transform: scale(1);
-  animation: droplet-ripple 0.6s ease-out;
+  animation: sunray-ripple 0.6s ease-out;
 }
-@keyframes droplet-ripple {
+@keyframes sunray-ripple {
   0% { transform: scale(0.3); opacity: 0.8; }
   100% { transform: scale(1.5); opacity: 0; }
 }
@@ -782,27 +787,27 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
 }
 * { scrollbar-width: thin; scrollbar-color: rgba(52, 73, 94, 0.4) transparent; }
 
-/* === Boutons thème pluie === */
-.btn-rain {
-  background: linear-gradient(135deg, #d4a017, #e67e22) !important;
+/* === Boutons thème soleil === */
+.btn-sun {
+  background: linear-gradient(135deg, #ffd700, #ffaa00) !important;
   color: #0a0e17 !important;
   font-weight: 600 !important;
   text-transform: none !important;
   border-radius: 50px !important;
-  border: 2px solid rgba(243, 156, 18, 0.4) !important;
-  box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3) !important;
+  border: 2px solid rgba(255, 200, 0, 0.5) !important;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4) !important;
   transition: all 0.3s ease !important;
   font-family: "Orbitron", sans-serif !important;
 }
-.btn-rain:hover {
+.btn-sun:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 25px rgba(243, 156, 18, 0.5) !important;
-  border-color: rgba(243, 156, 18, 0.7) !important;
+  box-shadow: 0 6px 25px rgba(255, 215, 0, 0.6) !important;
+  border-color: rgba(255, 200, 0, 0.8) !important;
 }
 `}
       </style>
 
-      {/* 🦉🌧️ Fond d'écran – Hibou sous la pluie (OVERLAY TRÈS LÉGER) */}
+      {/* 🦉☀️ Fond d'écran – Hibou sous le soleil (OVERLAY TRÈS LÉGER) */}
       <Box
         sx={{
           position: 'fixed',
@@ -810,7 +815,7 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/OwlRain.png')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/OwlSun.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -828,15 +833,15 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
         }}
       />
 
-      {/* 🌧️ Gouttes de pluie animées */}
+      {/* ☀️ Particules de soleil animées */}
       {[...Array(30)].map((_, i) => (
         <div 
           key={i} 
-          className="raindrop"
+          className="sunray"
           style={{ 
             left: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 2}s`,
-            animationDuration: `${0.7 + Math.random() * 0.8}s`
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${4 + Math.random() * 4}s`
           }}
         />
       ))}
@@ -852,7 +857,7 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
           fontFamily: '"Roboto", sans-serif',
           px: { xs: 0.5, sm: 1, md: 2 },
         }}
-        aria-label="Tableau de bord nocturne ANAVEO"
+        aria-label="Tableau de bord ensoleillé ANAVEO"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
           
@@ -863,7 +868,7 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
               background: 'rgba(10, 14, 23, 0.25)',
               backdropFilter: 'blur(8px)',
               WebkitBackdropFilter: 'blur(8px)',
-              border: '1px solid rgba(243, 156, 18, 0.2)',
+              border: '1px solid rgba(255, 200, 0, 0.25)',
               borderRadius: '24px',
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
               padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
@@ -873,8 +878,8 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
               transition: 'all 0.3s ease',
               '&:hover': {
                 background: 'rgba(10, 14, 23, 0.35)',
-                borderColor: 'rgba(243, 156, 18, 0.4)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(243, 156, 18, 0.15)',
+                borderColor: 'rgba(255, 200, 0, 0.45)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 200, 0, 0.2)',
               }
             }}
           >
@@ -886,12 +891,12 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
                 fontWeight: 'bold',
                 fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
                 color: '#ecf0f1',
-                textShadow: '0 2px 10px rgba(0,0,0,0.4), 0 0 20px rgba(243, 156, 18, 0.3)',
+                textShadow: '0 2px 10px rgba(0,0,0,0.4), 0 0 20px rgba(255, 200, 0, 0.4)',
                 margin: 0,
                 letterSpacing: '0.02em',
               }}
             >
-              🦉 It's sunny today !!! 🦉
+              🦉 Anaveo - Centre de Services 🦉
             </Typography>
           </Box>
 
@@ -917,11 +922,11 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
                 boxShadow: '0 4px 20px rgba(231, 76, 60, 0.1)',
               }}
             >
-              🌧️ Connexion WebSocket perdue. Reconnexion en cours...
+              ☀️ Connexion WebSocket perdue. Reconnexion en cours...
               <Button
                 size="small"
                 variant="outlined"
-                className="btn-rain"
+                className="btn-sun"
                 onClick={reconnect}
               >
                 🔄 Reconnecter
@@ -1020,7 +1025,7 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
                       border: '1px solid rgba(255, 255, 255, 0.1) !important',
                     },
                     '& th': {
-                      color: '#f39c12 !important',
+                      color: '#ffd700 !important',
                       fontWeight: 600,
                     },
                     '& td': {
@@ -1048,9 +1053,9 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
                       <Button
                         variant="contained"
                         onClick={unlockAudio}
-                        className="btn-rain droplet-hover"
+                        className="btn-sun sunray-hover"
                       >
-                        🦉 Activer l'ambiance sonore 🌧️
+                        ☀️ Activer l'ambiance sonore ☀️
                       </Button>
                     </Box>
                   )}

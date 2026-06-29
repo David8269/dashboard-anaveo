@@ -93,7 +93,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
             fontSize: '1.2rem',
             fontWeight: 'bold',
           }}>
-            🦉 Équipe Nocturne
+            🦉 Équipe 
           </Typography>
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Chip label="Veille en cours..." size="small" sx={{
@@ -154,7 +154,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
               fontSize: '1.2rem',
               fontWeight: 'bold',
             }}>
-               Équipe Nocturne
+               Équipe
             </Typography>
             <Tooltip title={isConnected ? "Connecté au CDS" : "Déconnecté"}>
               <Box sx={{
