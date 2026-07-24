@@ -38,7 +38,7 @@ const getAvatarSrc = (name = '') => {
   // Mapping prénom → fichier image (noms exacts depuis votre dossier)
   const avatarMap = {
     'benjamin': 'Benjamin Lespeau.jpg',
-    'gwenaelle': 'Gwenaëlle Valenti.jpg',
+    'gwenaëlle': 'Gwenaëlle Valenti.jpg',
     'julien': 'Julien Meyer.jpg',
     'malik': 'Malik Mounib.jpg',
     'marina': 'Marina Mignon.jpg',
