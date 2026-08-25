@@ -47,7 +47,7 @@ const getAvatarSrc = (name = '') => {
     'rana': 'Rana Al Kas Ellia.jpg',
     'romain': 'Romain Imperatori.jpg',
     'xavier': 'Xavier Rochard.jpg',
-    'willem': 'Willem Andreze-Louison.jpg',
+    'Kévin': 'Yannick Mallon.jpg',
     'yannick': 'Yannick Mallon.jpg',
   };
   
