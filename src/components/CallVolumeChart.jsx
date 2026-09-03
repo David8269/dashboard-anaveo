@@ -65,7 +65,7 @@ function CustomLabel({ dataLength }) {
         letterSpacing: '1px'
       }}
     >
-      🥨 Pause Déjeuner 🥨
+      🥨 Lunch Break 🥨
     </text>
   );
 }
@@ -93,13 +93,13 @@ function LegendComponent() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, py: 1, mt: 1 }}>
       <div style={itemStyle}>
-        <span style={squareStyle('#4ade80')}></span> Entrants
+        <span style={squareStyle('#4ade80')}></span> Inbound
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#fbbf24')}></span> Sortants
+        <span style={squareStyle('#fbbf24')}></span> Outbound
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#f87171')}></span> Perdus
+        <span style={squareStyle('#f87171')}></span> Absys
       </div>
     </Box>
   );
@@ -236,7 +236,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               display: 'block',
             }}
           >
-            🍺 Volume d'Appels
+            🍺 Call volume
           </Typography>
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Chip
@@ -315,7 +315,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               fontWeight: 400,
             }}
           >
-            🍺 Volume d'Appels
+            🍺 Call volume
           </Typography>
           <Chip
             label={wsConnected ? '🟢 En ligne' : '🔴 Hors ligne'}
@@ -336,7 +336,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
         </Box>
 
         {/* 📊 HAUTEUR AGRANDIE : 400px (au lieu de 260px) */}
-        <Box sx={{ width: '100%', height: 400, mt: 1 }} aria-label="Graphique des volumes d'appels">
+        <Box sx={{ width: '100%', height: 350, mt: 1 }} aria-label="Graphique des volumes d'appels">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
