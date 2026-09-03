@@ -18,71 +18,83 @@ import {
   Tooltip,
 } from 'recharts';
 
-// === 🦉 Couleurs thème Pluie & Hibou (MISES À JOUR) ===
-const INBOUND_COLOR = '#27ae60';  // VERT au lieu d'ambre
-const OUTBOUND_COLOR = '#ecf0f1'; // BLANC au lieu d'orangé
+// === 🍺 Couleurs thème Oktoberfest ===
+const INBOUND_COLOR = '#4ade80';  // Vert clair (succès)
+const OUTBOUND_COLOR = '#fbbf24'; // Or ambré (bière)
 
 const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString());
 const hideZeroLabels = (value) => (value === 0 ? '' : formatNumber(value));
 
-// === 🦉 Tooltip personnalisé – Style sombre (couleurs mises à jour) ===
+// === 🦉🍺 Tooltip personnalisé – Style Maßkrug (Ultra-Transparent) ===
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <Box
         sx={{
-          backgroundColor: 'rgba(10, 14, 23, 0.95)',
-          border: '1px solid rgba(243, 156, 18, 0.3)',
+          backgroundColor: 'rgba(10, 5, 0, 0.40)', // 40% pour garder un minimum de lisibilité
+          border: '1px solid rgba(255, 170, 0, 0.3)',
+          borderTop: '2px solid rgba(255, 248, 231, 0.6)',
           borderRadius: 2,
           p: 1.5,
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(8px)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(6px)',
         }}
       >
         <Typography 
           variant="caption" 
           sx={{ 
-            color: '#f39c12', 
-            fontWeight: 'bold', 
+            color: '#ffaa00', 
+            fontWeight: 700, 
             display: 'block', 
-            mb: 0.5,
-            fontFamily: '"Montserrat", sans-serif',
+            mb: 1,
+            fontFamily: '"Rye", serif',
+            fontSize: '0.9rem',
+            letterSpacing: '0.5px',
+            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
           }}
         >
-          {`Jour : ${label}`}
+          🕒 {label}
         </Typography>
         {payload.map((entry, index) => {
           const labels = { 
-            inbound: ' Appels entrants', 
-            outbound: '🌧️ Appels sortants'
+            inbound: 'Appels entrants', 
+            outbound: 'Appels sortants'
           };
           const colors = {
-            inbound: INBOUND_COLOR,   // VERT
-            outbound: OUTBOUND_COLOR, // BLANC
+            inbound: INBOUND_COLOR,
+            outbound: OUTBOUND_COLOR,
+          };
+          const icons = {
+            inbound: '',
+            outbound: '',
           };
           return (
             <Typography 
               key={index} 
               variant="body2" 
               sx={{ 
-                color: '#ecf0f1', 
-                fontSize: 11,
+                color: '#fff8e7', 
+                fontSize: 12,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 0.5,
+                gap: 0.8,
+                mb: 0.5,
+                fontFamily: '"Inter", sans-serif',
+                textShadow: '0 1px 3px rgba(0,0,0,0.8)',
               }}
             >
               <Box 
                 component="span" 
                 sx={{ 
-                  width: 10, 
-                  height: 10, 
+                  width: 12, 
+                  height: 12, 
                   bgcolor: colors[entry.dataKey], 
-                  borderRadius: '2px',
+                  borderRadius: '3px',
                   display: 'inline-block',
+                  boxShadow: `0 0 6px ${colors[entry.dataKey]}`,
                 }} 
               />
-              {labels[entry.dataKey] || entry.name}: <strong>{formatNumber(entry.value)}</strong>
+              {icons[entry.dataKey]} {labels[entry.dataKey] || entry.name}: <strong style={{ color: '#ffaa00' }}>{formatNumber(entry.value)}</strong>
             </Typography>
           );
         })}
@@ -113,66 +125,61 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     prevSlaDataRef.current = slaData;
   }, [slaData]);
 
-  // === 🦉 État vide – Ambiance nocturne ===
+  // === 🦉🍺 État vide – Ambiance Brasserie Ultra-Transparente ===
   if (data.length === 0) {
     return (
       <Card
         sx={{
-          // Glassmorphism ULTRA-TRANSPARENT
-          backgroundColor: 'rgba(10, 14, 23, 0.25)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(10, 5, 0, 0.20)', // ULTRA-TRANSPARENT (20%)
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
           width: '100%',
-          borderRadius: 3,
-          border: '1px solid rgba(243, 156, 18, 0.2)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          borderRadius: 4,
+          border: '1px solid rgba(255, 170, 0, 0.25)',
+          borderTop: '2px solid rgba(255, 248, 231, 0.5)', // Mousse fine
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 0 15px rgba(255, 255, 255, 0.05)',
+          // Texture givre/condensation discrète
+          backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px)',
+          backgroundSize: '15px 15px',
           position: 'relative',
           overflow: 'hidden',
           transition: 'all 0.3s ease',
           '&:hover': {
-            borderColor: 'rgba(243, 156, 18, 0.4)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 25px rgba(243, 156, 18, 0.1)',
+            backgroundColor: 'rgba(10, 5, 0, 0.30)',
+            borderColor: 'rgba(255, 248, 231, 0.5)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(255, 170, 0, 0.15)',
+            transform: 'translateY(-2px)',
           }
         }}
       >
-        {/* Lueur ambiante hibou */}
-        <Box sx={{
-          position: 'absolute',
-          top: 0,
-          left: '-50%',
-          width: '200%',
-          height: '100%',
-          background: 'radial-gradient(circle at 40% 50%, rgba(243, 156, 18, 0.06), transparent 70%)',
-          animation: 'owl-drift 22s linear infinite',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }} />
         <CardContent sx={{ position: 'relative', zIndex: 1 }}>
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Montserrat", sans-serif',
-              color: '#ecf0f1',
-              textShadow: '0 0 12px rgba(243, 156, 18, 0.4)',
+              fontFamily: '"Rye", serif',
+              color: '#fff8e7',
+              textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
               fontSize: '1.3rem',
+              fontWeight: 400,
+              mb: 2,
+              display: 'block',
             }}
           >
-            📊 Volume hebdomadaire des appels
+             Volume hebdomadaire des appels
           </Typography>
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Chip
-              label={wsConnected ? ' Aucun appel enregistré' : '🌧️ Connexion au flux...'}
+              label={wsConnected ? '🍺 Aucun appel enregistré' : '⚠️ Connexion au flux...'}
               size="small"
               sx={{
                 mb: 2,
-                background: wsConnected
-                  ? 'linear-gradient(135deg, #27ae60, #2ecc71)' // Dégradé vert
-                  : 'linear-gradient(135deg, #34495e, #2c3e50)',
-                color: wsConnected ? '#0a0e17' : '#ecf0f1',
+                background: 'rgba(255, 170, 0, 0.2)',
+                backdropFilter: 'blur(6px)',
+                color: '#fff8e7',
                 fontFamily: '"Montserrat", sans-serif',
-                animation: wsConnected ? 'none' : 'pulse-owl 1.5s infinite alternate',
-                border: '1px solid rgba(243, 156, 18, 0.3)',
-                fontWeight: 600,
+                fontWeight: 700,
+                animation: wsConnected ? 'none' : 'pulse-amber 2s infinite alternate',
+                border: '1px solid rgba(255, 248, 231, 0.5)',
               }}
             />
             <Skeleton 
@@ -180,23 +187,12 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               width="100%" 
               height={350} 
               sx={{ 
-                backgroundColor: 'rgba(243, 156, 18, 0.08)',
+                backgroundColor: 'rgba(255, 170, 0, 0.08)',
                 borderRadius: 2,
               }} 
             />
           </Box>
         </CardContent>
-        <style>{`
-          @keyframes pulse-owl {
-            0% { transform: scale(1); box-shadow: 0 0 8px rgba(243, 156, 18, 0.3); }
-            100% { transform: scale(1.04); box-shadow: 0 0 18px rgba(243, 156, 18, 0.5); }
-          }
-          @keyframes owl-drift {
-            0% { transform: translateX(0) translateY(0); }
-            50% { transform: translateX(-8%) translateY(-4%); }
-            100% { transform: translateX(0) translateY(0); }
-          }
-        `}</style>
       </Card>
     );
   }
@@ -205,12 +201,12 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     <>
       <style>
         {`
-          @keyframes pulse-owl {
-            0% { transform: scale(1); box-shadow: 0 0 8px rgba(243, 156, 18, 0.3); }
-            100% { transform: scale(1.04); box-shadow: 0 0 18px rgba(243, 156, 18, 0.5); }
+          @keyframes pulse-amber {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 170, 0, 0.3); }
+            100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
           }
 
-          @keyframes bar-rise-owl {
+          @keyframes bar-rise-amber {
             0% { 
               opacity: 0.6; 
               transform: scaleY(0); 
@@ -222,42 +218,47 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             }
           }
 
-          @keyframes owl-glow {
-            0%, 100% { text-shadow: 0 0 6px rgba(243, 156, 18, 0.3); }
-            50% { text-shadow: 0 0 12px rgba(243, 156, 18, 0.5); }
+          @keyframes amber-glow {
+            0%, 100% { text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8), 0 0 6px rgba(255, 170, 0, 0.3); }
+            50% { text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(255, 170, 0, 0.5); }
           }
 
-          @keyframes owl-drift-chart {
+          @keyframes amber-drift-chart {
             0% { transform: translateX(0) translateY(0); opacity: 0.4; }
             50% { transform: translateX(-6%) translateY(-3%); opacity: 0.6; }
             100% { transform: translateX(0) translateY(0); opacity: 0.4; }
           }
 
-          /* Effet goutte au survol */
-          .droplet-hover-chart {
+          @keyframes pulse-status-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+          }
+
+          /* Effet mousse au survol */
+          .foam-hover-chart {
             position: relative;
             overflow: hidden;
           }
-          .droplet-hover-chart::before {
+          .foam-hover-chart::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 248, 231, 0.1) 0%, transparent 70%);
             opacity: 0;
             transform: scale(0.3);
             transition: all 0.4s ease;
             pointer-events: none;
             border-radius: 50%;
           }
-          .droplet-hover-chart:hover::before {
+          .foam-hover-chart:hover::before {
             opacity: 1;
             transform: scale(1);
-            animation: droplet-ripple 0.6s ease-out;
+            animation: foam-ripple-chart 0.6s ease-out;
           }
-          @keyframes droplet-ripple {
+          @keyframes foam-ripple-chart {
             0% { transform: scale(0.3); opacity: 0.8; }
             100% { transform: scale(1.5); opacity: 0; }
           }
@@ -265,24 +266,30 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
       </style>
 
       <Card
-        className="droplet-hover-chart"
+        className="foam-hover-chart"
         sx={{
-          backgroundColor: 'rgba(10, 14, 23, 0.25)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(10, 5, 0, 0.20)', // ULTRA-TRANSPARENT (20%)
+          backdropFilter: 'blur(4px)', // Flou minimal pour voir l'image de fond
+          WebkitBackdropFilter: 'blur(4px)',
           width: '100%',
-          borderRadius: 3,
-          border: '1px solid rgba(243, 156, 18, 0.2)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          borderRadius: 4,
+          border: '1px solid rgba(255, 170, 0, 0.25)',
+          borderTop: '2px solid rgba(255, 248, 231, 0.5)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 0 15px rgba(255, 255, 255, 0.05)',
+          // Texture givre/condensation discrète
+          backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px)',
+          backgroundSize: '15px 15px',
           position: 'relative',
           overflow: 'hidden',
-          transition: 'all 0.3s ease',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           ...(animate && {
-            animation: 'pulse-owl 0.6s ease-in-out',
+            animation: 'pulse-amber 0.6s ease-in-out',
           }),
           '&:hover': {
-            borderColor: 'rgba(243, 156, 18, 0.4)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 25px rgba(243, 156, 18, 0.1)',
+            backgroundColor: 'rgba(10, 5, 0, 0.30)',
+            borderColor: 'rgba(255, 248, 231, 0.5)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(255, 170, 0, 0.15)',
+            transform: 'translateY(-2px)',
           },
           '&::before': {
             content: '""',
@@ -291,8 +298,8 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             left: 0,
             right: 0,
             height: '2px',
-            background: 'linear-gradient(90deg, transparent, #27ae60, rgba(243, 156, 18, 0.5), #ecf0f1, transparent)', // Gradient mis à jour
-            animation: 'owl-glow 3s infinite',
+            background: 'linear-gradient(90deg, transparent, #ffaa00, rgba(255, 248, 231, 0.5), #fbbf24, transparent)',
+            animation: 'amber-glow 3s infinite',
             zIndex: 2,
           },
           '&::after': {
@@ -302,36 +309,41 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             left: '-60%',
             width: '220%',
             height: '70%',
-            background: 'radial-gradient(circle at 50% 40%, rgba(212, 160, 23, 0.06), transparent 80%)',
+            background: 'radial-gradient(circle at 50% 40%, rgba(255, 221, 136, 0.06), transparent 80%)',
             pointerEvents: 'none',
             zIndex: 0,
-            animation: 'owl-drift-chart 25s linear infinite',
+            animation: 'amber-drift-chart 25s linear infinite',
           },
         }}
       >
-        <CardContent sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0 }}>
+        <CardContent sx={{ position: 'relative', zIndex: 1, pt: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography
               variant="overline"
               sx={{
-                fontFamily: '"Montserrat", sans-serif',
-                color: '#ecf0f1',
-                textShadow: '0 0 12px rgba(243, 156, 18, 0.4)',
+                fontFamily: '"Rye", serif',
+                color: '#fff8e7',
+                textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
                 fontSize: '1.3rem',
+                fontWeight: 400,
               }}
             >
-              📊 Volume des appels
+              🍺 Volume des appels
             </Typography>
             <Chip
-              label="🟢 En direct"
+              label="En direct"
               size="small"
               sx={{
-                background: 'linear-gradient(135deg, #27ae60, #2ecc71)',
-                color: '#0a0e17',
-                fontWeight: 'bold',
+                fontSize: 12,
+                background: wsConnected 
+                  ? 'rgba(74, 222, 128, 0.2)'
+                  : 'rgba(248, 113, 113, 0.2)',
+                backdropFilter: 'blur(6px)',
+                color: '#fff8e7',
+                fontWeight: 700,
                 fontFamily: '"Montserrat", sans-serif',
-                animation: 'pulse-status 2s infinite',
-                border: '1px solid rgba(243, 156, 18, 0.3)',
+                animation: wsConnected ? 'pulse-status-green 2s infinite' : 'none',
+                border: '1px solid rgba(255, 248, 231, 0.5)',
               }}
             />
           </Box>
@@ -342,116 +354,117 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
               margin={{ top: 30, right: 20, left: 10, bottom: 20 }}
               barSize={100}
             >
-              {/* Grille – Style sombre */}
+              {/* Grille – Style ambré très subtil */}
               <CartesianGrid 
                 strokeDasharray="3 3" 
-                stroke="rgba(243, 156, 18, 0.15)" 
-                opacity={0.2} 
+                stroke="rgba(255, 170, 0, 0.1)" 
+                opacity={0.4} 
               />
 
-              {/* Axe X – Texte gris clair */}
+              {/* Axe X – Texte avec ombre portée forte */}
               <XAxis
                 dataKey="dayLabel"
-                stroke="#bdc3c7"
+                stroke="#fff8e7"
                 tick={{
-                  fill: '#bdc3c7',
-                  fontSize: 11,
-                  fontWeight: 500,
-                  fontFamily: '"Montserrat", sans-serif',
-                  textShadow: '0 0 4px rgba(0,0,0,0.5)',
+                  fill: '#fff8e7',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: '"Inter", sans-serif',
+                  textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
                 }}
               />
 
-              {/* Axe Y – Texte gris clair */}
+              {/* Axe Y – Texte avec ombre portée forte */}
               <YAxis
-                stroke="#bdc3c7"
+                stroke="#fff8e7"
                 tick={{
-                  fill: '#bdc3c7',
-                  fontSize: 11,
-                  fontWeight: 500,
-                  fontFamily: '"Montserrat", sans-serif',
+                  fill: '#fff8e7',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: '"Inter", sans-serif',
+                  textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
                 }}
                 tickFormatter={hideZeroLabels}
               />
 
-              {/* Tooltip personnalisé sombre */}
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(243, 156, 18, 0.08)' }} />
+              {/* Tooltip personnalisé */}
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 170, 0, 0.08)' }} />
 
-              {/* Barre entrants – VERT (mis à jour) */}
+              {/* Barre entrants – VERT clair */}
               <Bar
                 dataKey="inbound"
                 name="Appels entrants"
                 fill={INBOUND_COLOR}
                 fillOpacity={0.85}
                 animationDuration={1200}
-                style={{ animation: 'bar-rise-owl 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
+                style={{ animation: 'bar-rise-amber 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
               >
                 <LabelList
                   dataKey="inbound"
                   position="top"
-                  fill="#ecf0f1"
+                  fill="#fff8e7"
                   fontWeight="bold"
-                  fontSize={11}
+                  fontSize={12}
                   formatter={hideZeroLabels}
                   style={{
-                    textShadow: '0 0 6px rgba(39, 174, 96, 0.4)', // Ombre verte
+                    textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8), 0 0 6px rgba(74, 222, 128, 0.4)',
                     fontFamily: '"Montserrat", sans-serif',
-                    animation: 'owl-glow 3s infinite alternate',
+                    animation: 'amber-glow 3s infinite alternate',
                   }}
                 />
               </Bar>
 
-              {/* Barre sortants – BLANC (mis à jour) */}
+              {/* Barre sortants – OR ambré */}
               <Bar
                 dataKey="outbound"
                 name="Appels sortants"
                 fill={OUTBOUND_COLOR}
                 fillOpacity={0.85}
                 animationDuration={1200}
-                style={{ animation: 'bar-rise-owl 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
+                style={{ animation: 'bar-rise-amber 1s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }}
               >
                 <LabelList
                   dataKey="outbound"
                   position="top"
-                  fill="#0a0e17" // Texte sombre pour contraste sur fond blanc
+                  fill="#1e140d" // Texte sombre pour contraste sur fond ambré
                   fontWeight="bold"
-                  fontSize={11}
+                  fontSize={12}
                   formatter={hideZeroLabels}
                   style={{
-                    textShadow: '0 0 6px rgba(236, 240, 241, 0.4)', // Ombre blanche
+                    textShadow: '0 1px 2px rgba(255, 255, 255, 0.3)',
                     fontFamily: '"Montserrat", sans-serif',
-                    animation: 'owl-glow 3s infinite alternate',
+                    animation: 'amber-glow 3s infinite alternate',
                   }}
                 />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
 
-          {/* Légende – Style sombre (couleurs mises à jour) */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 6, pt: 2, pb: 1 }}>
+          {/* Légende – Style Oktoberfest */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 6, pt: 3, pb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box 
                 sx={{ 
                   width: 16, 
                   height: 16, 
                   bgcolor: INBOUND_COLOR, 
-                  borderRadius: '2px', 
-                  boxShadow: `0 0 6px ${INBOUND_COLOR}`, 
-                  border: '1px solid rgba(243, 156, 18, 0.3)',
+                  borderRadius: '3px', 
+                  boxShadow: `0 0 8px ${INBOUND_COLOR}`, 
+                  border: '1px solid rgba(255, 248, 231, 0.5)',
                   opacity: 0.9,
                 }} 
               />
               <Typography
                 variant="body1"
                 sx={{
-                  fontFamily: '"Montserrat", sans-serif',
-                  fontWeight: 'bold',
-                  fontSize: 11,
-                  color: '#ecf0f1',
-                  textShadow: '0 0 4px rgba(0,0,0,0.5)',
+                  fontFamily: '"Inter", sans-serif',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  color: '#fff8e7',
+                  textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
                 }}
               >
-                🦉 Appels entrants
+                Appels entrants
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -460,23 +473,23 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
                   width: 16, 
                   height: 16, 
                   bgcolor: OUTBOUND_COLOR, 
-                  borderRadius: '2px', 
-                  boxShadow: `0 0 6px ${OUTBOUND_COLOR}`, 
-                  border: '1px solid rgba(243, 156, 18, 0.3)',
+                  borderRadius: '3px', 
+                  boxShadow: `0 0 8px ${OUTBOUND_COLOR}`, 
+                  border: '1px solid rgba(255, 248, 231, 0.5)',
                   opacity: 0.9,
                 }} 
               />
               <Typography
                 variant="body1"
                 sx={{
-                  fontFamily: '"Montserrat", sans-serif',
-                  fontWeight: 'bold',
-                  fontSize: 11,
-                  color: '#ecf0f1',
-                  textShadow: '0 0 4px rgba(0,0,0,0.5)',
+                  fontFamily: '"Inter", sans-serif',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  color: '#fff8e7',
+                  textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
                 }}
               >
-                ️ Appels sortants
+                Appels sortants
               </Typography>
             </Box>
           </Box>

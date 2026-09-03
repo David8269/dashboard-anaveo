@@ -12,9 +12,10 @@ import AgentTable from './components/AgentTable';
 import CallVolumeChart from './components/CallVolumeChart';
 import { useCallAggregates } from './hooks/useCallAggregates';
 import { parseCDRLine } from './utils/cdrParser';
-import { AUTHORIZED_AGENTS } from './config/agents';
 
-// === Helpers (inchangés - logique métier préservée) ===
+// ============================================================================
+// === HELPERS (Logique métier 100% préservée) ===
+// ============================================================================
 const isLunchBreak = (date) => {
   if (!date) return false;
   const totalMinutes = date.getHours() * 60 + date.getMinutes();
@@ -67,9 +68,9 @@ const getLocalDateStr = (date) => {
 
 const generateHalfHourSlots = () => {
   const slots = [];
-  for (let h = 8; h <= 18; h++) {
+  for (let h = 8; h <= 19; h++) {  // Changé de 18 à 19
     slots.push(`${h.toString().padStart(2, '0')}:30`);
-    if (h < 18) slots.push(`${(h + 1).toString().padStart(2, '0')}:00`);
+    if (h < 19) slots.push(`${(h + 1).toString().padStart(2, '0')}:00`);  // Changé de 18 à 19
   }
   return slots;
 };
@@ -89,7 +90,11 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === 🦉 Clock – Version Soleil & Hibou (PLUS TRANSPARENT) ===
+// ============================================================================
+// === COMPOSANTS UI ENHANCED OKTOBERFEST ===
+// ============================================================================
+
+// 🍺 Clock – Version Verre à bière ULTRA-TRANSPARENT
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -104,38 +109,46 @@ function Clock() {
     <Paper
       elevation={0}
       sx={{
-        fontFamily: '"Orbitron", sans-serif',
-        fontWeight: 'bold',
-        fontSize: { xs: '1.8rem', sm: '2.4rem', md: '3rem' },
-        color: '#ecf0f1',
-        textShadow: '0 0 15px rgba(255, 200, 0, 0.6)',
-        // Glassmorphism ULTRA-TRANSPARENT
-        background: 'rgba(10, 14, 23, 0.25)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        padding: { xs: '0.5rem 1rem', md: '0.8rem 1.4rem' },
-        borderRadius: '24px',
-        display: 'inline-block',
-        margin: '0 auto',
-        border: '1px solid rgba(255, 200, 0, 0.3)',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-        transition: 'all 0.3s ease',
+        fontFamily: '"Rye", serif',
+        fontWeight: 400,
+        fontSize: { xs: '1.5rem', sm: '2rem', md: '2.2rem' },
+        color: '#fff8e7',
+        // Ombre portée renforcée pour lisibilité sur fond transparent
+        textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
+        background: 'rgba(10, 5, 0, 0.20)', // ULTRA-TRANSPARENT (20%)
+        backdropFilter: 'blur(4px)', // Flou minimal
+        WebkitBackdropFilter: 'blur(4px)',
+        padding: { xs: '0.5rem 1.2rem', md: '0.8rem 1.8rem' },
+        borderRadius: '16px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.8rem',
+        border: '1px solid rgba(255, 170, 0, 0.25)',
+        borderTop: '2px solid rgba(255, 248, 231, 0.5)', // Mousse fine
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        // Texture givre/condensation discrète
+        backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px)',
+        backgroundSize: '15px 15px',
         '&:hover': {
-          background: 'rgba(10, 14, 23, 0.35)',
-          borderColor: 'rgba(255, 200, 0, 0.5)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 200, 0, 0.2)',
+          background: 'rgba(10, 5, 0, 0.30)',
+          borderColor: 'rgba(255, 248, 231, 0.5)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15)',
           transform: 'translateY(-2px)',
         }
       }}
       role="status"
       aria-live="polite"
     >
-      ☀️ {hours}:{minutes}:{seconds} ☀️
+      <span style={{ fontSize: '0.8em', filter: 'drop-shadow(0 0 5px rgba(255,170,0,0.8))' }}>🍺</span>
+      {hours}:{minutes}:<span style={{ color: '#ffaa00', fontFamily: '"Montserrat", sans-serif', fontWeight: 700 }}>{seconds}</span>
     </Paper>
   );
 }
 
-// === Schedulers & WebSocket (inchangés - logique préservée) ===
+// ============================================================================
+// === SCHEDULERS & WEBSOCKET (Logique 100% préservée) ===
+// ============================================================================
 const useDailyResetScheduler = (resetFn) => { 
   useEffect(() => {
     const scheduleNextReset = () => {
@@ -303,7 +316,7 @@ const useWebSocketData = (url, onLostCall) => {
     console.log(`[WS] 🔄 Tentative de connexion dans ${delay / 1000}s (essai #${reconnectAttemptsRef.current})`);
     reconnectTimeoutRef.current = setTimeout(() => {
       if (!isMountedRef.current) return;
-      console.log(`[WS] 🔄 Connexion à ${url}`);
+      console.log(`[WS]  Connexion à ${url}`);
       setError(null);
       setIsConnected(false);
       wsRef.current = new WebSocket(url);
@@ -333,7 +346,7 @@ const useWebSocketData = (url, onLostCall) => {
           if (msg.includes('"type":"keepalive"') || msg.includes('"type":"pong"')) {
             return;
           }
-          console.log(`[WS] 📥 Message brut reçu :`, msg);
+          console.log(`[WS]  Message brut reçu :`, msg);
           const cdr = parseCDRLine(msg);
           if (!cdr) {
             console.debug('[CDR] ❌ Appel ignoré (parsing échoué)', msg);
@@ -462,7 +475,9 @@ const useWebSocketData = (url, onLostCall) => {
   };
 };
 
-// === Gestion audio (inchangée) ===
+// ============================================================================
+// === GESTION AUDIO (Logique 100% préservée) ===
+// ============================================================================
 const playSound = (filename, context = '', volume = 0.8) => {
   try {
     const audio = new Audio(`${process.env.PUBLIC_URL}/sounds/${filename}`);
@@ -470,14 +485,16 @@ const playSound = (filename, context = '', volume = 0.8) => {
     const logContext = context ? `(${context})` : '';
     console.log(`[Son] 🔊 Lecture : ${filename} ${logContext}`);
     audio.play().catch(e => {
-      console.warn(`[Son] ❌ Échec lecture ${filename}:`, e.message);
+      console.warn(`[Son]  Échec lecture ${filename}:`, e.message);
     });
   } catch (error) {
     console.error(`[Son] 💥 Erreur :`, error);
   }
 };
 
-// === 🦉 App principale – Thème Soleil & Hibou (TRANSPARENCE MAX) ===
+// ============================================================================
+// === COMPOSANT PRINCIPAL APP ===
+// ============================================================================
 const App = () => {
   const WS_URL = 'wss://cds-on3cx.anaveo.com/cdr-ws/';
   const prevEmployeesRef = useRef([]);
@@ -571,7 +588,7 @@ const App = () => {
 
   const isAbandonRateCritical = useMemo(() => isAbandonCritical(kpi.abandonRate), [kpi.abandonRate]);
 
-  // 🔊 Sons horaires (inchangés)
+  // 🔊 Sons horaires (Logique préservée)
   useEffect(() => {
     if (!audioUnlocked) return;
     scheduledTimeoutsRef.current.forEach(id => clearTimeout(id));
@@ -605,8 +622,7 @@ const App = () => {
 
       const timeoutId = setTimeout(() => {
         const currentDate = new Date();
-        const isAllowed = !allowedDays || 
-                         (Array.isArray(allowedDays) && allowedDays.includes(currentDate.getDay()));
+        const isAllowed = !allowedDays || (Array.isArray(allowedDays) && allowedDays.includes(currentDate.getDay()));
         
         if (!isAllowed) {
           console.log(`[Son] ⏰ ${label} ignoré - jour non autorisé (${currentDate.toLocaleDateString()})`);
@@ -659,7 +675,7 @@ const App = () => {
     };
   }, [audioUnlocked]);
 
-  // 🔊 Top agent (inchangé)
+  // 🔊 Top agent (Logique préservée)
   useEffect(() => {
     if (!audioUnlocked || employees.length === 0) return;
     const totalCalls = kpi.totalAnsweredCalls + kpi.missedCallsTotal + kpi.totalOutboundCalls;
@@ -672,7 +688,7 @@ const App = () => {
       (a.inbound + a.outbound) > (top?.inbound + top?.outbound || 0) ? a : top, null
     );
     if (currentTop && (!prevTop || prevTop.name !== currentTop.name)) {
-      const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik','marina','willem','kévin','gwenaëlle']);
+      const allowedFirstNames = new Set(['xavier', 'rana', 'mathys', 'romain', 'nicolas', 'julien', 'benjamin', 'malik','marina','vivien','kévin','christophe','gwenaëlle']);
       const firstName = currentTop.name.split(' ')[0]?.toLowerCase() || '';
       const soundToPlay = allowedFirstNames.has(firstName) ? `${firstName}.mp3` : 'passage.mp3';
       playSound(soundToPlay, `Top agent : ${currentTop.name}`);
@@ -680,134 +696,124 @@ const App = () => {
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi]);
 
+  // === STYLE INJECTOR (Thème OKTOBERFEST ULTRA-TRANSPARENT) ===
+  const glassSx = {
+    '& .MuiPaper-root': {
+      background: 'rgba(10, 5, 0, 0.20) !important', // ULTRA-TRANSPARENT (20%)
+      backdropFilter: 'blur(4px) !important', // Flou minimal
+      WebkitBackdropFilter: 'blur(4px) !important',
+      border: '1px solid rgba(255, 170, 0, 0.25) !important',
+      borderTop: '2px solid rgba(255, 248, 231, 0.5) !important', // Mousse fine
+      borderRadius: '16px !important',
+      boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05) !important',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important',
+      // Texture givre/condensation discrète
+      backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px) !important',
+      backgroundSize: '15px 15px !important',
+      '&:hover': {
+        background: 'rgba(10, 5, 0, 0.30) !important',
+        borderColor: 'rgba(255, 248, 231, 0.5) !important',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15) !important',
+        transform: 'translateY(-2px)',
+      }
+    }
+  };
+
   return (
     <>
       <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700;900&family=Roboto:wght@300;400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;700;800&family=Rye&display=swap"
         rel="stylesheet"
       />
       <style>
         {`
-/* ☀️ Rayons de soleil – Animation lumineuse */
-@keyframes sun-float {
-  0% { 
-    transform: translateY(0) translateX(0) scale(1); 
-    opacity: 0;
-  }
-  10% { 
-    opacity: 0.8;
-  }
-  50% { 
-    transform: translateY(-30vh) translateX(20px) scale(1.2);
-    opacity: 0.9;
-  }
-  90% { 
-    opacity: 0.6;
-  }
-  100% { 
-    transform: translateY(-100vh) translateX(-10px) scale(0.8); 
-    opacity: 0;
-  }
-}
-.sunray {
-  position: fixed;
-  bottom: -20px;
-  width: 4px;
-  height: 4px;
-  background: radial-gradient(circle, rgba(255, 220, 0, 0.9), rgba(255, 180, 0, 0.5), transparent);
-  border-radius: 50%;
-  z-index: 1;
-  opacity: 0;
-  animation: sun-float linear infinite;
-  pointer-events: none;
-  box-shadow: 0 0 10px rgba(255, 220, 0, 0.6), 0 0 20px rgba(255, 180, 0, 0.3);
-  will-change: transform, opacity;
-}
-.sunray:nth-child(odd) { animation-duration: 4s; }
-.sunray:nth-child(even) { animation-duration: 6s; }
-.sunray:nth-child(3n) { animation-duration: 5s; width: 6px; height: 6px; }
-.sunray:nth-child(5n) { animation-duration: 7s; width: 8px; height: 8px; opacity: 0.95; }
+        /* === VARIABLES OKTOBERFEST === */
+        :root {
+          --okto-amber: #ffaa00;
+          --okto-foam: #fff8e7;
+          --okto-wood: #2c1e12;
+          --okto-bavarian: #0044cc;
+        }
 
-/* === Glassmorphism ULTRA-TRANSPARENT === */
-.glass-panel {
-  background: rgba(10, 14, 23, 0.25) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255, 200, 0, 0.25) !important;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-.glass-panel:hover {
-  background: rgba(10, 14, 23, 0.35) !important;
-  border-color: rgba(255, 200, 0, 0.45) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 200, 0, 0.2);
-  transform: translateY(-2px);
-}
+        /* === BULLES DE BIÈRE (Effervescence réaliste) === */
+        .beer-bubble {
+          position: fixed;
+          bottom: -20px;
+          background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 215, 0, 0.75));
+          border-radius: 50%;
+          opacity: 0;
+          pointer-events: none;
+          z-index: 1;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6), inset 0 0 2px rgba(255, 255, 255, 0.4);
+          animation: rise-wobble linear infinite;
+        }
 
-/* === Effet lumineux au survol === */
-.sunray-hover {
-  position: relative;
-  overflow: hidden;
-}
-.sunray-hover::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 220, 0, 0.15) 0%, transparent 70%);
-  opacity: 0;
-  transform: scale(0.3);
-  transition: all 0.4s ease;
-  pointer-events: none;
-  border-radius: 50%;
-}
-.sunray-hover:hover::before {
-  opacity: 1;
-  transform: scale(1);
-  animation: sunray-ripple 0.6s ease-out;
-}
-@keyframes sunray-ripple {
-  0% { transform: scale(0.3); opacity: 0.8; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
+        @keyframes rise-wobble {
+          0% { transform: translateY(0) translateX(0) scale(0.3); opacity: 0; }
+          10% { opacity: 0.85; }
+          25% { transform: translateY(-25vh) translateX(6px) scale(0.7); }
+          50% { transform: translateY(-50vh) translateX(-6px) scale(1); opacity: 0.6; }
+          75% { transform: translateY(-75vh) translateX(4px) scale(0.85); }
+          90% { opacity: 0.3; }
+          100% { transform: translateY(-110vh) translateX(-4px) scale(0.5); opacity: 0; }
+        }
 
-/* === Scrollbar sombre discrète === */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: rgba(52, 73, 94, 0.4);
-  border-radius: 3px;
-  transition: all 0.3s ease;
-}
-body.show-scrollbar ::-webkit-scrollbar-thumb {
-  background: rgba(93, 109, 126, 0.6);
-}
-* { scrollbar-width: thin; scrollbar-color: rgba(52, 73, 94, 0.4) transparent; }
+        /* === GLASSMORPHISM "VERRE À BIÈRE" (Ultra Transparent) === */
+        .glass-panel {
+          background: rgba(10, 5, 0, 0.20) !important; /* ULTRA-TRANSPARENT (20%) */
+          backdrop-filter: blur(4px) !important; /* Flou minimal */
+          -webkit-backdrop-filter: blur(4px) !important;
+          border: 1px solid rgba(255, 170, 0, 0.25) !important;
+          border-top: 2px solid rgba(255, 248, 231, 0.5) !important; /* Mousse fine */
+          border-radius: 16px !important;
+          box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          /* Texture givre/condensation discrète */
+          background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px) !important;
+          background-size: 15px 15px !important;
+        }
+        .glass-panel:hover {
+          background: rgba(10, 5, 0, 0.30) !important;
+          border-color: rgba(255, 248, 231, 0.5) !important;
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15) !important;
+          transform: translateY(-2px);
+        }
 
-/* === Boutons thème soleil === */
-.btn-sun {
-  background: linear-gradient(135deg, #ffd700, #ffaa00) !important;
-  color: #0a0e17 !important;
-  font-weight: 600 !important;
-  text-transform: none !important;
-  border-radius: 50px !important;
-  border: 2px solid rgba(255, 200, 0, 0.5) !important;
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4) !important;
-  transition: all 0.3s ease !important;
-  font-family: "Orbitron", sans-serif !important;
-}
-.btn-sun:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 25px rgba(255, 215, 0, 0.6) !important;
-  border-color: rgba(255, 200, 0, 0.8) !important;
-}
-`}
+        /* === Bouton Oktoberfest === */
+        .btn-oktoberfest {
+          background: rgba(255, 170, 0, 0.20) !important;
+          backdrop-filter: blur(4px);
+          color: var(--okto-amber) !important;
+          font-weight: 700 !important;
+          text-transform: uppercase !important;
+          border-radius: 8px !important;
+          border: 1px solid rgba(255, 170, 0, 0.4) !important;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+          transition: all 0.3s ease !important;
+          font-family: "Montserrat", sans-serif !important;
+          letter-spacing: 1px;
+        }
+        .btn-oktoberfest:hover {
+          background: rgba(255, 170, 0, 0.35) !important;
+          border-color: var(--okto-foam) !important;
+          color: var(--okto-foam) !important;
+          box-shadow: 0 0 20px rgba(255, 170, 0, 0.4) !important;
+          transform: translateY(-2px) !important;
+        }
+
+        /* === Scrollbar === */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(255, 170, 0, 0.3);
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--okto-amber); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(255, 170, 0, 0.3) transparent; }
+        `}
       </style>
 
-      {/* 🦉☀️ Fond d'écran – Hibou sous le soleil (OVERLAY TRÈS LÉGER) */}
+      {/* 🍻 Fond d'écran OKTOBERFEST - SANS AUCUN OVERLAY NI FLOU */}
       <Box
         sx={{
           position: 'fixed',
@@ -815,127 +821,119 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/OwlSun.png')`,
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/oktoberfest.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          zIndex: 0,
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'rgba(10, 14, 23, 0.15)', // Overlay très léger pour lisibilité
-            pointerEvents: 'none',
-          }
+          zIndex: 0
+          // Le bloc ::before a été SUPPRIMÉ pour que l'image soit 100% visible et nette
         }}
       />
 
-      {/* ☀️ Particules de soleil animées */}
-      {[...Array(30)].map((_, i) => (
-        <div 
-          key={i} 
-          className="sunray"
-          style={{ 
-            left: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 3}s`,
-            animationDuration: `${4 + Math.random() * 4}s`
-          }}
-        />
-      ))}
+      {/* ✨ Bulles de bière animées (Effervescence réaliste - 70 bulles) */}
+      <Box id="bubbles-container">
+        {[...Array(70)].map((_, i) => (
+          <div 
+            key={i} 
+            className="beer-bubble"
+            style={{ 
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${4 + Math.random() * 6}s`,
+              width: `${3 + Math.random() * 8}px`,
+              height: `${3 + Math.random() * 8}px`,
+            }}
+          />
+        ))}
+      </Box>
 
-      {/* Conteneur principal – Transparent */}
+      {/* 📊 Conteneur principal PLEINE LARGEUR */}
       <Box
         sx={{
           minHeight: '100vh',
-          py: { xs: 2, md: 4 },
+          py: { xs: 2, md: 3 },
           position: 'relative',
-          zIndex: 2,
-          color: '#ecf0f1',
-          fontFamily: '"Roboto", sans-serif',
-          px: { xs: 0.5, sm: 1, md: 2 },
+          zIndex: 10,
+          color: '#fff8e7',
+          fontFamily: '"Inter", sans-serif',
+          px: { xs: 1, sm: 1.5, md: 2 },
         }}
-        aria-label="Tableau de bord ensoleillé ANAVEO"
+        aria-label="Tableau de bord ANAVEO Oktoberfest"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
           
-          {/* Titre – Glassmorphism ultra-transparent */}
+          {/* 🏷️ En-tête Bavarois */}
           <Box
+            className="glass-panel"
             sx={{
-              mb: 1,
-              background: 'rgba(10, 14, 23, 0.25)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 200, 0, 0.25)',
-              borderRadius: '24px',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-              padding: { xs: '0.8rem 1.4rem', md: '1.2rem 2.2rem' },
-              display: 'inline-block',
-              margin: '0 auto',
-              textAlign: 'center',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                background: 'rgba(10, 14, 23, 0.35)',
-                borderColor: 'rgba(255, 200, 0, 0.45)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 200, 0, 0.2)',
-              }
+              mb: 2,
+              padding: { xs: '1rem', md: '1.5rem 2.5rem' },
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 2,
+              width: '100%',
             }}
           >
             <Typography
               variant="h1"
-              align="center"
               sx={{
-                fontFamily: '"Montserrat", sans-serif',
-                fontWeight: 'bold',
-                fontSize: { xs: '2rem', sm: '2.8rem', md: '3.6rem' },
-                color: '#ecf0f1',
-                textShadow: '0 2px 10px rgba(0,0,0,0.4), 0 0 20px rgba(255, 200, 0, 0.4)',
-                margin: 0,
+                fontFamily: '"Rye", serif',
+                fontWeight: 400,
+                fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.8rem' },
+                color: '#fff8e7',
+                textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
                 letterSpacing: '0.02em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
               }}
             >
-              🦉 Anaveo - Centre de Services 🦉
+              <span style={{ fontSize: '1.1em', filter: 'drop-shadow(0 0 8px rgba(255,170,0,0.6))' }}>🍻</span> 
+              <span>OKTOBERFEST</span> 
+              <span style={{ color: '#ffaa00', fontWeight: 400, fontSize: '0.5em', marginLeft: '0.5rem', fontFamily: '"Montserrat", sans-serif', letterSpacing: '2px' }}>
+                - Centre De Services 🍻
+              </span>
             </Typography>
-          </Box>
-
-          <Box textAlign="center" mb={0.5}>
+            
             <Clock />
           </Box>
 
+          {/* ⚠️ Alerte de connexion */}
           {!isConnected && (
             <Box
-              textAlign="center"
-              mb={2}
+              className="glass-panel"
               sx={{
-                color: '#ecf0f1',
-                fontWeight: 'bold',
-                textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                px: { xs: 2, sm: 3 },
-                background: 'rgba(10, 14, 23, 0.3)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                borderRadius: '16px',
-                py: 1,
-                border: '1px solid rgba(231, 76, 60, 0.3)',
-                boxShadow: '0 4px 20px rgba(231, 76, 60, 0.1)',
+                mb: 2,
+                p: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 2,
+                borderColor: 'rgba(255, 170, 0, 0.5) !important',
+                background: 'rgba(255, 170, 0, 0.10) !important',
+                animation: 'pulse-amber 2s infinite',
               }}
             >
-              ☀️ Connexion WebSocket perdue. Reconnexion en cours...
+              <style>{`@keyframes pulse-amber { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 170, 0, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(255, 170, 0, 0); } }`}</style>
+              <Typography sx={{ color: '#ffdd88', fontWeight: 700, fontFamily: '"Montserrat", sans-serif', letterSpacing: '1px', textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)' }}>
+                ⚠️ CONNEXION WEBSOCKET PERDUE
+              </Typography>
               <Button
                 size="small"
                 variant="outlined"
-                className="btn-sun"
+                className="btn-oktoberfest"
                 onClick={reconnect}
+                sx={{ borderColor: '#ffaa00 !important', color: '#ffaa00 !important' }}
               >
                 🔄 Reconnecter
               </Button>
             </Box>
           )}
 
-          {/* KPI Principaux – Ultra-transparents */}
-          <Grid container spacing={2.5} justifyContent="center" sx={{ mt: 0.5, px: { xs: 1.5, sm: 2.5, md: 3.5 } }} aria-label="KPI Principaux">
+          {/* 📈 KPI Principaux */}
+          <Grid container spacing={2.5} sx={{ mt: 0.5 }} aria-label="KPI Principaux">
             {[
               { title: "Total Agents", value: kpi.totalAgents, color: "info", critical: false },
               { title: "Number of Calls", value: kpi.totalCallsThisWeek.toString(), color: "primary", critical: false },
@@ -948,22 +946,14 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
                   value={item.value.toString()} 
                   valueColor={item.color} 
                   isCritical={item.critical} 
-                  sx={{
-                    '& .MuiPaper-root': {
-                      background: 'rgba(10, 14, 23, 0.25) !important',
-                      backdropFilter: 'blur(8px) !important',
-                      border: '1px solid rgba(255, 255, 255, 0.1) !important',
-                      borderRadius: '20px !important',
-                      color: '#ecf0f1 !important',
-                    }
-                  }}
+                  sx={glassSx}
                 />
               </Grid>
             ))}
           </Grid>
 
-          {/* KPI Détail Appels – Ultra-transparents */}
-          <Grid container spacing={2.5} justifyContent="center" sx={{ mt: 1, px: { xs: 1.5, sm: 2.5, md: 3.5 } }} aria-label="KPI Détail Appels">
+          {/* 📊 KPI Détail Appels */}
+          <Grid container spacing={2.5} sx={{ mt: 1 }} aria-label="KPI Détail Appels">
             {[
               { title: "Answered Calls", value: kpi.totalAnsweredCalls, color: "default", critical: false },
               { title: "Missed Calls", value: kpi.missedCallsTotal, color: "error", critical: false },
@@ -977,36 +967,23 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
                   value={item.value.toString()} 
                   valueColor={item.color} 
                   isCritical={item.critical}
-                  sx={{
-                    '& .MuiPaper-root': {
-                      background: 'rgba(10, 14, 23, 0.25) !important',
-                      backdropFilter: 'blur(8px) !important',
-                      border: '1px solid rgba(255, 255, 255, 0.1) !important',
-                      borderRadius: '20px !important',
-                      color: '#ecf0f1 !important',
-                    }
-                  }}
+                  sx={glassSx}
                 />
               </Grid>
             ))}
           </Grid>
 
-          <Box mt={2} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
+          {/* 📉 Graphique Volume d'appels */}
+          <Box mt={3} sx={glassSx}>
             <CallVolumeChart 
               callVolumes={callVolumes} 
               wsConnected={isConnected} 
               halfHourSlots={halfHourSlots} 
-              sx={{
-                '& .MuiPaper-root': {
-                  background: 'rgba(10, 14, 23, 0.25) !important',
-                  backdropFilter: 'blur(8px) !important',
-                  border: '1px solid rgba(255, 255, 255, 0.1) !important',
-                }
-              }}
             />
           </Box>
 
-          <Box mt={{ xs: 7, md: 9 }} pb={7} px={{ xs: 1.5, sm: 2.5, md: 3.5 }}>
+          {/* 📋 Tableaux et Graphiques SLA */}
+          <Box mt={4} pb={4} sx={{ width: '100%' }}>
             <Grid container spacing={4} direction="column">
               <Grid size={{ xs: 12 }}>
                 <AgentTable
@@ -1019,44 +996,50 @@ body.show-scrollbar ::-webkit-scrollbar-thumb {
                   isConnected={isConnected}
                   lastUpdate={lastUpdate}
                   sx={{
-                    '& .MuiPaper-root': {
-                      background: 'rgba(10, 14, 23, 0.25) !important',
-                      backdropFilter: 'blur(8px) !important',
-                      border: '1px solid rgba(255, 255, 255, 0.1) !important',
-                    },
+                    ...glassSx,
                     '& th': {
-                      color: '#ffd700 !important',
-                      fontWeight: 600,
+                      color: '#ffaa00 !important',
+                      fontWeight: 700,
+                      fontFamily: '"Montserrat", sans-serif',
+                      letterSpacing: '0.05em',
+                      borderBottom: '1px solid rgba(255, 170, 0, 0.3) !important',
+                      textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
                     },
                     '& td': {
-                      color: '#ecf0f1 !important',
-                      borderBottomColor: 'rgba(255, 255, 255, 0.1) !important',
+                      color: '#fff8e7 !important',
+                      borderBottomColor: 'rgba(255, 170, 0, 0.15) !important',
+                      fontFamily: '"Inter", sans-serif',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.8)',
+                    },
+                    '& tr:hover td': {
+                      background: 'rgba(255, 170, 0, 0.10) !important',
                     }
                   }}
                 />
               </Grid>
+              
               <Grid size={{ xs: 12 }}>
-                <Box position="relative">
+                <Box position="relative" sx={glassSx}>
                   <SLABarchart 
                     slaData={slaDataForChart} 
                     wsConnected={isConnected}
-                    sx={{
-                      '& .MuiPaper-root': {
-                        background: 'rgba(10, 14, 23, 0.25) !important',
-                        backdropFilter: 'blur(8px) !important',
-                        border: '1px solid rgba(255, 255, 255, 0.1) !important',
-                      }
-                    }}
                   />
+                  
                   {!audioUnlocked && (
-                    <Box sx={{ position: 'absolute', bottom: 16, right: 16, zIndex: 2 }}>
+                    <Box sx={{ position: 'absolute', bottom: 24, right: 24, zIndex: 20 }}>
                       <Button
                         variant="contained"
                         onClick={unlockAudio}
-                        className="btn-sun sunray-hover"
+                        className="btn-oktoberfest"
+                        startIcon={<span style={{ fontSize: '1.2em' }}>🍻</span>}
+                        sx={{ 
+                          boxShadow: '0 0 20px rgba(255, 170, 0, 0.3) !important',
+                          animation: 'pulse-glow-amber 2s infinite'
+                        }}
                       >
-                        ☀️ Activer l'ambiance sonore ☀️
+                        Activer l'Ambiance Bavaroise
                       </Button>
+                      <style>{`@keyframes pulse-glow-amber { 0%, 100% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.3); } 50% { box-shadow: 0 0 30px rgba(255, 170, 0, 0.6); } }`}</style>
                     </Box>
                   )}
                 </Box>
