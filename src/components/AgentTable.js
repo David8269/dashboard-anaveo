@@ -325,7 +325,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                         label={
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             {statusConfig.icon}
-                            {emp.status || 'en ligne'}
+                            {emp.status || 'Online'}
                           </Box>
                         }
                         size="small"
