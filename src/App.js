@@ -813,22 +813,21 @@ const App = () => {
         `}
       </style>
 
-      {/* 🍻 Fond d'écran OKTOBERFEST - SANS AUCUN OVERLAY NI FLOU */}
-      <Box
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundImage: `url('${process.env.PUBLIC_URL}/images/oktoberfest.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          zIndex: 0
-          // Le bloc ::before a été SUPPRIMÉ pour que l'image soit 100% visible et nette
-        }}
-      />
+      {/* 🍻 Fond d'écran OKTOBERFEST - SANS ZOOM, PLEIN ÉCRAN */}
+<Box
+  sx={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundImage: `url('${process.env.PUBLIC_URL}/images/oktoberfest.png')`,
+    backgroundSize: '100% 100%', // ✅ Changé de 'cover' à '100% 100%'
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    zIndex: 0
+  }}
+/>
 
       {/* ✨ Bulles de bière animées (Effervescence réaliste - 70 bulles) */}
       <Box id="bubbles-container">
