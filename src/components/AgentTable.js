@@ -41,7 +41,6 @@ const getAvatarSrc = (name = '') => {
     'julien': 'Julien Meyer.jpg',
     'malik': 'Malik Mounib.jpg',
     'marina': 'Marina Mignon.jpg',
-    'mathys': 'Mathys Accus.jpg',
     'nicolas': 'Nicolas Prele.jpg',
     'rana': 'Rana Al Kas Ellia.jpg',
     'romain': 'Romain Imperatori.jpg',
@@ -70,95 +69,92 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === 🍺 Style de base pour l'effet "Verre à bière ULTRA-TRANSPARENT" ===
+// ===  Style de base pour l'effet "Ruban de Verre" Octobre Rose ===
 const frostedGlassSx = {
   position: 'relative',
   overflow: 'hidden',
-  backgroundColor: 'rgba(10, 5, 0, 0.20)', // ULTRA-TRANSPARENT (20%)
-  backdropFilter: 'blur(4px)', // Flou minimal pour voir l'image de fond
-  WebkitBackdropFilter: 'blur(4px)',
+  backgroundColor: 'rgba(45, 10, 30, 0.60)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
   borderRadius: 4,
-  border: '1px solid rgba(255, 170, 0, 0.25)', // Bordure très subtile
-  borderTop: '2px solid rgba(255, 248, 231, 0.5)', // Mousse fine
+  border: '1px solid rgba(255, 77, 148, 0.3)',
+  borderTop: '3px solid #ff4d94', // Effet Ruban Rose
   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05)',
-  // Texture de condensation/givre discrète
-  backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px)',
-  backgroundSize: '15px 15px',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   '&:hover': {
-    backgroundColor: 'rgba(10, 5, 0, 0.30)', // Légèrement plus opaque au survol
-    borderColor: 'rgba(255, 248, 231, 0.5)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15)',
+    backgroundColor: 'rgba(74, 14, 46, 0.70)',
+    borderColor: 'rgba(255, 230, 240, 0.6)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 77, 148, 0.2)',
     transform: 'translateY(-2px)',
   }
 };
 
 export default function AgentTable({ employees = [], isLoading = false, isConnected = false, lastUpdate = null }) {
   
-  // === État de chargement – Thème Oktoberfest Ultra-Transparent ===
+  // === État de chargement – Thème Octobre Rose ===
   if (isLoading) {
     return (
       <Card sx={frostedGlassSx}>
         <CardContent>
           <Typography variant="overline" sx={{
-            fontFamily: '"Rye", serif',
-            color: '#fff8e7',
-            textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
-            fontSize: '1.3rem',
-            fontWeight: 400,
+            fontFamily: '"Dancing Script", cursive',
+            color: '#ff4d94',
+            textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
+            fontSize: '1.5rem',
+            fontWeight: 700,
             mb: 2,
           }}>
-            🍺 Équipe
+            🎀 Équipe
           </Typography>
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Chip label="Mise en percussion..." size="small" sx={{
+            <Chip label="Chargement en cours..." size="small" sx={{
               mb: 2,
-              background: 'rgba(255, 170, 0, 0.2)',
+              background: 'rgba(255, 77, 148, 0.2)',
               backdropFilter: 'blur(6px)',
-              color: '#fff8e7',
+              color: '#ffe6f0',
               fontFamily: '"Montserrat", sans-serif',
               fontWeight: 700,
-              animation: 'pulse-amber 2s infinite alternate',
-              border: '1px solid rgba(255, 248, 231, 0.5)',
+              animation: 'pulse-rose 2s infinite alternate',
+              border: '1px solid rgba(255, 230, 240, 0.5)',
             }} />
-            <Skeleton variant="rectangular" width="100%" height={400} sx={{ backgroundColor: 'rgba(255, 170, 0, 0.08)', borderRadius: 2 }} />
+            <Skeleton variant="rectangular" width="100%" height={400} sx={{ backgroundColor: 'rgba(255, 77, 148, 0.08)', borderRadius: 2 }} />
           </Box>
         </CardContent>
       </Card>
     );
   }
 
-  // === État vide – Thème Oktoberfest Ultra-Transparent ===
+  // === État vide – Thème Octobre Rose ===
   if (!employees || employees.length === 0) {
     return (
       <Card sx={frostedGlassSx}>
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography variant="overline" sx={{
-              fontFamily: '"Rye", serif',
-              color: '#fff8e7',
-              textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
-              fontSize: '1.3rem',
-              fontWeight: 400,
+              fontFamily: '"Dancing Script", cursive',
+              color: '#ff4d94',
+              textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
+              fontSize: '1.5rem',
+              fontWeight: 700,
             }}>
-              🍺 Équipe
+              🎀 Équipe
             </Typography>
             <Tooltip title={isConnected ? "Connecté au CDS" : "Déconnecté"}>
               <Box sx={{
                 width: 14,
                 height: 14,
                 borderRadius: '50%',
-                bgcolor: isConnected ? '#4ade80' : '#f87171',
-                animation: isConnected ? 'pulse-glow-amber 2s infinite' : 'none',
-                boxShadow: isConnected ? '0 0 12px rgba(74, 222, 128, 0.8)' : 'none',
-                border: '2px solid rgba(255, 248, 231, 0.5)',
+                bgcolor: isConnected ? '#6ee7b7' : '#fca5a5',
+                animation: isConnected ? 'pulse-glow-rose 2s infinite' : 'none',
+                boxShadow: isConnected ? '0 0 12px rgba(110, 231, 183, 0.8)' : 'none',
+                border: '2px solid rgba(255, 230, 240, 0.5)',
               }} />
             </Tooltip>
           </Box>
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="#fff8e7" sx={{ 
+            <Typography variant="body2" color="#ffe6f0" sx={{ 
               fontStyle: 'italic', 
-              textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+              textShadow: '0 2px 6px rgba(0,0,0,0.9)',
               fontFamily: '"Inter", sans-serif',
             }}>
                Aucun agent en service...
@@ -175,20 +171,20 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
     ), [employees]);
   
   const getMedalEmoji = (rank) => 
-    rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '🍺';
+    rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '🎀';
 
   return (
     <Card sx={frostedGlassSx}>
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="overline" sx={{
-            fontFamily: '"Rye", serif',
-            color: '#fff8e7',
-            textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
-            fontSize: '1.3rem',
-            fontWeight: 400,
+            fontFamily: '"Dancing Script", cursive',
+            color: '#ff4d94',
+            textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
+            fontSize: '1.5rem',
+            fontWeight: 700,
           }}>
-            🍺 Équipe
+            🎀 Équipe
           </Typography>
           <Box display="flex" alignItems="center" gap={1.5}>
             <Tooltip title={isConnected ? "Connecté au CDS" : "Déconnecté"}>
@@ -196,16 +192,16 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                 width: 14,
                 height: 14,
                 borderRadius: '50%',
-                bgcolor: isConnected ? '#4ade80' : '#f87171',
-                animation: isConnected ? 'pulse-glow-amber 2s infinite' : 'none',
-                boxShadow: isConnected ? '0 0 12px rgba(74, 222, 128, 0.8)' : 'none',
-                border: '2px solid rgba(255, 248, 231, 0.5)',
+                bgcolor: isConnected ? '#6ee7b7' : '#fca5a5',
+                animation: isConnected ? 'pulse-glow-rose 2s infinite' : 'none',
+                boxShadow: isConnected ? '0 0 12px rgba(110, 231, 183, 0.8)' : 'none',
+                border: '2px solid rgba(255, 230, 240, 0.5)',
               }} />
             </Tooltip>
             {lastUpdate && (
-              <Typography variant="caption" color="#d4c5a9" sx={{ 
+              <Typography variant="caption" color="#d4849c" sx={{ 
                 fontStyle: 'italic', 
-                textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.8)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.9)',
                 fontFamily: '"Inter", sans-serif',
               }}>
                 {`MàJ : ${lastUpdate.toLocaleTimeString()}`}
@@ -224,11 +220,11 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     scope="col"
                     sx={{
                       fontWeight: 700,
-                      color: '#ffaa00',
+                      color: '#ff4d94',
                       fontFamily: '"Montserrat", sans-serif',
                       fontSize: '0.85rem',
-                      borderBottom: '1px solid rgba(255, 170, 0, 0.3)',
-                      textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+                      borderBottom: '1px solid rgba(255, 77, 148, 0.3)',
+                      textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                       letterSpacing: '0.5px',
                     }}
                     align={i >= 3 ? 'right' : 'left'}
@@ -254,12 +250,12 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     hover
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 170, 0, 0.1)', // Plus transparent au survol
-                        boxShadow: 'inset 0 0 15px rgba(255, 170, 0, 0.15)',
+                        backgroundColor: 'rgba(255, 77, 148, 0.1)',
+                        boxShadow: 'inset 0 0 15px rgba(255, 77, 148, 0.15)',
                       },
                       transition: 'all 0.3s ease',
                       '&:not(:last-child)': {
-                        borderBottom: '1px solid rgba(255, 170, 0, 0.15)',
+                        borderBottom: '1px solid rgba(255, 77, 148, 0.15)',
                       },
                     }}
                   >
@@ -269,17 +265,17 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           <span
                             style={{
                               fontSize: '20px',
-                              filter: 'drop-shadow(0 0 8px rgba(255, 170, 0, 0.6))',
-                              animation: 'medal-glow-amber 2.5s infinite alternate',
+                              filter: 'drop-shadow(0 0 8px rgba(255, 77, 148, 0.6))',
+                              animation: 'medal-glow-rose 2.5s infinite alternate',
                             }}
                           >
                             {medal}
                           </span>
                         )}
                         <Typography sx={{ 
-                          color: '#fff8e7', 
+                          color: '#ffe6f0', 
                           fontWeight: 700, 
-                          textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                           fontFamily: '"Montserrat", sans-serif',
                         }}>
                           {index + 1}
@@ -295,25 +291,25 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                             width: 42,
                             height: 42,
                             mr: 1.5,
-                            border: '2px solid rgba(255, 170, 0, 0.5)',
+                            border: '2px solid rgba(255, 77, 148, 0.5)',
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
                             transition: 'all 0.3s',
                             objectFit: 'cover',
                             '&:hover': { 
                               transform: 'scale(1.15)',
-                              boxShadow: '0 4px 16px rgba(255, 170, 0, 0.6)',
-                              borderColor: 'rgba(255, 248, 231, 0.8)',
+                              boxShadow: '0 4px 16px rgba(255, 77, 148, 0.6)',
+                              borderColor: 'rgba(255, 230, 240, 0.8)',
                             },
-                            bgcolor: !avatarSrc ? 'rgba(255, 170, 0, 0.3)' : 'transparent',
-                            color: !avatarSrc ? '#fff8e7' : 'inherit',
+                            bgcolor: !avatarSrc ? 'rgba(255, 77, 148, 0.3)' : 'transparent',
+                            color: !avatarSrc ? '#ffe6f0' : 'inherit',
                           }}
                         >
                           {!avatarSrc && getInitials(emp.name)}
                         </Avatar>
                         <Typography sx={{ 
-                          color: '#fff8e7', 
+                          color: '#ffe6f0', 
                           fontWeight: 600, 
-                          textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                           fontFamily: '"Inter", sans-serif',
                         }}>
                           {emp.name || '-'}
@@ -333,23 +329,23 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           fontWeight: 600,
                           cursor: 'pointer',
                           transition: 'all 0.3s ease',
-                          backgroundColor: 'rgba(10, 5, 0, 0.3)', // Plus transparent
+                          backgroundColor: 'rgba(45, 10, 30, 0.4)',
                           backdropFilter: 'blur(4px)',
-                          color: '#fff8e7',
-                          border: '1px solid rgba(255, 170, 0, 0.3)',
+                          color: '#ffe6f0',
+                          border: '1px solid rgba(255, 77, 148, 0.3)',
                           '&:hover': {
                             transform: 'scale(1.1)',
-                            boxShadow: '0 0 12px rgba(255, 170, 0, 0.5)',
-                            backgroundColor: 'rgba(10, 5, 0, 0.5)',
+                            boxShadow: '0 0 12px rgba(255, 77, 148, 0.5)',
+                            backgroundColor: 'rgba(74, 14, 46, 0.5)',
                           },
                         }}
                       />
                     </TableCell>
                     <TableCell align="right">
                       <Typography sx={{ 
-                        color: '#fff8e7', 
+                        color: '#ffe6f0', 
                         fontWeight: 600, 
-                        textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+                        textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                         fontFamily: '"Inter", sans-serif',
                       }}>
                         {emp.inbound != null ? emp.inbound : '-'}
@@ -363,40 +359,40 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           sx={{
                             fontWeight: 700,
                             minWidth: 60,
-                            border: '1px solid rgba(255, 248, 231, 0.5)',
-                            backgroundColor: 'rgba(10, 5, 0, 0.3)', // Plus transparent
+                            border: '1px solid rgba(255, 230, 240, 0.5)',
+                            backgroundColor: 'rgba(45, 10, 30, 0.4)',
                             backdropFilter: 'blur(4px)',
-                            color: '#fff8e7',
+                            color: '#ffe6f0',
                             ...(inboundCritical
                               ? {
-                                  backgroundColor: 'rgba(248, 113, 113, 0.6)',
-                                  color: '#fff8e7',
+                                  backgroundColor: 'rgba(252, 165, 165, 0.6)',
+                                  color: '#ffe6f0',
                                   fontFamily: '"Montserrat", sans-serif',
-                                  animation: 'pulse-critical-amber 2s infinite alternate',
-                                  border: '1px solid rgba(255, 248, 231, 0.8)',
+                                  animation: 'pulse-critical-rose 2s infinite alternate',
+                                  border: '1px solid rgba(255, 230, 240, 0.8)',
                                 }
                               : getDurationColor(inboundSec) === 'warning'
                               ? { 
-                                  backgroundColor: 'rgba(251, 191, 36, 0.6)', 
-                                  color: '#1e140d',
-                                  border: '1px solid rgba(255, 248, 231, 0.5)',
+                                  backgroundColor: 'rgba(249, 168, 212, 0.6)', 
+                                  color: '#2d0a1e',
+                                  border: '1px solid rgba(255, 230, 240, 0.5)',
                                 }
                               : { 
-                                  backgroundColor: 'rgba(74, 222, 128, 0.6)', 
-                                  color: '#fff8e7',
-                                  border: '1px solid rgba(255, 248, 231, 0.5)',
+                                  backgroundColor: 'rgba(110, 231, 183, 0.6)', 
+                                  color: '#ffe6f0',
+                                  border: '1px solid rgba(255, 230, 240, 0.5)',
                                 }),
                           }}
                         />
                       ) : (
-                        <Typography sx={{ color: '#fff8e7', textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)' }}>-</Typography>
+                        <Typography sx={{ color: '#ffe6f0', textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>-</Typography>
                       )}
                     </TableCell>
                     <TableCell align="right">
                       <Typography sx={{ 
-                        color: '#fff8e7', 
+                        color: '#ffe6f0', 
                         fontWeight: 600, 
-                        textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+                        textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                         fontFamily: '"Inter", sans-serif',
                       }}>
                         {emp.outbound != null ? emp.outbound : '-'}
@@ -410,33 +406,33 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                           sx={{
                             fontWeight: 700,
                             minWidth: 60,
-                            border: '1px solid rgba(255, 248, 231, 0.5)',
-                            backgroundColor: 'rgba(10, 5, 0, 0.3)', // Plus transparent
+                            border: '1px solid rgba(255, 230, 240, 0.5)',
+                            backgroundColor: 'rgba(45, 10, 30, 0.4)',
                             backdropFilter: 'blur(4px)',
-                            color: '#fff8e7',
+                            color: '#ffe6f0',
                             ...(outboundCritical
                               ? {
-                                  backgroundColor: 'rgba(248, 113, 113, 0.6)',
-                                  color: '#fff8e7',
+                                  backgroundColor: 'rgba(252, 165, 165, 0.6)',
+                                  color: '#ffe6f0',
                                   fontFamily: '"Montserrat", sans-serif',
-                                  animation: 'pulse-critical-amber 2s infinite alternate',
-                                  border: '1px solid rgba(255, 248, 231, 0.8)',
+                                  animation: 'pulse-critical-rose 2s infinite alternate',
+                                  border: '1px solid rgba(255, 230, 240, 0.8)',
                                 }
                               : getDurationColor(outboundSec) === 'warning'
                               ? { 
-                                  backgroundColor: 'rgba(251, 191, 36, 0.6)', 
-                                  color: '#1e140d',
-                                  border: '1px solid rgba(255, 248, 231, 0.5)',
+                                  backgroundColor: 'rgba(249, 168, 212, 0.6)', 
+                                  color: '#2d0a1e',
+                                  border: '1px solid rgba(255, 230, 240, 0.5)',
                                 }
                               : { 
-                                  backgroundColor: 'rgba(74, 222, 128, 0.6)', 
-                                  color: '#fff8e7',
-                                  border: '1px solid rgba(255, 248, 231, 0.5)',
+                                  backgroundColor: 'rgba(110, 231, 183, 0.6)', 
+                                  color: '#ffe6f0',
+                                  border: '1px solid rgba(255, 230, 240, 0.5)',
                                 }),
                           }}
                         />
                       ) : (
-                        <Typography sx={{ color: '#fff8e7', textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)' }}>-</Typography>
+                        <Typography sx={{ color: '#ffe6f0', textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>-</Typography>
                       )}
                     </TableCell>
                   </TableRow>
@@ -448,21 +444,21 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
       </CardContent>
       
       <style>{`
-        @keyframes medal-glow-amber {
-          0% { filter: drop-shadow(0 0 4px rgba(255, 170, 0, 0.5)); }
-          100% { filter: drop-shadow(0 0 12px rgba(255, 170, 0, 0.8)) drop-shadow(0 0 18px rgba(255, 170, 0, 0.6)); }
+        @keyframes medal-glow-rose {
+          0% { filter: drop-shadow(0 0 4px rgba(255, 77, 148, 0.5)); }
+          100% { filter: drop-shadow(0 0 12px rgba(255, 77, 148, 0.8)) drop-shadow(0 0 18px rgba(255, 77, 148, 0.6)); }
         }
-        @keyframes pulse-glow-amber {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
-          50% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+        @keyframes pulse-glow-rose {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(110, 231, 183, 0.5); }
+          50% { box-shadow: 0 0 0 8px rgba(110, 231, 183, 0); }
         }
-        @keyframes pulse-amber {
-          0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 170, 0, 0.3); }
-          100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
+        @keyframes pulse-rose {
+          0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 77, 148, 0.3); }
+          100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 77, 148, 0.5); }
         }
-        @keyframes pulse-critical-amber {
-          0% { transform: scale(1); box-shadow: 0 0 8px rgba(248, 113, 113, 0.6); }
-          100% { transform: scale(1.04); box-shadow: 0 0 16px rgba(248, 113, 113, 0.9); }
+        @keyframes pulse-critical-rose {
+          0% { transform: scale(1); box-shadow: 0 0 8px rgba(252, 165, 165, 0.6); }
+          100% { transform: scale(1.04); box-shadow: 0 0 16px rgba(252, 165, 165, 0.9); }
         }
       `}</style>
     </Card>

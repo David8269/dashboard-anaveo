@@ -1,17 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, Typography } from '@mui/material';
 
-// === 🦉🍺 Icônes thème Oktoberfest ===
+// === 🦉🎀 Icônes thème Octobre Rose ===
 const getIconForTitle = (title) => {
   const lower = title.toLowerCase();
   if (lower.includes('agent')) return '🦉';
   if (lower.includes('call') || lower.includes('appel') || lower.includes('entrant')) return '📞';
-  if (lower.includes('abandon') || lower.includes('perdu') || lower.includes('missed')) return '🚨';
+  if (lower.includes('abandon') || lower.includes('perdu') || lower.includes('missed')) return '🚫';
   if (lower.includes('aht') || lower.includes('durée') || lower.includes('temps')) return '⏱️';
   if (lower.includes('total') || lower.includes('nombre')) return '📊';
   if (lower.includes('outbound') || lower.includes('sortant')) return '📤';
   if (lower.includes('rate') || lower.includes('taux')) return '📈';
-  return '🍺';
+  return '🎀';
 };
 
 export default function KPICard({ 
@@ -38,15 +38,15 @@ export default function KPICard({
 
   const isValueCritical = isCritical || valueColor === 'error';
   
-  // === 🦉🍺 Couleurs adaptées au thème Oktoberfest ===
+  // === 🦉🎀 Couleurs adaptées au thème Octobre Rose ===
   const getValueColor = () => {
-    if (isValueCritical) return '#f87171'; // Rouge clair (alerte)
+    if (isValueCritical) return '#fca5a5'; // Rouge rosé (alerte)
     switch (valueColor) {
-      case 'success': return '#4ade80';    // Vert clair (succès)
-      case 'warning': return '#fbbf24';    // Or ambré (attention)
-      case 'error':   return '#f87171';    // Rouge clair (erreur)
-      case 'info':    return '#ffaa00';    // Ambre (info)
-      default:        return '#fff8e7';    // Mousse (défaut)
+      case 'success': return '#6ee7b7';    // Vert doux (succès)
+      case 'warning': return '#f9a8d4';    // Rose pastel (attention)
+      case 'error':   return '#fca5a5';    // Rouge rosé (erreur)
+      case 'info':    return '#ff4d94';    // Rose vif (info)
+      default:        return '#ffe6f0';    // Rose poudré (défaut)
     }
   };
 
@@ -55,55 +55,55 @@ export default function KPICard({
   return (
     <>
       <style>{`
-        /* 🍺 Animation mise à jour KPI (Lueur ambrée ultra-transparente) */
-        @keyframes kpi-highlight-amber {
+        /* 🎀 Animation mise à jour KPI (Lueur rose ultra-transparente) */
+        @keyframes kpi-highlight-rose {
           0% { 
-            background-color: rgba(255, 170, 0, 0.25); 
-            box-shadow: 0 0 20px rgba(255, 170, 0, 0.4); 
+            background-color: rgba(255, 77, 148, 0.25); 
+            box-shadow: 0 0 20px rgba(255, 77, 148, 0.4); 
           }
           100% { 
-            background-color: rgba(10, 5, 0, 0.20); 
+            background-color: rgba(45, 10, 30, 0.60); 
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05); 
           }
         }
 
-        /* 🔴 Animation critique – Lueur rouge ambrée */
-        @keyframes pulse-critical-amber {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.6); }
-          50% { box-shadow: 0 0 0 12px rgba(248, 113, 113, 0); }
+        /* 🔴 Animation critique – Lueur rose vif */
+        @keyframes pulse-critical-rose {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(252, 165, 165, 0.6); }
+          50% { box-shadow: 0 0 0 12px rgba(252, 165, 165, 0); }
         }
 
-        /* 🍻 Secousse subtile pour alerte */
+        /* 🎀 Secousse subtile pour alerte */
         @keyframes shake-critical {
           0%, 100% { transform: translateX(0); }
           10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
           20%, 40%, 60%, 80% { transform: translateX(2px); }
         }
 
-        /* ✨ Scintillement ambré */
-        @keyframes twinkle-amber {
+        /* ✨ Scintillement rose */
+        @keyframes twinkle-rose {
           0%, 100% { opacity: 1; filter: brightness(1); }
           25% { opacity: 0.95; filter: brightness(1.15); }
           50% { opacity: 1; filter: brightness(0.9); }
           75% { opacity: 0.98; filter: brightness(1.08); }
         }
 
-        /* 🌫️ Lueur ambiante flottante (Bois/Bière) */
-        @keyframes amber-drift-kpi {
+        /* 🌫️ Lueur ambiante flottante (Rose/Or rose) */
+        @keyframes rose-drift-kpi {
           0% { transform: translateX(0) translateY(0); opacity: 0.5; }
           50% { transform: translateX(-5%) translateY(-3%); opacity: 0.75; }
           100% { transform: translateX(0) translateY(0); opacity: 0.5; }
         }
 
-        /* 🍺 Effet mousse au survol */
-        .kpi-foam-ripple::before {
+        /* 🎀 Effet ruban/ondulation au survol */
+        .kpi-ribbon-ripple::before {
           content: '';
           position: absolute;
           top: -50%;
           left: -50%;
           width: 200%;
           height: 200%;
-          background: radial-gradient(circle, rgba(255, 248, 231, 0.15) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(255, 77, 148, 0.15) 0%, transparent 70%);
           opacity: 0;
           transform: scale(0.3);
           transition: all 0.4s ease;
@@ -111,57 +111,54 @@ export default function KPICard({
           border-radius: 50%;
           z-index: 2;
         }
-        .kpi-foam-ripple:hover::before {
+        .kpi-ribbon-ripple:hover::before {
           opacity: 1;
           transform: scale(1);
-          animation: foam-ripple-anim 0.6s ease-out;
+          animation: ribbon-ripple-anim 0.6s ease-out;
         }
-        @keyframes foam-ripple-anim {
+        @keyframes ribbon-ripple-anim {
           0% { transform: scale(0.3); opacity: 0.8; }
           100% { transform: scale(1.5); opacity: 0; }
         }
       `}</style>
 
       <Card
-        className="kpi-foam-ripple"
+        className="kpi-ribbon-ripple"
         sx={{
-          // === Glassmorphism "Verre à bière ULTRA-TRANSPARENT" ===
-          backgroundColor: 'rgba(10, 5, 0, 0.20)', // TRANSPARENCE EXTRÊME (20%)
-          backdropFilter: 'blur(4px)', // Flou minimal pour voir l'image de fond
-          WebkitBackdropFilter: 'blur(4px)',
+          // === Glassmorphism "Ruban de Verre" ===
+          backgroundColor: 'rgba(45, 10, 30, 0.60)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           height: `${height}px`,
           borderRadius: 4,
-          border: `1px solid ${isValueCritical ? 'rgba(248, 113, 113, 0.4)' : 'rgba(255, 170, 0, 0.25)'}`,
-          borderTop: `2px solid rgba(255, 248, 231, 0.5)`, // Mousse fine
+          border: `1px solid ${isValueCritical ? 'rgba(252, 165, 165, 0.4)' : 'rgba(255, 77, 148, 0.3)'}`,
+          borderTop: `3px solid #ff4d94`, // Effet Ruban Rose
           boxShadow: isValueCritical 
-            ? '0 4px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(248, 113, 113, 0.2)' 
+            ? '0 4px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(252, 165, 165, 0.2)' 
             : '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05)',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          // Texture givre/condensation discrète
-          backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px)',
-          backgroundSize: '15px 15px',
           ...(animate && {
-            animation: `kpi-highlight-amber 0.8s ease-out`,
+            animation: `kpi-highlight-rose 0.8s ease-out`,
           }),
           ...(isValueCritical && {
-            animation: 'shake-critical 2.5s infinite, pulse-critical-amber 2s infinite',
+            animation: 'shake-critical 2.5s infinite, pulse-critical-rose 2s infinite',
             '&:hover': {
-              animation: 'pulse-critical-amber 2s infinite',
+              animation: 'pulse-critical-rose 2s infinite',
             },
           }),
           '&:hover': {
             transform: 'translateY(-4px)',
-            backgroundColor: 'rgba(10, 5, 0, 0.30)', // Légèrement plus opaque au survol
+            backgroundColor: 'rgba(74, 14, 46, 0.70)',
             borderColor: isValueCritical
-              ? 'rgba(248, 113, 113, 0.6)'
-              : 'rgba(255, 248, 231, 0.5)',
+              ? 'rgba(252, 165, 165, 0.6)'
+              : 'rgba(255, 230, 240, 0.6)',
             boxShadow: isValueCritical
-              ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(248, 113, 113, 0.3)'
-              : '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15)',
+              ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(252, 165, 165, 0.3)'
+              : '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 77, 148, 0.2)',
           },
           position: 'relative',
           overflow: 'hidden',
-          // === Lueur ambiante ambrée ===
+          // === Lueur ambiante rose ===
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -170,8 +167,8 @@ export default function KPICard({
             right: 0,
             bottom: 0,
             background: isValueCritical
-              ? 'radial-gradient(circle at 50% 0%, rgba(248, 113, 113, 0.1) 0%, transparent 70%)'
-              : 'radial-gradient(circle at 50% 0%, rgba(255, 170, 0, 0.08) 0%, transparent 70%)',
+              ? 'radial-gradient(circle at 50% 0%, rgba(252, 165, 165, 0.1) 0%, transparent 70%)'
+              : 'radial-gradient(circle at 50% 0%, rgba(255, 77, 148, 0.08) 0%, transparent 70%)',
             pointerEvents: 'none',
             zIndex: 0,
           },
@@ -183,11 +180,11 @@ export default function KPICard({
             width: '180%',
             height: '80%',
             background: isValueCritical
-              ? 'radial-gradient(circle at 60% 40%, rgba(248, 113, 113, 0.06), transparent 75%)'
-              : 'radial-gradient(circle at 40% 60%, rgba(255, 221, 136, 0.05), transparent 80%)',
+              ? 'radial-gradient(circle at 60% 40%, rgba(252, 165, 165, 0.06), transparent 75%)'
+              : 'radial-gradient(circle at 40% 60%, rgba(255, 153, 200, 0.05), transparent 80%)',
             pointerEvents: 'none',
             zIndex: 0,
-            animation: 'amber-drift-kpi 18s linear infinite',
+            animation: 'rose-drift-kpi 18s linear infinite',
           },
         }}
       >
@@ -207,12 +204,11 @@ export default function KPICard({
           <Typography
             variant="overline"
             sx={{
-              fontWeight: 400,
-              color: '#fff8e7',
-              // Ombre portée renforcée pour lisibilité sur fond transparent
-              textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
-              fontFamily: '"Rye", serif',
-              fontSize: '1.1rem',
+              fontWeight: 700,
+              color: '#ffe6f0',
+              textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
+              fontFamily: '"Dancing Script", cursive', // Calligraphie élégante
+              fontSize: '1.2rem',
               display: 'flex',
               alignItems: 'center',
               gap: 0.5,
@@ -220,9 +216,9 @@ export default function KPICard({
               lineHeight: 1.3,
               letterSpacing: '0.5px',
               ...(isValueCritical && {
-                animation: 'twinkle-amber 3s infinite alternate',
-                color: '#f87171',
-                textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(248, 113, 113, 0.6)',
+                animation: 'twinkle-rose 3s infinite alternate',
+                color: '#fca5a5',
+                textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(252, 165, 165, 0.6)',
               }),
             }}
           >
@@ -233,7 +229,7 @@ export default function KPICard({
             <Typography 
               variant="caption" 
               sx={{ 
-                color: '#d4c5a9',
+                color: '#d4849c', // Or rose
                 display: 'block', 
                 mb: 1,
                 fontSize: '0.85rem',
@@ -241,7 +237,7 @@ export default function KPICard({
                 textAlign: 'center',
                 lineHeight: 1.3,
                 fontFamily: '"Inter", sans-serif',
-                textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.8)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.9)',
               }}
             >
               {subtitle}
@@ -263,14 +259,14 @@ export default function KPICard({
               display: 'flex',
               alignItems: 'flex-end',
               gap: 0.5,
-              textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)', // Ombre renforcée
+              textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
               ...(animate && {
                 transform: 'scale(1.12)',
                 transition: 'transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1)',
               }),
               ...(isValueCritical && {
-                textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8), 0 0 15px rgba(248, 113, 113, 0.6)',
-                animation: 'twinkle-amber 2.5s infinite alternate',
+                textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8), 0 0 15px rgba(252, 165, 165, 0.6)',
+                animation: 'twinkle-rose 2.5s infinite alternate',
               }),
             }}
             aria-live="polite"
@@ -281,12 +277,12 @@ export default function KPICard({
                 component="span"
                 variant="subtitle1"
                 sx={{
-                  color: '#d4c5a9',
+                  color: '#d4849c',
                   fontWeight: 500,
                   fontSize: '1rem',
                   fontFamily: '"Inter", sans-serif',
                   ml: 0.5,
-                  textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.8)',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.9)',
                 }}
               >
                 {unit}

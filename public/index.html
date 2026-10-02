@@ -2,49 +2,48 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="./favicon-sun.ico" />
+  <link rel="icon" href="./favicon-rose.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Interface Oktoberfest Edition. Suivi en temps réel des opérations." />
-  <meta name="theme-color" content="#1a120b" />
-  <title>🍺OKTOBERFEST🍺</title>
+  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Interface Octobre Rose Edition. Ensemble contre le cancer du sein." />
+  <meta name="theme-color" content="#c2185b" />
+  <title>🎀 OCTOBRE ROSE 🎀 | Service Center ANAVEO</title>
 
-  <!-- 🦉🍺 Polices : Rye (Style Brasserie Bavaroise) + Inter/Montserrat (Pro & Data) -->
+  <!-- 🦉🎀 Polices : Dancing Script (Calligraphie élégante) + Inter/Montserrat (Pro & Data) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;700;800&family=Rye&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
 
   <style>
     /* =========================================
-       VARIABLES THÈME OKTOBERFEST PRO
+       VARIABLES THÈME OCTOBRE ROSE PRO
        ========================================= */
     :root {
-      /* Fonds : Nuit chaude sous la tente & Bois sombre */
-      --bg-primary: #0f0a06;
-      --bg-secondary: #1e140d;
-      --bg-tertiary: #2c1e12;
+      /* Fonds : Nuit douce et profonde, nuances de prune et de rose sombre */
+      --bg-primary: #1a0510;
+      --bg-secondary: #2d0a1e;
+      --bg-tertiary: #4a0e2e;
       
-      /* Accents : Bière Ambrée, Mousse & Bavarois */
-      --accent-amber: #ffaa00;
-      --accent-amber-dim: rgba(255, 170, 0, 0.15);
-      --accent-foam: #fff8e7;
-      --accent-bavarian-blue: #0044cc;
-      --accent-bavarian-dim: rgba(0, 68, 204, 0.15);
-      --accent-glow: 0 0 20px rgba(255, 170, 0, 0.3), 0 0 40px rgba(255, 248, 231, 0.1);
+      /* Accents : Rose Vif (Ruban), Rose Poudré et Or Rose */
+      --accent-pink: #ff4d94;
+      --accent-pink-dim: rgba(255, 77, 148, 0.15);
+      --accent-soft: #ffe6f0;
+      --accent-rose-gold: #d4849c;
+      --accent-glow: 0 0 20px rgba(255, 77, 148, 0.4), 0 0 40px rgba(255, 230, 240, 0.1);
       
       /* Texte */
-      --text-primary: #fff8e7;
-      --text-secondary: #d4c5a9;
-      --text-muted: #8a7b6b;
+      --text-primary: #fff0f5;
+      --text-secondary: #f8c8dc;
+      --text-muted: #b37a8a;
       
-      /* États */
-      --state-success: #4ade80;
-      --state-warning: #fbbf24;
-      --state-error: #f87171;
+      /* États (adaptés en nuances harmonieuses) */
+      --state-success: #6ee7b7;
+      --state-warning: #f9a8d4;
+      --state-error: #fca5a5;
       
-      /* Glassmorphism "Maßkrug" (Chope givrée) */
-      --glass-bg: rgba(20, 15, 10, 0.65);
-      --glass-border: rgba(255, 170, 0, 0.15);
-      --glass-border-hover: rgba(255, 170, 0, 0.5);
+      /* Glassmorphism "Ruban de Verre" */
+      --glass-bg: rgba(45, 10, 30, 0.65);
+      --glass-border: rgba(255, 77, 148, 0.2);
+      --glass-border-hover: rgba(255, 77, 148, 0.6);
       --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     }
 
@@ -68,48 +67,45 @@
     }
 
     /* =========================================
-       ARRIÈRE-PLAN ATMOSPHÈRE BIETFESTZELT
+       ARRIÈRE-PLAN ATMOSPHÈRE BOKEH & LUMIÈRE
        ========================================= */
     body {
       position: relative;
       background-image: 
-        /* Motif subtil de losanges bavarois (très discret) */
-        repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 10px, transparent 10px, transparent 20px),
-        repeating-linear-gradient(-45deg, rgba(0, 68, 204, 0.02) 0px, rgba(0, 68, 204, 0.02) 10px, transparent 10px, transparent 20px),
-        /* Halos de lumière chaude (Guirlandes / Ambiance) */
-        radial-gradient(circle at 15% 20%, rgba(255, 170, 0, 0.12) 0%, transparent 45%),
-        radial-gradient(circle at 85% 80%, rgba(255, 200, 50, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, rgba(44, 30, 18, 0.8) 0%, var(--bg-primary) 100%);
-      background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%, 100% 100%;
+        /* Halos de lumière douce (Effet Bokeh de l'image) */
+        radial-gradient(circle at 15% 20%, rgba(255, 77, 148, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 85% 80%, rgba(212, 132, 156, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(74, 14, 46, 0.6) 0%, var(--bg-primary) 100%);
+      background-size: 100% 100%, 100% 100%, 100% 100%;
       background-attachment: fixed;
     }
 
     /* =========================================
-       BULLES DE MOUSSE (Remplace les Data Nodes)
+       PARTICULES DE LUMIÈRE (Effet Bokeh animé)
        ========================================= */
-    .foam-bubble {
+    .bokeh-particle {
       position: fixed;
       bottom: -20px;
       width: 6px;
       height: 6px;
-      background: radial-gradient(circle at 30% 30%, var(--accent-foam), var(--accent-amber));
+      background: radial-gradient(circle at 30% 30%, var(--accent-soft), var(--accent-pink));
       border-radius: 50%;
       opacity: 0;
       pointer-events: none;
       z-index: 2;
-      box-shadow: 0 0 6px rgba(255, 170, 0, 0.4);
-      animation: rise-bubble linear infinite;
+      box-shadow: 0 0 8px rgba(255, 77, 148, 0.6);
+      animation: float-particle linear infinite;
     }
 
-    @keyframes rise-bubble {
+    @keyframes float-particle {
       0% { transform: translateY(0) scale(0.5); opacity: 0; }
-      10% { opacity: 0.7; }
-      50% { transform: translateY(-50vh) scale(1.2) translateX(5px); opacity: 0.5; }
-      100% { transform: translateY(-110vh) scale(0.8) translateX(-5px); opacity: 0; }
+      10% { opacity: 0.6; }
+      50% { transform: translateY(-50vh) scale(1.5) translateX(10px); opacity: 0.4; }
+      100% { transform: translateY(-110vh) scale(0.8) translateX(-10px); opacity: 0; }
     }
 
     /* =========================================
-       ÉCRAN DE CHARGEMENT "MISE EN PERCUSSION"
+       ÉCRAN DE CHARGEMENT "MOBILISATION"
        ========================================= */
     #loading-screen {
       position: fixed;
@@ -134,10 +130,10 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
       border-radius: 24px;
-      box-shadow: var(--glass-shadow), 0 0 60px rgba(255, 170, 0, 0.1);
+      box-shadow: var(--glass-shadow), 0 0 60px rgba(255, 77, 148, 0.15);
       position: relative;
       overflow: hidden;
-      min-width: 340px;
+      min-width: 360px;
     }
 
     /* Reflet de verre sur le loader */
@@ -148,7 +144,7 @@
       left: -100%;
       width: 50%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
       animation: glass-shine 3s ease-in-out infinite;
     }
 
@@ -162,23 +158,32 @@
       font-size: 4.5rem;
       margin-bottom: 1rem;
       display: inline-block;
-      filter: drop-shadow(0 0 15px rgba(255, 170, 0, 0.5));
-      animation: owl-toast 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 15px rgba(255, 77, 148, 0.6));
+      animation: owl-breathe 3s ease-in-out infinite;
     }
 
-    @keyframes owl-toast {
-      0%, 100% { transform: scale(1) rotate(0deg); }
-      25% { transform: scale(1.05) rotate(-3deg); }
-      75% { transform: scale(1.05) rotate(3deg); }
+    @keyframes owl-breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
     .loader-title {
-      font-family: 'Rye', serif;
-      font-size: 1.5rem;
-      color: var(--accent-amber);
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.2rem;
+      color: var(--accent-pink);
       letter-spacing: 1px;
-      margin-bottom: 0.5rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      margin-bottom: 0.25rem;
+      text-shadow: 0 2px 8px rgba(255, 77, 148, 0.3);
+    }
+
+    .loader-slogan {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      color: var(--accent-rose-gold);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
     }
 
     .loader-subtitle {
@@ -189,41 +194,41 @@
       font-weight: 300;
     }
 
-    /* Barre de progression style "Chope qui se remplit" */
+    /* Barre de progression style "Ruban qui se déploie" */
     .progress-bar {
       width: 100%;
-      height: 12px;
+      height: 10px;
       background: rgba(0, 0, 0, 0.4);
-      border-radius: 6px;
+      border-radius: 5px;
       overflow: hidden;
       position: relative;
-      border: 1px solid rgba(255, 170, 0, 0.2);
+      border: 1px solid rgba(255, 77, 148, 0.3);
     }
 
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(to top, #cc8800, var(--accent-amber));
-      border-radius: 6px;
-      box-shadow: 0 0 15px var(--accent-amber);
-      animation: pour-beer 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      background: linear-gradient(90deg, #c2185b, var(--accent-pink));
+      border-radius: 5px;
+      box-shadow: 0 0 15px var(--accent-pink);
+      animation: fill-ribbon 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       position: relative;
     }
 
-    /* Mousse au sommet de la barre de progression */
+    /* Éclat lumineux au sommet de la barre */
     .progress-fill::after {
       content: '';
       position: absolute;
-      top: -2px;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: var(--accent-foam);
-      border-radius: 4px;
-      box-shadow: 0 0 8px var(--accent-foam);
+      top: 0;
+      right: 0;
+      width: 20px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.6);
+      filter: blur(4px);
+      border-radius: 50%;
     }
 
-    @keyframes pour-beer {
+    @keyframes fill-ribbon {
       0% { width: 0%; }
       60% { width: 85%; }
       80% { width: 92%; }
@@ -231,14 +236,14 @@
     }
 
     /* =========================================
-       COMPOSANTS GLASSMORPHISM "MAßKRUG"
+       COMPOSANTS GLASSMORPHISM "RUBAN DE VERRE"
        ========================================= */
     .glass-panel {
       background: var(--glass-bg);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--glass-border);
-      border-top: 3px solid rgba(255, 248, 231, 0.6); /* Effet mousse sur le bord supérieur */
+      border-top: 3px solid var(--accent-pink); /* Effet ruban sur le bord supérieur */
       border-radius: 16px;
       box-shadow: var(--glass-shadow);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -248,7 +253,7 @@
 
     .glass-panel:hover {
       border-color: var(--glass-border-hover);
-      box-shadow: var(--glass-shadow), 0 0 40px rgba(255, 170, 0, 0.15);
+      box-shadow: var(--glass-shadow), 0 0 40px rgba(255, 77, 148, 0.2);
       transform: translateY(-4px);
     }
 
@@ -260,7 +265,7 @@
       left: -100%;
       width: 50%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
       transition: left 0.6s ease;
     }
     .glass-panel:hover::after {
@@ -276,22 +281,22 @@
       font-weight: 700;
     }
 
-    .font-bavarian { font-family: 'Rye', serif; }
+    .font-calligraphy { font-family: 'Dancing Script', cursive; }
     .font-tech { font-family: 'Inter', sans-serif; }
     
-    .text-amber { color: var(--accent-amber); }
-    .text-foam { color: var(--accent-foam); }
-    .text-bavarian { color: #4d88ff; }
+    .text-rose { color: var(--accent-pink); }
+    .text-soft { color: var(--accent-soft); }
+    .text-gold { color: var(--accent-rose-gold); }
     .text-muted { color: var(--text-muted); }
     
     .text-glow {
-      text-shadow: 0 0 15px rgba(255, 170, 0, 0.4);
+      text-shadow: 0 0 15px rgba(255, 77, 148, 0.5);
     }
 
-    .btn-oktoberfest {
-      background: linear-gradient(135deg, rgba(255, 170, 0, 0.15), rgba(255, 248, 231, 0.05));
-      color: var(--accent-amber);
-      border: 1px solid rgba(255, 170, 0, 0.4);
+    .btn-octobre-rose {
+      background: linear-gradient(135deg, rgba(255, 77, 148, 0.15), rgba(255, 230, 240, 0.05));
+      color: var(--accent-pink);
+      border: 1px solid rgba(255, 77, 148, 0.4);
       padding: 0.75rem 1.5rem;
       border-radius: 8px;
       font-family: 'Montserrat', sans-serif;
@@ -305,12 +310,12 @@
       text-transform: uppercase;
     }
 
-    .btn-oktoberfest:hover {
-      background: linear-gradient(135deg, rgba(255, 170, 0, 0.3), rgba(255, 248, 231, 0.1));
-      border-color: var(--accent-foam);
-      box-shadow: 0 0 25px rgba(255, 170, 0, 0.3);
+    .btn-octobre-rose:hover {
+      background: linear-gradient(135deg, rgba(255, 77, 148, 0.3), rgba(255, 230, 240, 0.1));
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 25px rgba(255, 77, 148, 0.4);
       transform: translateY(-2px);
-      color: var(--accent-foam);
+      color: var(--accent-soft);
     }
 
     /* =========================================
@@ -336,20 +341,21 @@
       border: 2px solid var(--bg-primary);
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--accent-amber);
+      background: var(--accent-pink);
     }
   </style>
 </head>
 <body>
-  <!-- 🍺 Conteneur des bulles de mousse (généré par JS) -->
-  <div id="bubbles-container"></div>
+  <!-- 🎀 Conteneur des particules de lumière (généré par JS) -->
+  <div id="particles-container"></div>
 
-  <!-- ⚡ Écran de chargement "Brasserie Analytique" -->
+  <!-- ⚡ Écran de chargement "Mobilisation Octobre Rose" -->
   <div id="loading-screen">
     <div class="loader-container">
-      <div class="owl-icon">🦉🍺</div>
-      <div class="loader-title">BRASSERIE ANALYTIQUE</div>
-      <div class="loader-subtitle">Mise en percussion des fûts de données ANAVEO...</div>
+      <div class="owl-icon">🦉🎀</div>
+      <div class="loader-title">Octobre Rose</div>
+      <div class="loader-slogan">Ensemble contre le cancer du sein</div>
+      <div class="loader-subtitle">Chargement de l'interface analytique ANAVEO...</div>
       <div class="progress-bar">
         <div class="progress-fill"></div>
       </div>
@@ -370,34 +376,34 @@
           loader.style.visibility = 'hidden';
           setTimeout(() => loader.remove(), 800);
         }
-      }, 2200); // Temps calé pour apprécier l'animation de "remplissage"
+      }, 2200); // Temps calé pour apprécier l'animation de chargement
     });
 
-    // 2. Génération optimisée des "Bulles de Mousse" (Remplace les Data Nodes)
+    // 2. Génération optimisée des "Particules de Lumière" (Effet Bokeh)
     document.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('bubbles-container');
-      const bubbleCount = 50; // Nombre de bulles pour un effet pétillant
+      const container = document.getElementById('particles-container');
+      const particleCount = 40; // Nombre de particules pour un effet élégant et non surchargé
 
-      for (let i = 0; i < bubbleCount; i++) {
-        const bubble = document.createElement('div');
-        bubble.className = 'foam-bubble';
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'bokeh-particle';
         
-        // Position et timing aléatoires pour un effet de carbonatation naturel
-        bubble.style.left = `${Math.random() * 100}%`;
-        bubble.style.animationDelay = `${Math.random() * 6}s`;
-        bubble.style.animationDuration = `${5 + Math.random() * 7}s`;
+        // Position et timing aléatoires pour un effet de profondeur naturel
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 8}s`;
+        particle.style.animationDuration = `${6 + Math.random() * 8}s`;
         
-        // Variation subtile de taille et de couleur (Mousse ou Ambré)
-        const size = 4 + Math.random() * 6;
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
+        // Variation subtile de taille et d'intensité lumineuse
+        const size = 4 + Math.random() * 8;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
         
-        if (Math.random() > 0.6) {
-          bubble.style.background = 'radial-gradient(circle at 30% 30%, #ffffff, #ffdd88)';
-          bubble.style.boxShadow = '0 0 8px rgba(255, 255, 255, 0.6)';
+        if (Math.random() > 0.7) {
+          particle.style.background = 'radial-gradient(circle at 30% 30%, #ffffff, #ff99c8)';
+          particle.style.boxShadow = '0 0 12px rgba(255, 153, 200, 0.8)';
         }
         
-        container.appendChild(bubble);
+        container.appendChild(particle);
       }
     });
   </script>

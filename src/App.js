@@ -68,9 +68,9 @@ const getLocalDateStr = (date) => {
 
 const generateHalfHourSlots = () => {
   const slots = [];
-  for (let h = 8; h <= 19; h++) {  // Changé de 18 à 19
+  for (let h = 8; h <= 19; h++) {
     slots.push(`${h.toString().padStart(2, '0')}:30`);
-    if (h < 19) slots.push(`${(h + 1).toString().padStart(2, '0')}:00`);  // Changé de 18 à 19
+    if (h < 19) slots.push(`${(h + 1).toString().padStart(2, '0')}:00`);
   }
   return slots;
 };
@@ -91,10 +91,10 @@ const mmssToSeconds = (mmss) => {
 };
 
 // ============================================================================
-// === COMPOSANTS UI ENHANCED OKTOBERFEST ===
+// === COMPOSANTS UI ENHANCED OCTOBRE ROSE ===
 // ============================================================================
 
-// 🍺 Clock – Version Verre à bière ULTRA-TRANSPARENT
+// 🎀 Clock – Version Élégante & Lumineuse
 function Clock() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -109,39 +109,35 @@ function Clock() {
     <Paper
       elevation={0}
       sx={{
-        fontFamily: '"Rye", serif',
-        fontWeight: 400,
+        fontFamily: '"Montserrat", sans-serif',
+        fontWeight: 600,
         fontSize: { xs: '1.5rem', sm: '2rem', md: '2.2rem' },
-        color: '#fff8e7',
-        // Ombre portée renforcée pour lisibilité sur fond transparent
-        textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
-        background: 'rgba(10, 5, 0, 0.20)', // ULTRA-TRANSPARENT (20%)
-        backdropFilter: 'blur(4px)', // Flou minimal
-        WebkitBackdropFilter: 'blur(4px)',
+        color: '#ffe6f0',
+        textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
+        background: 'rgba(45, 10, 30, 0.60)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         padding: { xs: '0.5rem 1.2rem', md: '0.8rem 1.8rem' },
         borderRadius: '16px',
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.8rem',
-        border: '1px solid rgba(255, 170, 0, 0.25)',
-        borderTop: '2px solid rgba(255, 248, 231, 0.5)', // Mousse fine
+        border: '1px solid rgba(255, 77, 148, 0.3)',
+        borderTop: '3px solid #ff4d94', // Effet Ruban
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        // Texture givre/condensation discrète
-        backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px)',
-        backgroundSize: '15px 15px',
         '&:hover': {
-          background: 'rgba(10, 5, 0, 0.30)',
-          borderColor: 'rgba(255, 248, 231, 0.5)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15)',
+          background: 'rgba(74, 14, 46, 0.70)',
+          borderColor: 'rgba(255, 230, 240, 0.6)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 77, 148, 0.2)',
           transform: 'translateY(-2px)',
         }
       }}
       role="status"
       aria-live="polite"
     >
-      <span style={{ fontSize: '0.8em', filter: 'drop-shadow(0 0 5px rgba(255,170,0,0.8))' }}>🍺</span>
-      {hours}:{minutes}:<span style={{ color: '#ffaa00', fontFamily: '"Montserrat", sans-serif', fontWeight: 700 }}>{seconds}</span>
+      <span style={{ fontSize: '0.9em', filter: 'drop-shadow(0 0 5px rgba(255,77,148,0.8))' }}>🎀</span>
+      {hours}:{minutes}:<span style={{ color: '#ff4d94', fontWeight: 700 }}>{seconds}</span>
     </Paper>
   );
 }
@@ -696,24 +692,21 @@ const App = () => {
     prevEmployeesRef.current = [...employees];
   }, [employees, audioUnlocked, kpi]);
 
-  // === STYLE INJECTOR (Thème OKTOBERFEST ULTRA-TRANSPARENT) ===
+  // === STYLE INJECTOR (Thème OCTOBRE ROSE) ===
   const glassSx = {
     '& .MuiPaper-root': {
-      background: 'rgba(10, 5, 0, 0.20) !important', // ULTRA-TRANSPARENT (20%)
-      backdropFilter: 'blur(4px) !important', // Flou minimal
-      WebkitBackdropFilter: 'blur(4px) !important',
-      border: '1px solid rgba(255, 170, 0, 0.25) !important',
-      borderTop: '2px solid rgba(255, 248, 231, 0.5) !important', // Mousse fine
+      background: 'rgba(45, 10, 30, 0.60) !important',
+      backdropFilter: 'blur(12px) !important',
+      WebkitBackdropFilter: 'blur(12px) !important',
+      border: '1px solid rgba(255, 77, 148, 0.3) !important',
+      borderTop: '3px solid #ff4d94 !important', // Effet Ruban
       borderRadius: '16px !important',
       boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05) !important',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important',
-      // Texture givre/condensation discrète
-      backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px) !important',
-      backgroundSize: '15px 15px !important',
       '&:hover': {
-        background: 'rgba(10, 5, 0, 0.30) !important',
-        borderColor: 'rgba(255, 248, 231, 0.5) !important',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15) !important',
+        background: 'rgba(74, 14, 46, 0.70) !important',
+        borderColor: 'rgba(255, 230, 240, 0.6) !important',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 77, 148, 0.2) !important',
         transform: 'translateY(-2px)',
       }
     }
@@ -722,82 +715,76 @@ const App = () => {
   return (
     <>
       <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;700;800&family=Rye&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;700;800&display=swap"
         rel="stylesheet"
       />
       <style>
         {`
-        /* === VARIABLES OKTOBERFEST === */
+        /* === VARIABLES OCTOBRE ROSE === */
         :root {
-          --okto-amber: #ffaa00;
-          --okto-foam: #fff8e7;
-          --okto-wood: #2c1e12;
-          --okto-bavarian: #0044cc;
+          --rose-primary: #ff4d94;
+          --rose-soft: #ffe6f0;
+          --rose-deep: #2d0a1e;
+          --rose-gold: #d4849c;
         }
 
-        /* === BULLES DE BIÈRE (Effervescence réaliste) === */
-        .beer-bubble {
+        /* === PARTICULES DE LUMIÈRE (Effet Bokeh élégant) === */
+        .bokeh-particle {
           position: fixed;
           bottom: -20px;
-          background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 215, 0, 0.75));
+          background: radial-gradient(circle at 30% 30%, rgba(255, 230, 240, 0.9), rgba(255, 77, 148, 0.6));
           border-radius: 50%;
           opacity: 0;
           pointer-events: none;
           z-index: 1;
-          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6), inset 0 0 2px rgba(255, 255, 255, 0.4);
-          animation: rise-wobble linear infinite;
+          box-shadow: 0 0 8px rgba(255, 77, 148, 0.6);
+          animation: float-particle linear infinite;
         }
 
-        @keyframes rise-wobble {
-          0% { transform: translateY(0) translateX(0) scale(0.3); opacity: 0; }
-          10% { opacity: 0.85; }
-          25% { transform: translateY(-25vh) translateX(6px) scale(0.7); }
-          50% { transform: translateY(-50vh) translateX(-6px) scale(1); opacity: 0.6; }
-          75% { transform: translateY(-75vh) translateX(4px) scale(0.85); }
-          90% { opacity: 0.3; }
-          100% { transform: translateY(-110vh) translateX(-4px) scale(0.5); opacity: 0; }
+        @keyframes float-particle {
+          0% { transform: translateY(0) scale(0.5); opacity: 0; }
+          10% { opacity: 0.6; }
+          50% { transform: translateY(-50vh) scale(1.5) translateX(10px); opacity: 0.4; }
+          100% { transform: translateY(-110vh) scale(0.8) translateX(-10px); opacity: 0; }
         }
 
-        /* === GLASSMORPHISM "VERRE À BIÈRE" (Ultra Transparent) === */
+        /* === GLASSMORPHISM "RUBAN DE VERRE" === */
         .glass-panel {
-          background: rgba(10, 5, 0, 0.20) !important; /* ULTRA-TRANSPARENT (20%) */
-          backdrop-filter: blur(4px) !important; /* Flou minimal */
-          -webkit-backdrop-filter: blur(4px) !important;
-          border: 1px solid rgba(255, 170, 0, 0.25) !important;
-          border-top: 2px solid rgba(255, 248, 231, 0.5) !important; /* Mousse fine */
+          background: rgba(45, 10, 30, 0.60) !important;
+          backdropFilter: blur(12px) !important;
+          -webkit-backdrop-filter: blur(12px) !important;
+          border: 1px solid rgba(255, 77, 148, 0.3) !important;
+          border-top: 3px solid #ff4d94 !important; /* Effet Ruban */
           border-radius: 16px !important;
           box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05) !important;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-          /* Texture givre/condensation discrète */
-          background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px) !important;
-          background-size: 15px 15px !important;
         }
         .glass-panel:hover {
-          background: rgba(10, 5, 0, 0.30) !important;
-          border-color: rgba(255, 248, 231, 0.5) !important;
-          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15) !important;
+          background: rgba(74, 14, 46, 0.70) !important;
+          border-color: rgba(255, 230, 240, 0.6) !important;
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 77, 148, 0.2) !important;
           transform: translateY(-2px);
         }
 
-        /* === Bouton Oktoberfest === */
-        .btn-oktoberfest {
-          background: rgba(255, 170, 0, 0.20) !important;
-          backdrop-filter: blur(4px);
-          color: var(--okto-amber) !important;
+        /* === Bouton Octobre Rose === */
+        .btn-octobre-rose {
+          background: rgba(255, 77, 148, 0.15) !important;
+          backdrop-filter: blur(8px);
+          color: var(--rose-primary) !important;
           font-weight: 700 !important;
           text-transform: uppercase !important;
           border-radius: 8px !important;
-          border: 1px solid rgba(255, 170, 0, 0.4) !important;
+          border: 1px solid rgba(255, 77, 148, 0.4) !important;
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
           transition: all 0.3s ease !important;
           font-family: "Montserrat", sans-serif !important;
           letter-spacing: 1px;
         }
-        .btn-oktoberfest:hover {
-          background: rgba(255, 170, 0, 0.35) !important;
-          border-color: var(--okto-foam) !important;
-          color: var(--okto-foam) !important;
-          box-shadow: 0 0 20px rgba(255, 170, 0, 0.4) !important;
+        .btn-octobre-rose:hover {
+          background: rgba(255, 77, 148, 0.3) !important;
+          border-color: var(--rose-soft) !important;
+          color: var(--rose-soft) !important;
+          box-shadow: 0 0 20px rgba(255, 77, 148, 0.4) !important;
           transform: translateY(-2px) !important;
         }
 
@@ -805,42 +792,42 @@ const App = () => {
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb {
-          background: rgba(255, 170, 0, 0.3);
+          background: rgba(255, 77, 148, 0.3);
           border-radius: 4px;
         }
-        ::-webkit-scrollbar-thumb:hover { background: var(--okto-amber); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(255, 170, 0, 0.3) transparent; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--rose-primary); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(255, 77, 148, 0.3) transparent; }
         `}
       </style>
 
-      {/* 🍻 Fond d'écran OKTOBERFEST - SANS ZOOM, PLEIN ÉCRAN */}
-<Box
-  sx={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundImage: `url('${process.env.PUBLIC_URL}/images/oktoberfest.png')`,
-    backgroundSize: '100% 100%', // ✅ Changé de 'cover' à '100% 100%'
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    zIndex: 0
-  }}
-/>
+      {/* 🎀 Fond d'écran OCTOBRE ROSE - Remplacez 'octobre-rose.png' par le nom de votre fichier image */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: `url('${process.env.PUBLIC_URL}/images/octobre-rose.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          zIndex: 0
+        }}
+      />
 
-      {/* ✨ Bulles de bière animées (Effervescence réaliste - 70 bulles) */}
-      <Box id="bubbles-container">
-        {[...Array(70)].map((_, i) => (
+      {/* ✨ Particules de lumière animées (Effet Bokeh - 50 particules) */}
+      <Box id="particles-container">
+        {[...Array(50)].map((_, i) => (
           <div 
             key={i} 
-            className="beer-bubble"
+            className="bokeh-particle"
             style={{ 
               left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${4 + Math.random() * 6}s`,
-              width: `${3 + Math.random() * 8}px`,
-              height: `${3 + Math.random() * 8}px`,
+              animationDelay: `${Math.random() * 8}s`,
+              animationDuration: `${6 + Math.random() * 8}s`,
+              width: `${4 + Math.random() * 8}px`,
+              height: `${4 + Math.random() * 8}px`,
             }}
           />
         ))}
@@ -853,15 +840,15 @@ const App = () => {
           py: { xs: 2, md: 3 },
           position: 'relative',
           zIndex: 10,
-          color: '#fff8e7',
+          color: '#ffe6f0',
           fontFamily: '"Inter", sans-serif',
           px: { xs: 1, sm: 1.5, md: 2 },
         }}
-        aria-label="Tableau de bord ANAVEO Oktoberfest"
+        aria-label="Tableau de bord ANAVEO Octobre Rose"
       >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
           
-          {/* 🏷️ En-tête Bavarois */}
+          {/* 🏷️ En-tête Élégant */}
           <Box
             className="glass-panel"
             sx={{
@@ -875,26 +862,40 @@ const App = () => {
               width: '100%',
             }}
           >
-            <Typography
-              variant="h1"
-              sx={{
-                fontFamily: '"Rye", serif',
-                fontWeight: 400,
-                fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.8rem' },
-                color: '#fff8e7',
-                textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
-                letterSpacing: '0.02em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
-              <span style={{ fontSize: '1.1em', filter: 'drop-shadow(0 0 8px rgba(255,170,0,0.6))' }}>🍻</span> 
-              <span>OKTOBERFEST</span> 
-              <span style={{ color: '#ffaa00', fontWeight: 400, fontSize: '0.5em', marginLeft: '0.5rem', fontFamily: '"Montserrat", sans-serif', letterSpacing: '2px' }}>
-                - Centre De Services 🍻
-              </span>
-            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'center', sm: 'flex-start' } }}>
+              <Typography
+                variant="h1"
+                sx={{
+                  fontFamily: '"Dancing Script", cursive',
+                  fontWeight: 700,
+                  fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.2rem' },
+                  color: '#ff4d94',
+                  textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
+                  letterSpacing: '0.02em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  lineHeight: 1.2,
+                }}
+              >
+                <span style={{ fontSize: '1em', filter: 'drop-shadow(0 0 8px rgba(255,77,148,0.6))' }}>🎀</span> 
+                <span>Octobre Rose 🎀</span> 
+              </Typography>
+              <Typography
+                sx={{
+                  fontFamily: '"Montserrat", sans-serif',
+                  fontSize: { xs: '0.8rem', md: '0.95rem' },
+                  color: '#d4849c',
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                  fontWeight: 600,
+                  mt: 0.5,
+                  textShadow: '0 1px 4px rgba(0,0,0,0.8)'
+                }}
+              >
+                Ensemble contre le cancer du sein
+              </Typography>
+            </Box>
             
             <Clock />
           </Box>
@@ -910,21 +911,21 @@ const App = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 2,
-                borderColor: 'rgba(255, 170, 0, 0.5) !important',
-                background: 'rgba(255, 170, 0, 0.10) !important',
-                animation: 'pulse-amber 2s infinite',
+                borderColor: 'rgba(255, 77, 148, 0.6) !important',
+                background: 'rgba(255, 77, 148, 0.10) !important',
+                animation: 'pulse-rose 2s infinite',
               }}
             >
-              <style>{`@keyframes pulse-amber { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 170, 0, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(255, 170, 0, 0); } }`}</style>
-              <Typography sx={{ color: '#ffdd88', fontWeight: 700, fontFamily: '"Montserrat", sans-serif', letterSpacing: '1px', textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)' }}>
+              <style>{`@keyframes pulse-rose { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 148, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(255, 77, 148, 0); } }`}</style>
+              <Typography sx={{ color: '#ff99c8', fontWeight: 700, fontFamily: '"Montserrat", sans-serif', letterSpacing: '1px', textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
                 ⚠️ CONNEXION WEBSOCKET PERDUE
               </Typography>
               <Button
                 size="small"
                 variant="outlined"
-                className="btn-oktoberfest"
+                className="btn-octobre-rose"
                 onClick={reconnect}
-                sx={{ borderColor: '#ffaa00 !important', color: '#ffaa00 !important' }}
+                sx={{ borderColor: '#ff4d94 !important', color: '#ff4d94 !important' }}
               >
                 🔄 Reconnecter
               </Button>
@@ -997,21 +998,21 @@ const App = () => {
                   sx={{
                     ...glassSx,
                     '& th': {
-                      color: '#ffaa00 !important',
+                      color: '#ff4d94 !important',
                       fontWeight: 700,
                       fontFamily: '"Montserrat", sans-serif',
                       letterSpacing: '0.05em',
-                      borderBottom: '1px solid rgba(255, 170, 0, 0.3) !important',
-                      textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+                      borderBottom: '1px solid rgba(255, 77, 148, 0.3) !important',
+                      textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                     },
                     '& td': {
-                      color: '#fff8e7 !important',
-                      borderBottomColor: 'rgba(255, 170, 0, 0.15) !important',
+                      color: '#ffe6f0 !important',
+                      borderBottomColor: 'rgba(255, 77, 148, 0.15) !important',
                       fontFamily: '"Inter", sans-serif',
-                      textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.8)',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.9)',
                     },
                     '& tr:hover td': {
-                      background: 'rgba(255, 170, 0, 0.10) !important',
+                      background: 'rgba(255, 77, 148, 0.10) !important',
                     }
                   }}
                 />
@@ -1029,16 +1030,16 @@ const App = () => {
                       <Button
                         variant="contained"
                         onClick={unlockAudio}
-                        className="btn-oktoberfest"
-                        startIcon={<span style={{ fontSize: '1.2em' }}>🍻</span>}
+                        className="btn-octobre-rose"
+                        startIcon={<span style={{ fontSize: '1.2em' }}>🎀</span>}
                         sx={{ 
-                          boxShadow: '0 0 20px rgba(255, 170, 0, 0.3) !important',
-                          animation: 'pulse-glow-amber 2s infinite'
+                          boxShadow: '0 0 20px rgba(255, 77, 148, 0.3) !important',
+                          animation: 'pulse-glow-rose 2s infinite'
                         }}
                       >
-                        Activer l'Ambiance Bavaroise
+                        Activer les Alertes Sonores
                       </Button>
-                      <style>{`@keyframes pulse-glow-amber { 0%, 100% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.3); } 50% { box-shadow: 0 0 30px rgba(255, 170, 0, 0.6); } }`}</style>
+                      <style>{`@keyframes pulse-glow-rose { 0%, 100% { box-shadow: 0 0 15px rgba(255, 77, 148, 0.3); } 50% { box-shadow: 0 0 30px rgba(255, 77, 148, 0.6); } }`}</style>
                     </Box>
                   )}
                 </Box>

@@ -22,32 +22,28 @@ import {
 const lunchStartIndex = 8;
 const lunchEndIndex = 11;
 
-// === 🍺 Style "Verre à bière ULTRA-TRANSPARENT" (20% d'opacité, blur 4px) ===
+// === 🎀 Style "Ruban de Verre" Octobre Rose ===
 const ultraFrostedGlassSx = {
-  backgroundColor: 'rgba(10, 5, 0, 0.20)', // TRANSPARENCE EXTRÊME (20%)
-  backdropFilter: 'blur(4px)', // Flou minimal pour voir l'image de fond
-  WebkitBackdropFilter: 'blur(4px)',
+  backgroundColor: 'rgba(45, 10, 30, 0.60)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
   borderRadius: 4,
-  border: '1px solid rgba(255, 170, 0, 0.25)', // Bordure très subtile
-  borderTop: '2px solid rgba(255, 248, 231, 0.5)', // Mousse fine mais visible
+  border: '1px solid rgba(255, 77, 148, 0.3)',
+  borderTop: '3px solid #ff4d94', // Effet Ruban Rose
   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05)',
-  // Texture de condensation/givre (discrète)
-  backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 1px, transparent 1px)',
-  backgroundSize: '15px 15px',
   position: 'relative',
   overflow: 'hidden',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   '&:hover': {
-    backgroundColor: 'rgba(10, 5, 0, 0.30)', // Légèrement plus opaque au survol
-    borderColor: 'rgba(255, 248, 231, 0.5)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 170, 0, 0.15)',
+    backgroundColor: 'rgba(74, 14, 46, 0.70)',
+    borderColor: 'rgba(255, 230, 240, 0.6)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 77, 148, 0.2)',
     transform: 'translateY(-2px)',
   }
 };
 
-// === 🦉 Label personnalisé – CENTRÉ entre les deux lignes ===
+// === 🦉🎀 Label personnalisé – CENTRÉ entre les deux lignes ===
 function CustomLabel({ dataLength }) {
-  // Calcul du centre exact entre lunchStartIndex (8) et lunchEndIndex (11)
   const centerIndex = (lunchStartIndex + lunchEndIndex) / 2; // = 9.5
   const xPosition = dataLength > 0 ? (centerIndex / (dataLength - 1)) * 100 : 50;
   
@@ -55,22 +51,22 @@ function CustomLabel({ dataLength }) {
     <text 
       x={`${xPosition}%`} 
       y={25} 
-      fill="#fff8e7"
-      fontSize={13} 
+      fill="#ff4d94"
+      fontSize={14} 
       textAnchor="middle" 
       fontWeight="bold" 
-      fontFamily='"Rye", serif'
+      fontFamily='"Dancing Script", cursive'
       style={{ 
-        textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8), 0 0 15px rgba(255, 170, 0, 0.6)',
+        textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
         letterSpacing: '1px'
       }}
     >
-      🥨 Lunch Break 🥨
+      🎀 Lunch Break 🎀
     </text>
   );
 }
 
-// === 🍺 Légende – Thème Oktoberfest ===
+// === 🎀 Légende – Thème Octobre Rose ===
 function LegendComponent() {
   const itemStyle = { 
     display: 'flex', 
@@ -78,38 +74,38 @@ function LegendComponent() {
     gap: 6, 
     fontWeight: 600, 
     fontSize: 12,
-    color: '#fff8e7',
-    textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+    color: '#ffe6f0',
+    textShadow: '0 2px 6px rgba(0,0,0,0.9)',
     fontFamily: '"Inter", sans-serif',
   };
   const squareStyle = (color) => ({ 
-    width: 14,
-    height: 14, 
+    width: 15,
+    height: 15, 
     backgroundColor: color, 
     borderRadius: 3,
     boxShadow: `0 0 8px ${color}`,
-    border: '1px solid rgba(255, 248, 231, 0.5)',
+    border: '1px solid rgba(255, 230, 240, 0.5)',
   });
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, py: 1, mt: 1 }}>
       <div style={itemStyle}>
-        <span style={squareStyle('#4ade80')}></span> Inbound
+        <span style={squareStyle('#6ee7b7')}></span> Inbound
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#fbbf24')}></span> Outbound
+        <span style={squareStyle('#fde047')}></span> Outbound
       </div>
       <div style={itemStyle}>
-        <span style={squareStyle('#f87171')}></span> Absys
+        <span style={squareStyle('#fca5a5')}></span> Absys
       </div>
     </Box>
   );
 }
 
-// === 🦉🍺 Label des barres – Animation critique ===
+// === 🦉🎀 Label des barres – Animation critique ===
 const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
   if (!value || value <= 0) return null;
   const isAbsysCritical = dataKey === 'ABSYS' && value > 5;
-  const labelColor = isAbsysCritical ? '#f87171' : '#fff8e7';
+  const labelColor = isAbsysCritical ? '#fca5a5' : '#ffe6f0';
 
   return (
     <text
@@ -121,9 +117,9 @@ const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
       fontWeight="bold"
       fontFamily='"Montserrat", sans-serif'
       style={{
-        animation: isAbsysCritical ? 'pulse-critical-amber 2s infinite alternate' : 'none',
-        filter: isAbsysCritical ? 'drop-shadow(0 0 6px rgba(248, 113, 113, 0.8))' : 'none',
-        textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)', // Ombre renforcée
+        animation: isAbsysCritical ? 'pulse-critical-rose 2s infinite alternate' : 'none',
+        filter: isAbsysCritical ? 'drop-shadow(0 0 6px rgba(252, 165, 165, 0.8))' : 'none',
+        textShadow: '0 2px 6px rgba(0,0,0,0.9)',
       }}
     >
       {value}
@@ -131,30 +127,30 @@ const renderCustomLabel = ({ x, y, width, value, dataKey }) => {
   );
 };
 
-// === 🦉 Tooltip personnalisé – Style Maßkrug (Ultra-Transparent) ===
+// === 🦉🎀 Tooltip personnalisé – Style "Ruban de Verre" ===
 const CustomTooltip = ({ active, payload, label, halfHourSlots }) => {
   if (active && payload && payload.length) {
     return (
       <Box
         sx={{
-          backgroundColor: 'rgba(10, 5, 0, 0.40)', // 40% pour garder un minimum de lisibilité
-          border: '1px solid rgba(255, 170, 0, 0.3)',
-          borderTop: '2px solid rgba(255, 248, 231, 0.6)',
+          backgroundColor: 'rgba(45, 10, 30, 0.75)',
+          border: '1px solid rgba(255, 77, 148, 0.3)',
+          borderTop: '3px solid #ff4d94',
           borderRadius: 2,
           p: 1.5,
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(6px)',
+          backdropFilter: 'blur(12px)',
         }}
       >
         <Typography 
           variant="caption" 
           sx={{ 
-            color: '#ffaa00', 
+            color: '#ff4d94', 
             fontWeight: 700, 
             display: 'block', 
             mb: 1,
-            fontFamily: '"Rye", serif',
-            fontSize: '0.9rem',
+            fontFamily: '"Dancing Script", cursive',
+            fontSize: '1.1rem',
             letterSpacing: '0.5px',
             textShadow: '0 2px 4px rgba(0,0,0,0.8)',
           }}
@@ -168,21 +164,21 @@ const CustomTooltip = ({ active, payload, label, halfHourSlots }) => {
             ABSYS: 'Appels perdus' 
           };
           const colors = {
-            CDS_IN: '#4ade80',
-            CDS_OUT: '#fbbf24',
-            ABSYS: '#f87171',
+            CDS_IN: '#6ee7b7',
+            CDS_OUT: '#fde047',
+            ABSYS: '#fca5a5',
           };
           const icons = {
             CDS_IN: '📞',
             CDS_OUT: '📤',
-            ABSYS: '❌',
+            ABSYS: '🚫',
           };
           return (
             <Typography 
               key={index} 
               variant="body2" 
               sx={{ 
-                color: '#fff8e7', 
+                color: '#ffe6f0', 
                 fontSize: 12,
                 display: 'flex',
                 alignItems: 'center',
@@ -203,7 +199,7 @@ const CustomTooltip = ({ active, payload, label, halfHourSlots }) => {
                   boxShadow: `0 0 6px ${colors[entry.dataKey]}`,
                 }} 
               />
-              {icons[entry.dataKey]} {labels[entry.dataKey] || entry.name}: <strong style={{ color: '#ffaa00' }}>{entry.value}</strong>
+              {icons[entry.dataKey]} {labels[entry.dataKey] || entry.name}: <strong style={{ color: '#ff4d94' }}>{entry.value}</strong>
             </Typography>
           );
         })}
@@ -219,7 +215,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
     [callVolumes]
   );
 
-  // === 🦉🍺 État vide – Ambiance Brasserie Ultra-Transparente ===
+  // === 🦉🎀 État vide – Ambiance Octobre Rose ===
   if (callVolumes.length === 0) {
     return (
       <Card sx={ultraFrostedGlassSx}>
@@ -227,30 +223,30 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Rye", serif',
-              color: '#fff8e7',
-              textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(255, 170, 0, 0.6)',
-              fontSize: '1.3rem',
-              fontWeight: 400,
+              fontFamily: '"Dancing Script", cursive',
+              color: '#ff4d94',
+              textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
+              fontSize: '1.5rem',
+              fontWeight: 700,
               mb: 2,
               display: 'block',
             }}
           >
-            🍺 Call volume
+            🦉🎀 Volume d'appels
           </Typography>
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <Chip
-              label={wsConnected ? '🍺 Aucun appel enregistré' : '⚠️ Connexion au flux...'}
+              label={wsConnected ? '🎀 Aucun appel enregistré' : '⚠️ Connexion au flux...'}
               size="small"
               sx={{
                 mb: 2,
-                background: 'rgba(255, 170, 0, 0.2)',
+                background: 'rgba(255, 77, 148, 0.2)',
                 backdropFilter: 'blur(6px)',
-                color: '#fff8e7',
+                color: '#ffe6f0',
                 fontFamily: '"Montserrat", sans-serif',
                 fontWeight: 700,
-                animation: wsConnected ? 'none' : 'pulse-amber 2s infinite alternate',
-                border: '1px solid rgba(255, 248, 231, 0.5)',
+                animation: wsConnected ? 'none' : 'pulse-rose 2s infinite alternate',
+                border: '1px solid rgba(255, 230, 240, 0.5)',
               }}
             />
             <Skeleton 
@@ -258,7 +254,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               width="100%" 
               height={350} 
               sx={{ 
-                backgroundColor: 'rgba(255, 170, 0, 0.08)',
+                backgroundColor: 'rgba(255, 77, 148, 0.08)',
                 borderRadius: 2,
               }} 
             />
@@ -279,15 +275,15 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
   return (
     <Card sx={ultraFrostedGlassSx}>
-      {/* Lueurs ambiantes ambrées (très atténuées pour ne pas masquer le fond) */}
+      {/* Lueurs ambiantes roses (Effet Bokeh subtil en arrière-plan du graphique) */}
       <Box sx={{
         position: 'absolute',
         top: 0,
         left: '-60%',
         width: '220%',
         height: '100%',
-        background: 'radial-gradient(circle at 30% 40%, rgba(255, 170, 0, 0.06), transparent 80%)',
-        animation: 'amber-drift 20s linear infinite',
+        background: 'radial-gradient(circle at 30% 40%, rgba(255, 77, 148, 0.08), transparent 80%)',
+        animation: 'rose-drift 20s linear infinite',
         pointerEvents: 'none',
         zIndex: 0,
       }} />
@@ -297,8 +293,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
         right: '-70%',
         width: '240%',
         height: '60%',
-        background: 'radial-gradient(circle at 70% 30%, rgba(255, 221, 136, 0.04), transparent 85%)',
-        animation: 'amber-drift-reverse 28s linear infinite',
+        background: 'radial-gradient(circle at 70% 30%, rgba(255, 153, 200, 0.06), transparent 85%)',
+        animation: 'rose-drift-reverse 28s linear infinite',
         pointerEvents: 'none',
         zIndex: 0,
       }} />
@@ -308,14 +304,14 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           <Typography
             variant="overline"
             sx={{
-              fontFamily: '"Rye", serif',
-              color: '#fff8e7',
-              textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(255, 170, 0, 0.6)',
-              fontSize: '1.3rem',
-              fontWeight: 400,
+              fontFamily: '"Dancing Script", cursive',
+              color: '#ff4d94',
+              textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(255, 77, 148, 0.4)',
+              fontSize: '1.5rem',
+              fontWeight: 700,
             }}
           >
-            🍺 Call volume
+            🎀 Call Volume
           </Typography>
           <Chip
             label={wsConnected ? '🟢 Online' : '🔴 Offline'}
@@ -323,19 +319,18 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             sx={{
               fontSize: 12,
               background: wsConnected 
-                ? 'rgba(74, 222, 128, 0.2)'
-                : 'rgba(248, 113, 113, 0.2)',
+                ? 'rgba(110, 231, 183, 0.2)'
+                : 'rgba(252, 165, 165, 0.2)',
               backdropFilter: 'blur(6px)',
-              color: '#fff8e7',
+              color: '#ffe6f0',
               fontWeight: 700,
               fontFamily: '"Montserrat", sans-serif',
-              animation: wsConnected ? 'pulse-status-green 2s infinite' : 'none',
-              border: '1px solid rgba(255, 248, 231, 0.5)',
+              animation: wsConnected ? 'pulse-status-rose 2s infinite' : 'none',
+              border: '1px solid rgba(255, 230, 240, 0.5)',
             }}
           />
         </Box>
 
-        {/* 📊 HAUTEUR AGRANDIE : 290px (au lieu de 260px) */}
         <Box sx={{ width: '100%', height: 290, mt: 1 }} aria-label="Graphique des volumes d'appels">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -344,22 +339,22 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               barSize={20}
               stackOffset="none"
             >
-              {/* Grille – Style ambré très subtil */}
+              {/* Grille – Style rose très subtil */}
               <CartesianGrid 
                 strokeDasharray="3 3" 
-                stroke="rgba(255, 170, 0, 0.1)" 
+                stroke="rgba(255, 77, 148, 0.15)" 
                 opacity={0.4} 
               />
 
-              {/* Axe X – Texte avec ombre portée forte */}
+              {/* Axe X */}
               <XAxis
                 dataKey="index"
-                stroke="#fff8e7"
+                stroke="#ffe6f0"
                 tick={{
-                  fill: '#fff8e7',
+                  fill: '#ffe6f0',
                   fontSize: 11,
                   fontWeight: 600,
-                  textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+                  textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                   fontFamily: '"Inter", sans-serif',
                 }}
                 tickFormatter={(index) => {
@@ -375,15 +370,15 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
                 tickMargin={12}
               />
 
-              {/* Axe Y – Texte avec ombre portée forte */}
+              {/* Axe Y */}
               <YAxis
-                stroke="#fff8e7"
+                stroke="#ffe6f0"
                 tick={{
-                  fill: '#fff8e7',
+                  fill: '#ffe6f0',
                   fontSize: 11,
                   fontWeight: 600,
                   fontFamily: '"Inter", sans-serif',
-                  textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8)',
+                  textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                 }}
                 domain={[0, domainMax]}
                 tickCount={tickCount}
@@ -393,52 +388,52 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
               {/* Tooltip personnalisé */}
               <Tooltip
                 content={<CustomTooltip halfHourSlots={halfHourSlots} />}
-                cursor={{ fill: 'rgba(255, 170, 0, 0.08)' }}
+                cursor={{ fill: 'rgba(255, 77, 148, 0.08)' }}
               />
 
-              {/* Zone pause déjeuner – Style ambré */}
+              {/* Zone pause déjeuner – Style Ruban Rose */}
               <ReferenceArea
                 x1={lunchStartIndex}
                 x2={lunchEndIndex}
                 y1={0}
                 y2="dataMax"
-                fill="#ffaa00"
+                fill="#ff4d94"
                 fillOpacity={0.08}
-                stroke="rgba(255, 170, 0, 0.3)"
+                stroke="rgba(255, 77, 148, 0.3)"
                 strokeOpacity={0.5}
                 strokeDasharray="4 4"
               />
-              <ReferenceLine x={lunchStartIndex} stroke="#ffaa00" strokeWidth={2} strokeDasharray="6 4" opacity={0.5} />
-              <ReferenceLine x={lunchEndIndex} stroke="#ffaa00" strokeWidth={2} strokeDasharray="6 4" opacity={0.5} />
+              <ReferenceLine x={lunchStartIndex} stroke="#ff4d94" strokeWidth={2} strokeDasharray="6 4" opacity={0.5} />
+              <ReferenceLine x={lunchEndIndex} stroke="#ff4d94" strokeWidth={2} strokeDasharray="6 4" opacity={0.5} />
               <CustomLabel dataLength={data.length} />
 
-              {/* Barres – Couleurs Oktoberfest */}
+              {/* Barres – Couleurs harmonisées Octobre Rose */}
               <Bar 
                 dataKey="CDS_IN" 
                 name="Appels entrants" 
-                fill="#4ade80"
+                fill="#6ee7b7"
                 fillOpacity={0.85}
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-amber 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-rose 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
               <Bar 
                 dataKey="CDS_OUT" 
                 name="Appels sortants" 
-                fill="#fbbf24"
+                fill="#fde047"
                 fillOpacity={0.85}
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-amber 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-rose 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
               <Bar 
                 dataKey="ABSYS" 
                 name="Appels perdus" 
-                fill="#f87171"
+                fill="#fca5a5"
                 fillOpacity={0.9}
                 label={renderCustomLabel} 
                 radius={[4, 4, 0, 0]} 
-                style={{ animation: 'bar-rise-amber 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
+                style={{ animation: 'bar-rise-rose 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards' }} 
               />
             </BarChart>
           </ResponsiveContainer>
@@ -449,7 +444,7 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
 
       <style>
         {`
-          @keyframes bar-rise-amber {
+          @keyframes bar-rise-rose {
             0% { 
               transform: scaleY(0); 
               opacity: 0; 
@@ -461,37 +456,37 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
             }
           }
 
-          @keyframes pulse-amber {
+          @keyframes pulse-rose {
             0% { 
               transform: scale(1); 
-              box-shadow: 0 0 10px rgba(255, 170, 0, 0.3); 
+              box-shadow: 0 0 10px rgba(255, 77, 148, 0.3); 
             }
             100% { 
               transform: scale(1.05); 
-              box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); 
+              box-shadow: 0 0 20px rgba(255, 77, 148, 0.5); 
             }
           }
 
-          @keyframes pulse-status-green {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
-            50% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+          @keyframes pulse-status-rose {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(110, 231, 183, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(110, 231, 183, 0); }
           }
 
-          @keyframes amber-drift {
+          @keyframes rose-drift {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(-10%) translateY(-5%); }
             100% { transform: translateX(0) translateY(0); }
           }
 
-          @keyframes amber-drift-reverse {
+          @keyframes rose-drift-reverse {
             0% { transform: translateX(0) translateY(0); }
             50% { transform: translateX(12%) translateY(3%); }
             100% { transform: translateX(0) translateY(0); }
           }
 
-          @keyframes pulse-critical-amber {
-            0% { transform: scale(1); box-shadow: 0 0 8px rgba(248, 113, 113, 0.6); }
-            100% { transform: scale(1.04); box-shadow: 0 0 16px rgba(248, 113, 113, 0.9); }
+          @keyframes pulse-critical-rose {
+            0% { transform: scale(1); box-shadow: 0 0 8px rgba(252, 165, 165, 0.6); }
+            100% { transform: scale(1.04); box-shadow: 0 0 16px rgba(252, 165, 165, 0.9); }
           }
         `}
       </style>
