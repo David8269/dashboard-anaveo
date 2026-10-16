@@ -168,7 +168,7 @@ function GothicHeader({ isConnected }) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ fontSize: '2.5rem', animation: 'pumpkin-glow 2s ease-in-out infinite', filter: 'drop-shadow(0 0 15px rgba(255, 107, 53, 0.8))' }}>🎃</Box>
             <Box>
-              <Typography sx={{ fontFamily: '"Creepster", cursive', fontSize: { xs: '2rem', md: '2.5rem' }, fontWeight: 700, background: 'linear-gradient(135deg, #ffaa00 0%, #ff6b35 50%, #ff4500 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '0.08em', textShadow: '0 0 30px rgba(255, 107, 53, 0.5)', lineHeight: 1 }}>HALLOWEEN AU CENTRE DE SERVICES</Typography>
+              <Typography sx={{ fontFamily: '"Creepster", cursive', fontSize: { xs: '2rem', md: '2.5rem' }, fontWeight: 700, background: 'linear-gradient(135deg, #ffaa00 0%, #ff6b35 50%, #ff4500 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '0.08em', textShadow: '0 0 30px rgba(255, 107, 53, 0.5)', lineHeight: 1 }}>HALLOWEEN</Typography>
               <Typography sx={{ fontFamily: '"Dancing Script", cursive', fontSize: { xs: '0.9rem', md: '1.1rem' }, color: '#d484f0', letterSpacing: '1px', fontWeight: 600, textShadow: '0 0 10px rgba(157, 78, 221, 0.6)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <span style={{ animation: 'star-twinkle 2s ease-in-out infinite' }}>✦</span> Une nuit pleine d'appels... <span style={{ animation: 'star-twinkle 2s ease-in-out infinite 1s' }}>✦</span>
               </Typography>
