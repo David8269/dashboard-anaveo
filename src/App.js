@@ -145,7 +145,7 @@ function GothicHeader({ isConnected }) {
       <Box sx={{ position: 'absolute', top: 8, left: 8, fontSize: '1.5rem', opacity: 0.4, animation: 'gargoyle-watch 4s ease-in-out infinite' }}>🦇</Box>
       <Box sx={{ position: 'absolute', top: 8, right: 8, fontSize: '1.5rem', opacity: 0.4, animation: 'gargoyle-watch 4s ease-in-out infinite 2s' }}>🦇</Box>
       <Box sx={{ position: 'absolute', bottom: 8, left: 8, fontSize: '1.2rem', opacity: 0.3 }}>🕷️</Box>
-      <Box sx={{ position: 'absolute', bottom: 8, right: 8, fontSize: '1.2rem', opacity: 0.3 }}>️</Box>
+      <Box sx={{ position: 'absolute', bottom: 8, right: 8, fontSize: '1.2rem', opacity: 0.3 }}>🕸️</Box>
       
       <Box sx={{ position: 'absolute', top: '50%', left: '5%', right: '5%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.3), rgba(157, 78, 221, 0.3), transparent)', transform: 'translateY(-50%)' }} />
       
@@ -169,7 +169,7 @@ function GothicHeader({ isConnected }) {
             <Box sx={{ fontSize: '2.5rem', animation: 'pumpkin-glow 2s ease-in-out infinite', filter: 'drop-shadow(0 0 15px rgba(255, 107, 53, 0.8))' }}>🎃</Box>
             <Box>
               <Typography sx={{ fontFamily: '"Creepster", cursive', fontSize: { xs: '2rem', md: '2.5rem' }, fontWeight: 700, background: 'linear-gradient(135deg, #ffaa00 0%, #ff6b35 50%, #ff4500 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '0.08em', textShadow: '0 0 30px rgba(255, 107, 53, 0.5)', lineHeight: 1 }}>HALLOWEEN</Typography>
-              <Typography sx={{ fontFamily: '"Dancing Script", cursive', fontSize: { xs: '0.9rem', md: '1.1rem' }, color: '#d484f0', letterSpacing: '1px', fontWeight: 600, textShadow: '0 0 10px rgba(157, 78, 221, 0.6)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography sx={{ fontFamily: '"Dancing Script", cursive', fontSize: { xs: '1.2rem', md: '1.6rem' }, color: '#d484f0', letterSpacing: '1px', fontWeight: 600, textShadow: '0 0 10px rgba(157, 78, 221, 0.6)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <span style={{ animation: 'star-twinkle 2s ease-in-out infinite' }}>✦</span> Une nuit pleine d'appels... <span style={{ animation: 'star-twinkle 2s ease-in-out infinite 1s' }}>✦</span>
               </Typography>
             </Box>
@@ -557,10 +557,11 @@ const App = () => {
           {!isConnected && (
             <Box sx={{ mb: 3, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, borderRadius: '16px', border: '2px solid rgba(255, 0, 64, 0.8)', background: 'rgba(255, 0, 64, 0.2)', backdropFilter: 'blur(12px)', animation: 'alert-pulse 2s infinite' }}>
               <Typography sx={{ color: '#ffffff', fontWeight: 700, fontFamily: '"Montserrat", sans-serif', letterSpacing: '1px', textShadow: '0 0 10px rgba(255, 0, 64, 0.8)' }}>⚠️ CONNEXION WEBSOCKET PERDUE</Typography>
-              <Button size="small" variant="outlined" onClick={reconnect} sx={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(157, 78, 221, 0.7))', color: '#ffffff', border: '2px solid rgba(255, 200, 100, 0.8)', '&:hover': { background: 'linear-gradient(135deg, rgba(255, 123, 77, 0.9), rgba(173, 98, 255, 0.7))' } }}> Reconnecter</Button>
+              <Button size="small" variant="outlined" onClick={reconnect} sx={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(157, 78, 221, 0.7))', color: '#ffffff', border: '2px solid rgba(255, 200, 100, 0.8)', '&:hover': { background: 'linear-gradient(135deg, rgba(255, 123, 77, 0.9), rgba(173, 98, 255, 0.7))' } }}>🔄 Reconnecter</Button>
             </Box>
           )}
 
+          {/* ✅ KPI DU HAUT : Texte parfaitement centré */}
           <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box sx={{ 
@@ -570,10 +571,12 @@ const App = () => {
                 p: 2, 
                 border: '1px solid rgba(157, 78, 221, 0.5)', 
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-                minHeight: '140px', // ✅ Augmentation de la hauteur
+                minHeight: '140px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                alignItems: 'center', // ✅ Centrage horizontal
+                textAlign: 'center'   // ✅ Centrage du texte
               }}>
                 <Typography sx={{ fontSize: '0.75rem', color: '#d484f0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>👥 Total Techs</Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', textShadow: '0 0 15px rgba(157, 78, 221, 0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>{kpi.totalAgents}</Typography>
@@ -587,10 +590,12 @@ const App = () => {
                 p: 2, 
                 border: '1px solid rgba(255, 170, 0, 0.5)', 
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-                minHeight: '140px', // ✅ Augmentation de la hauteur
+                minHeight: '140px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                alignItems: 'center', // ✅ Centrage horizontal
+                textAlign: 'center'   // ✅ Centrage du texte
               }}>
                 <Typography sx={{ fontSize: '0.75rem', color: '#ffaa00', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>📞 Number of Calls</Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', textShadow: '0 0 15px rgba(255, 170, 0, 0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>{kpi.totalCallsThisWeek}</Typography>
@@ -604,10 +609,12 @@ const App = () => {
                 p: 2, 
                 border: `1px solid ${isInboundAHTCritical ? 'rgba(255, 69, 0, 0.6)' : 'rgba(57, 255, 20, 0.6)'}`, 
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-                minHeight: '140px', // ✅ Augmentation de la hauteur
+                minHeight: '140px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                alignItems: 'center', // ✅ Centrage horizontal
+                textAlign: 'center'   // ✅ Centrage du texte
               }}>
                 <Typography sx={{ fontSize: '0.75rem', color: isInboundAHTCritical ? '#ff4500' : '#39ff14', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>⏱️ Avg Inbound AHT</Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', textShadow: `0 0 15px ${isInboundAHTCritical ? 'rgba(255, 69, 0, 0.6)' : 'rgba(57, 255, 20, 0.6)'}, 0 2px 4px rgba(0,0,0,0.9)` }}>{kpi.avgInboundAHT}</Typography>
@@ -621,10 +628,12 @@ const App = () => {
                 p: 2, 
                 border: `1px solid ${isOutboundAHTCritical ? 'rgba(255, 69, 0, 0.6)' : 'rgba(57, 255, 20, 0.6)'}`, 
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-                minHeight: '140px', // ✅ Augmentation de la hauteur
+                minHeight: '140px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                alignItems: 'center', // ✅ Centrage horizontal
+                textAlign: 'center'   // ✅ Centrage du texte
               }}>
                 <Typography sx={{ fontSize: '0.75rem', color: isOutboundAHTCritical ? '#ff4500' : '#39ff14', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>📤 Avg Outbound AHT</Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', textShadow: `0 0 15px ${isOutboundAHTCritical ? 'rgba(255, 69, 0, 0.6)' : 'rgba(57, 255, 20, 0.6)'}, 0 2px 4px rgba(0,0,0,0.9)` }}>{kpi.avgOutboundAHT}</Typography>
@@ -632,13 +641,14 @@ const App = () => {
             </Grid>
           </Grid>
 
+          {/* ✅ KPI DU BAS : Tailles de police harmonisées avec le haut */}
           <Grid container spacing={2.5} sx={{ mt: 2 }}>
             {[
               { title: "Answered Calls", value: kpi.totalAnsweredCalls, icon: "✅", color: "#39ff14" },
-              { title: "Missed Calls", value: kpi.missedCallsTotal, icon: "", color: "#ff4500" },
-              { title: "Total Inbound", value: kpi.totalInboundCalls, icon: "", color: "#9d4edd" },
-              { title: "Total Outbound", value: kpi.totalOutboundCalls, icon: "", color: "#ffaa00" },
-              { title: "Abandon Rate", value: kpi.abandonRate, icon: "", color: isAbandonRateCritical ? "#ff4500" : "#39ff14" },
+              { title: "Missed Calls", value: kpi.missedCallsTotal, icon: "❌", color: "#ff4500" },
+              { title: "Total Inbound", value: kpi.totalInboundCalls, icon: "📥", color: "#9d4edd" },
+              { title: "Total Outbound", value: kpi.totalOutboundCalls, icon: "📤", color: "#ffaa00" },
+              { title: "Abandon Rate", value: kpi.abandonRate, icon: "📉", color: isAbandonRateCritical ? "#ff4500" : "#39ff14" },
             ].map((item, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
                 <Box sx={{ 
@@ -649,20 +659,37 @@ const App = () => {
                   border: `1px solid ${item.color}80`, 
                   boxShadow: '0 8px 32px rgba(0,0,0,0.6)', 
                   textAlign: 'center',
-                  minHeight: '140px', // ✅ Augmentation de la hauteur
+                  minHeight: '140px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  alignItems: 'center' // ✅ Centrage horizontal
                 }}>
                   <Typography sx={{ fontSize: '1.5rem', mb: 0.5 }}>{item.icon}</Typography>
-                  <Typography sx={{ fontSize: '0.7rem', color: item.color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.title}</Typography>
-                  <Typography sx={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', mt: 0.5, textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>{item.value}</Typography>
+                  <Typography sx={{ 
+                    fontSize: '0.75rem', // ✅ Harmonisé avec le haut (était 0.7rem)
+                    color: item.color, 
+                    fontWeight: 700, 
+                    textTransform: 'uppercase', 
+                    letterSpacing: '1px' // ✅ Harmonisé avec le haut (était 0.5px)
+                  }}>
+                    {item.title}
+                  </Typography>
+                  <Typography sx={{ 
+                    fontSize: '2rem', // ✅ Harmonisé avec le haut (était 1.5rem)
+                    fontWeight: 800, 
+                    color: '#ffffff', 
+                    mt: 0.5, 
+                    textShadow: '0 0 15px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0,0,0,0.9)' // ✅ Ombre harmonisée
+                  }}>
+                    {item.value}
+                  </Typography>
                 </Box>
               </Grid>
             ))}
           </Grid>
 
-          <Box mt={4} sx={{ background: 'transparent', p: 0 }}>
+          <Box mt={4} sx={{ background: 'transparent', p: 0, minHeight: '400px' }}>
             <CallVolumeChart callVolumes={callVolumes} wsConnected={isConnected} halfHourSlots={halfHourSlots} />
           </Box>
 
