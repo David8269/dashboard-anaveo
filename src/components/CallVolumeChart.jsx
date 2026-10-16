@@ -342,8 +342,8 @@ function CallVolumeChart({ callVolumes = [], wsConnected = false, halfHourSlots 
           />
         </Box>
 
-        <Box sx={{ width: '100%', height: 290, mt: 1 }} aria-label="Graphique des volumes d'appels">
-          <ResponsiveContainer width="100%" height="100%">
+        <Box sx={{ width: '100%', height: 340, mt: 1 }} aria-label="Graphique des volumes d'appels">
+          <ResponsiveContainer width="100%" height="110%">
             <BarChart
               data={data}
               margin={{ top: 20, right: 20, left: 10, bottom: 5 }}
