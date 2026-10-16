@@ -2,49 +2,38 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="./favicon-rose.ico" />
+  <link rel="icon" href="/images/favicon-halloween.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Interface Octobre Rose Edition. Ensemble contre le cancer du sein." />
-  <meta name="theme-color" content="#c2185b" />
-  <title>🎀 OCTOBRE ROSE 🎀 | Service Center ANAVEO</title>
+  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Interface Halloween Edition. Une nuit pleine de données..." />
+  <meta name="theme-color" content="#ff6b35" />
+  <title>🎃 HALLOWEEN | Service Center ANAVEO</title>
 
-  <!-- 🦉🎀 Polices : Dancing Script (Calligraphie élégante) + Inter/Montserrat (Pro & Data) -->
+  <!-- 🦉🎃 Polices : Creepster (Horreur) + Dancing Script (Élégance gothique) + Inter/Montserrat (Data Pro) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     /* =========================================
-       VARIABLES THÈME OCTOBRE ROSE PRO
+       VARIABLES THÈME HALLOWEEN PREMIUM
        ========================================= */
     :root {
-      /* Fonds : Nuit douce et profonde, nuances de prune et de rose sombre */
-      --bg-primary: #1a0510;
-      --bg-secondary: #2d0a1e;
-      --bg-tertiary: #4a0e2e;
+      /* Accents : Orange Citrouille, Violet Mystique, Vert Néon Toxique */
+      --accent-orange: #ff6b35;
+      --accent-purple: #9d4edd;
+      --accent-green: #39ff14;
+      --accent-gold: #ffaa00;
       
-      /* Accents : Rose Vif (Ruban), Rose Poudré et Or Rose */
-      --accent-pink: #ff4d94;
-      --accent-pink-dim: rgba(255, 77, 148, 0.15);
-      --accent-soft: #ffe6f0;
-      --accent-rose-gold: #d4849c;
-      --accent-glow: 0 0 20px rgba(255, 77, 148, 0.4), 0 0 40px rgba(255, 230, 240, 0.1);
+      /* Texte (Blanc pur pour un contraste maximal sur l'image) */
+      --text-primary: #ffffff;
+      --text-secondary: #ffe4cc;
+      --text-muted: #d4a373;
       
-      /* Texte */
-      --text-primary: #fff0f5;
-      --text-secondary: #f8c8dc;
-      --text-muted: #b37a8a;
-      
-      /* États (adaptés en nuances harmonieuses) */
-      --state-success: #6ee7b7;
-      --state-warning: #f9a8d4;
-      --state-error: #fca5a5;
-      
-      /* Glassmorphism "Ruban de Verre" */
-      --glass-bg: rgba(45, 10, 30, 0.65);
-      --glass-border: rgba(255, 77, 148, 0.2);
-      --glass-border-hover: rgba(255, 77, 148, 0.6);
-      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      /* Glassmorphism "Citrouille de Verre" Premium */
+      --glass-bg: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(157, 78, 221, 0.05));
+      --glass-border: rgba(255, 107, 53, 0.4);
+      --glass-border-hover: rgba(255, 140, 100, 0.7);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(255, 107, 53, 0.05);
     }
 
     /* =========================================
@@ -58,7 +47,7 @@
 
     html, body {
       height: 100%;
-      background-color: var(--bg-primary);
+      background-color: #1a0f1a; /* Fallback */
       color: var(--text-primary);
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
@@ -67,45 +56,84 @@
     }
 
     /* =========================================
-       ARRIÈRE-PLAN ATMOSPHÈRE BOKEH & LUMIÈRE
+       ARRIÈRE-PLAN HALLOWEEN (CLAIR & VISIBLE)
        ========================================= */
     body {
       position: relative;
-      background-image: 
-        /* Halos de lumière douce (Effet Bokeh de l'image) */
-        radial-gradient(circle at 15% 20%, rgba(255, 77, 148, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 85% 80%, rgba(212, 132, 156, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(74, 14, 46, 0.6) 0%, var(--bg-primary) 100%);
-      background-size: 100% 100%, 100% 100%, 100% 100%;
+      /* Image pure sans calque sombre pour une visibilité maximale */
+      background-image: url('/images/halloween-bg.png');
+      background-size: cover;
+      background-position: center center;
       background-attachment: fixed;
     }
 
+    /* Couche de brume animée (très subtile pour ne pas assombrir) */
+    .fog-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, transparent 0%, rgba(157, 78, 221, 0.05) 50%, transparent 100%);
+      pointer-events: none;
+      z-index: 1;
+      animation: fog-move 20s ease-in-out infinite;
+    }
+
+    @keyframes fog-move {
+      0%, 100% { transform: translateY(0); opacity: 0.3; }
+      50% { transform: translateY(-30px); opacity: 0.6; }
+    }
+
+    /* Vignette subtile (focus sur le centre, bords très légèrement assombris) */
+    .vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.3) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
     /* =========================================
-       PARTICULES DE LUMIÈRE (Effet Bokeh animé)
+       PARTICULES HALLOWEEN (Feux follets)
        ========================================= */
-    .bokeh-particle {
+    .halloween-particle {
       position: fixed;
       bottom: -20px;
-      width: 6px;
-      height: 6px;
-      background: radial-gradient(circle at 30% 30%, var(--accent-soft), var(--accent-pink));
       border-radius: 50%;
       opacity: 0;
       pointer-events: none;
-      z-index: 2;
-      box-shadow: 0 0 8px rgba(255, 77, 148, 0.6);
-      animation: float-particle linear infinite;
+      z-index: 3;
+      animation: float-ghost linear infinite;
     }
 
-    @keyframes float-particle {
+    .particle-orange {
+      background: radial-gradient(circle at 30% 30%, #ffaa00, #ff6b35);
+      box-shadow: 0 0 15px #ff6b35, 0 0 30px #ffaa00;
+    }
+
+    .particle-purple {
+      background: radial-gradient(circle at 30% 30%, #d484f0, #9d4edd);
+      box-shadow: 0 0 15px #9d4edd, 0 0 30px #7b2cbf;
+    }
+
+    .particle-green {
+      background: radial-gradient(circle at 30% 30%, #7fff00, #39ff14);
+      box-shadow: 0 0 15px #39ff14, 0 0 30px #00ff00;
+    }
+
+    @keyframes float-ghost {
       0% { transform: translateY(0) scale(0.5); opacity: 0; }
-      10% { opacity: 0.6; }
-      50% { transform: translateY(-50vh) scale(1.5) translateX(10px); opacity: 0.4; }
-      100% { transform: translateY(-110vh) scale(0.8) translateX(-10px); opacity: 0; }
+      10% { opacity: 0.7; }
+      50% { transform: translateY(-50vh) scale(1.2) translateX(15px); opacity: 0.4; }
+      100% { transform: translateY(-110vh) scale(0.8) translateX(-15px); opacity: 0; }
     }
 
     /* =========================================
-       ÉCRAN DE CHARGEMENT "MOBILISATION"
+       ÉCRAN DE CHARGEMENT "NUIT D'HALLOWEEN"
        ========================================= */
     #loading-screen {
       position: fixed;
@@ -117,7 +145,8 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: var(--bg-primary);
+      background: rgba(10, 10, 10, 0.8); /* Légèrement sombre uniquement pour le loader */
+      backdrop-filter: blur(10px);
       z-index: 9999;
       transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
     }
@@ -125,110 +154,138 @@
     .loader-container {
       text-align: center;
       padding: 3rem;
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 2px solid rgba(255, 107, 53, 0.6);
       border-radius: 24px;
-      box-shadow: var(--glass-shadow), 0 0 60px rgba(255, 77, 148, 0.15);
+      box-shadow: 0 0 60px rgba(255, 107, 53, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.1);
       position: relative;
       overflow: hidden;
-      min-width: 360px;
+      min-width: 380px;
+      animation: fadeInUp 0.8s ease-out;
     }
 
-    /* Reflet de verre sur le loader */
     .loader-container::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-      animation: glass-shine 3s ease-in-out infinite;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,107,53,0.15) 0%, transparent 70%);
+      animation: pulse-glow 3s ease-in-out infinite;
     }
 
-    @keyframes glass-shine {
-      0% { left: -100%; }
-      50% { left: 150%; }
-      100% { left: 150%; }
+    @keyframes pulse-glow {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0.8; }
     }
 
     .owl-icon {
-      font-size: 4.5rem;
+      font-size: 5rem;
       margin-bottom: 1rem;
       display: inline-block;
-      filter: drop-shadow(0 0 15px rgba(255, 77, 148, 0.6));
-      animation: owl-breathe 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.8));
+      animation: owl-float 3s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
     }
 
-    @keyframes owl-breathe {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+    @keyframes owl-float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-10px) rotate(2deg); }
+    }
+
+    .pumpkin-glow {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 2rem;
+      animation: flicker 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 10px #ff6b35);
+      z-index: 1;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.95); }
+      52% { opacity: 1; transform: scale(1); }
+      54% { opacity: 0.8; transform: scale(0.98); }
     }
 
     .loader-title {
-      font-family: 'Dancing Script', cursive;
-      font-size: 2.2rem;
-      color: var(--accent-pink);
-      letter-spacing: 1px;
-      margin-bottom: 0.25rem;
-      text-shadow: 0 2px 8px rgba(255, 77, 148, 0.3);
+      font-family: 'Creepster', cursive;
+      font-size: 3rem;
+      color: var(--accent-orange);
+      letter-spacing: 3px;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 10px rgba(255, 107, 53, 0.8), 0 0 20px rgba(255, 107, 53, 0.5), 3px 3px 0px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 1;
     }
 
     .loader-slogan {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.85rem;
-      color: var(--accent-rose-gold);
-      text-transform: uppercase;
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.3rem;
+      color: var(--accent-purple);
       letter-spacing: 2px;
       margin-bottom: 1.5rem;
       font-weight: 600;
+      text-shadow: 0 0 10px rgba(157, 78, 221, 0.5);
+      position: relative;
+      z-index: 1;
     }
 
     .loader-subtitle {
       font-family: 'Inter', sans-serif;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
       color: var(--text-secondary);
       margin-bottom: 2rem;
       font-weight: 300;
+      position: relative;
+      z-index: 1;
     }
 
-    /* Barre de progression style "Ruban qui se déploie" */
     .progress-bar {
       width: 100%;
-      height: 10px;
+      height: 12px;
       background: rgba(0, 0, 0, 0.4);
-      border-radius: 5px;
+      border-radius: 6px;
       overflow: hidden;
       position: relative;
-      border: 1px solid rgba(255, 77, 148, 0.3);
+      border: 1px solid rgba(255, 107, 53, 0.4);
+      z-index: 1;
     }
 
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #c2185b, var(--accent-pink));
-      border-radius: 5px;
-      box-shadow: 0 0 15px var(--accent-pink);
-      animation: fill-ribbon 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      background: linear-gradient(90deg, #ff4500, #ff6b35, #ffaa00);
+      border-radius: 6px;
+      box-shadow: 0 0 20px var(--accent-orange);
+      animation: fill-pumpkin 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       position: relative;
     }
 
-    /* Éclat lumineux au sommet de la barre */
     .progress-fill::after {
       content: '';
       position: absolute;
-      top: 0;
+      top: -2px;
       right: 0;
-      width: 20px;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.6);
-      filter: blur(4px);
-      border-radius: 50%;
+      width: 30px;
+      height: 16px;
+      background: radial-gradient(ellipse at center, #fff5e6 0%, transparent 70%);
+      filter: blur(2px);
+      animation: flame-flicker 0.5s ease-in-out infinite alternate;
     }
 
-    @keyframes fill-ribbon {
+    @keyframes flame-flicker {
+      0% { opacity: 0.8; transform: scaleY(1); }
+      100% { opacity: 1; transform: scaleY(1.2); }
+    }
+
+    @keyframes fill-pumpkin {
       0% { width: 0%; }
       60% { width: 85%; }
       80% { width: 92%; }
@@ -236,40 +293,41 @@
     }
 
     /* =========================================
-       COMPOSANTS GLASSMORPHISM "RUBAN DE VERRE"
+       COMPOSANTS GLASSMORPHISM PREMIUM
        ========================================= */
     .glass-panel {
       background: var(--glass-bg);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-top: 3px solid var(--accent-pink); /* Effet ruban sur le bord supérieur */
-      border-radius: 16px;
+      border: 2px solid var(--glass-border);
+      border-top: 3px solid var(--accent-orange);
+      border-radius: 20px;
       box-shadow: var(--glass-shadow);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
     }
 
-    .glass-panel:hover {
-      border-color: var(--glass-border-hover);
-      box-shadow: var(--glass-shadow), 0 0 40px rgba(255, 77, 148, 0.2);
-      transform: translateY(-4px);
-    }
-
-    /* Reflet subtil sur les panneaux au hover */
-    .glass-panel::after {
+    .glass-panel::before {
       content: '';
       position: absolute;
       top: 0;
       left: -100%;
-      width: 50%;
+      width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: left 0.6s ease;
     }
-    .glass-panel:hover::after {
-      left: 150%;
+
+    .glass-panel:hover {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(157, 78, 221, 0.1));
+      border-color: var(--glass-border-hover);
+      box-shadow: 0 12px 40px rgba(255, 107, 53, 0.3), 0 0 30px rgba(255, 107, 53, 0.2);
+      transform: translateY(-4px);
+    }
+
+    .glass-panel:hover::before {
+      left: 100%;
     }
 
     /* =========================================
@@ -281,41 +339,103 @@
       font-weight: 700;
     }
 
+    .font-horror { font-family: 'Creepster', cursive; }
     .font-calligraphy { font-family: 'Dancing Script', cursive; }
     .font-tech { font-family: 'Inter', sans-serif; }
     
-    .text-rose { color: var(--accent-pink); }
-    .text-soft { color: var(--accent-soft); }
-    .text-gold { color: var(--accent-rose-gold); }
-    .text-muted { color: var(--text-muted); }
+    .text-orange { color: var(--accent-orange); }
+    .text-purple { color: var(--accent-purple); }
+    .text-green { color: var(--accent-green); }
+    .text-gold { color: var(--accent-gold); }
     
     .text-glow {
-      text-shadow: 0 0 15px rgba(255, 77, 148, 0.5);
+      text-shadow: 0 0 15px rgba(255, 107, 53, 0.7);
     }
 
-    .btn-octobre-rose {
-      background: linear-gradient(135deg, rgba(255, 77, 148, 0.15), rgba(255, 230, 240, 0.05));
-      color: var(--accent-pink);
-      border: 1px solid rgba(255, 77, 148, 0.4);
+    /* =========================================
+       BOUTON "POTION MAGIQUE"
+       ========================================= */
+    .btn-halloween {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(157, 78, 221, 0.7));
+      color: #ffffff;
+      border: 2px solid rgba(255, 200, 100, 0.8);
       padding: 0.75rem 1.5rem;
-      border-radius: 8px;
+      border-radius: 12px;
       font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.5), 0 0 30px rgba(255, 107, 53, 0.3);
     }
 
-    .btn-octobre-rose:hover {
-      background: linear-gradient(135deg, rgba(255, 77, 148, 0.3), rgba(255, 230, 240, 0.1));
-      border-color: var(--accent-soft);
-      box-shadow: 0 0 25px rgba(255, 77, 148, 0.4);
-      transform: translateY(-2px);
-      color: var(--accent-soft);
+    .btn-halloween::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-halloween:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-halloween:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 30px rgba(255, 107, 53, 0.7), 0 0 50px rgba(255, 107, 53, 0.4);
+    }
+
+    /* =========================================
+       DÉCORATIONS & ANIMATIONS
+       ========================================= */
+    .spider-web {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 80px;
+      height: 80px;
+      opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M0,0 L100,100 M100,0 L0,100 M50,0 L50,100 M0,50 L100,50' stroke='%23ffffff' stroke-width='0.5' fill='none'/%3E%3Ccircle cx='50' cy='50' r='20' stroke='%23ffffff' stroke-width='0.5' fill='none'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%23ffffff' stroke-width='0.5' fill='none'/%3E%3Ccircle cx='50' cy='50' r='50' stroke='%23ffffff' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes bat-fly {
+      0% { transform: translateX(-100px) translateY(0) rotate(0deg); }
+      25% { transform: translateX(25vw) translateY(-30px) rotate(5deg); }
+      50% { transform: translateX(50vw) translateY(0) rotate(0deg); }
+      75% { transform: translateX(75vw) translateY(-20px) rotate(-5deg); }
+      100% { transform: translateX(calc(100vw + 100px)) translateY(0) rotate(0deg); }
+    }
+
+    .bat-decoration {
+      position: fixed;
+      font-size: 2rem;
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 5;
+      animation: bat-fly 15s linear infinite;
+      filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
     /* =========================================
@@ -329,32 +449,45 @@
     }
 
     ::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
     }
     ::-webkit-scrollbar-track {
-      background: var(--bg-primary);
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 1px solid rgba(255, 107, 53, 0.2);
     }
     ::-webkit-scrollbar-thumb {
-      background: var(--bg-tertiary);
-      border-radius: 5px;
-      border: 2px solid var(--bg-primary);
+      background: linear-gradient(180deg, var(--accent-orange), var(--accent-purple));
+      border-radius: 6px;
+      border: 2px solid rgba(0, 0, 0, 0.3);
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--accent-pink);
+      background: linear-gradient(180deg, #ffaa00, #d484f0);
     }
   </style>
 </head>
 <body>
-  <!-- 🎀 Conteneur des particules de lumière (généré par JS) -->
+  <!-- 🌫️ Couche de brume subtile -->
+  <div class="fog-layer"></div>
+
+  <!-- 🌑 Vignette (focus sur le centre) -->
+  <div class="vignette"></div>
+
+  <!-- 🦇 Chauves-souris décoratives -->
+  <div class="bat-decoration" style="top: 15%; animation-delay: 0s;">🦇</div>
+  <div class="bat-decoration" style="top: 35%; animation-delay: 5s;">🦇</div>
+  <div class="bat-decoration" style="top: 55%; animation-delay: 10s;">🦇</div>
+
+  <!-- 🎃 Conteneur des particules Halloween -->
   <div id="particles-container"></div>
 
-  <!-- ⚡ Écran de chargement "Mobilisation Octobre Rose" -->
+  <!-- ⚡ Écran de chargement "Nuit d'Halloween" -->
   <div id="loading-screen">
     <div class="loader-container">
-      <div class="owl-icon">🦉🎀</div>
-      <div class="loader-title">Octobre Rose</div>
-      <div class="loader-slogan">Ensemble contre le cancer du sein</div>
+      <div class="pumpkin-glow">🎃</div>
+      <div class="owl-icon">🦉</div>
+      <div class="loader-title">HALLOWEEN</div>
+      <div class="loader-slogan">Une nuit pleine de données...</div>
       <div class="loader-subtitle">Chargement de l'interface analytique ANAVEO...</div>
       <div class="progress-bar">
         <div class="progress-fill"></div>
@@ -363,7 +496,7 @@
   </div>
 
   <!-- ✅ Point de montage React -->
-  <div id="root"></div>
+  <div id="root" class="animate-in"></div>
 
   <!-- 🧠 Scripts -->
   <script>
@@ -376,35 +509,40 @@
           loader.style.visibility = 'hidden';
           setTimeout(() => loader.remove(), 800);
         }
-      }, 2200); // Temps calé pour apprécier l'animation de chargement
+      }, 2500);
     });
 
-    // 2. Génération optimisée des "Particules de Lumière" (Effet Bokeh)
+    // 2. Génération des particules Halloween (Feux follets multicolores)
     document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('particles-container');
-      const particleCount = 40; // Nombre de particules pour un effet élégant et non surchargé
+      const particleCount = 60;
+      const colors = ['particle-orange', 'particle-purple', 'particle-green'];
 
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
-        particle.className = 'bokeh-particle';
+        particle.className = `halloween-particle ${colors[Math.floor(Math.random() * colors.length)]}`;
         
-        // Position et timing aléatoires pour un effet de profondeur naturel
         particle.style.left = `${Math.random() * 100}%`;
-        particle.style.animationDelay = `${Math.random() * 8}s`;
-        particle.style.animationDuration = `${6 + Math.random() * 8}s`;
+        particle.style.animationDelay = `${Math.random() * 10}s`;
+        particle.style.animationDuration = `${8 + Math.random() * 12}s`;
         
-        // Variation subtile de taille et d'intensité lumineuse
-        const size = 4 + Math.random() * 8;
+        const size = 4 + Math.random() * 12;
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
         
-        if (Math.random() > 0.7) {
-          particle.style.background = 'radial-gradient(circle at 30% 30%, #ffffff, #ff99c8)';
-          particle.style.boxShadow = '0 0 12px rgba(255, 153, 200, 0.8)';
-        }
-        
         container.appendChild(particle);
       }
+    });
+
+    // 3. Effet de parallaxe subtil sur la souris pour l'image de fond
+    document.addEventListener('mousemove', (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      
+      const bg = document.body;
+      bg.style.backgroundPosition = `
+        calc(50% + ${x * 15}px) calc(50% + ${y * 15}px)
+      `;
     });
   </script>
 </body>
