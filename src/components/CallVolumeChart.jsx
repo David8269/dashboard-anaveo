@@ -56,20 +56,21 @@ const ultraFrostedGlassSx = {
 // === 🎃 Label personnalisé Pause Déjeuner – CENTRÉ ===
 function CustomLabel({ dataLength }) {
   const centerIndex = (lunchStartIndex + lunchEndIndex) / 2; // = 9.5
-  const xPosition = dataLength > 0 ? (centerIndex / (dataLength - 1)) * 100 : 50;
+  const xPosition = dataLength > 0 ? (centerIndex / (dataLength - 2)) * 100 : 50;
   
   return (
     <text 
       x={`${xPosition}%`} 
       y={25} 
       fill="#ffaa00"
-      fontSize={14} 
+      fontSize={20} 
       textAnchor="middle" 
+      dominantBaseline="middle"
       fontWeight="bold" 
       fontFamily='"Creepster", "Dancing Script", cursive'
       style={{ 
         textShadow: '0 0 10px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)',
-        letterSpacing: '1px'
+        letterSpacing: '6px'
       }}
     >
       🎃 Lunch Break 🎃
