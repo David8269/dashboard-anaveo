@@ -22,18 +22,16 @@ import {
 const lunchStartIndex = 8;
 const lunchEndIndex = 11;
 
-// === 🎃 Style "Citrouille de Verre" (Transparence accrue + Lisibilité max) ===
+// === 🎃 Style "Citrouille de Verre" (TRANSPARENCE MAXIMALE) ===
 const ultraFrostedGlassSx = {
-  backgroundColor: 'rgba(10, 5, 10, 0.60)',
+  backgroundColor: 'rgba(10, 5, 10, 0.35)', // ✅ Transparence accrue (était 0.60)
   backdropFilter: 'blur(24px)',
   WebkitBackdropFilter: 'blur(24px)',
   borderRadius: 4,
-  // ✅ CORRECTION : Utilisation de boxShadow pour la bordure au lieu de border
   boxShadow: '0 0 0 1px rgba(255, 107, 53, 0.4), 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255, 107, 53, 0.05)',
   position: 'relative',
   overflow: 'hidden',
   transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-  // ✅ CORRECTION : Bordure supérieure via pseudo-élément
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -47,7 +45,7 @@ const ultraFrostedGlassSx = {
     zIndex: 1,
   },
   '&:hover': {
-    backgroundColor: 'rgba(26, 15, 26, 0.70)',
+    backgroundColor: 'rgba(26, 15, 26, 0.45)', // ✅ Transparence accrue au hover (était 0.70)
     boxShadow: '0 0 0 1px rgba(255, 140, 100, 0.6), 0 12px 40px rgba(255, 107, 53, 0.3), 0 0 30px rgba(255, 107, 53, 0.2)',
     transform: 'translateY(-4px)',
   }

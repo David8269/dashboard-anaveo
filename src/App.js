@@ -88,7 +88,7 @@ const mmssToSeconds = (mmss) => {
 };
 
 // ============================================================================
-// === 🏰 HEADER CATHÉDRALE GOTHIQUE ===
+// === 🏰 HEADER CATHÉDRALE GOTHIQUE (TRANSPARENCE ACCRUE) ===
 // ============================================================================
 function GothicHeader({ isConnected }) {
   const [time, setTime] = useState(new Date());
@@ -111,6 +111,7 @@ function GothicHeader({ isConnected }) {
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mx: 0.5 }}>
       <Box sx={{ position: 'relative', width: '20px', height: '30px', mb: '-2px' }}>
         <Box sx={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '16px', height: '28px', background: `radial-gradient(ellipse at center bottom, ${color} 0%, #ff4500 40%, transparent 70%)`, borderRadius: '50% 50% 20% 20%', animation: 'flame-dance 0.8s ease-in-out infinite alternate', filter: `blur(1px)`, opacity: 0.9 }} />
+        {/* ✅ CORRECTION ICI : Le backtick ` a été remplacé par une apostrophe ' à la fin du background */}
         <Box sx={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '8px', height: '18px', background: 'radial-gradient(ellipse at center bottom, #ffeb3b 0%, #ffaa00 60%, transparent 80%)', borderRadius: '50% 50% 20% 20%', animation: 'flame-dance-inner 0.6s ease-in-out infinite alternate' }} />
         <Box sx={{ position: 'absolute', bottom: '-5px', left: '50%', transform: 'translateX(-50%)', width: '40px', height: '40px', background: `radial-gradient(circle, ${color}40 0%, transparent 70%)`, borderRadius: '50%', animation: 'glow-pulse 2s ease-in-out infinite' }} />
       </Box>
@@ -123,7 +124,7 @@ function GothicHeader({ isConnected }) {
   const TimeDigit = ({ value, label, color, flickerValue }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', px: 1 }}>
       <Candle height={50} color={color} />
-      <Box sx={{ mx: 1, px: 2, py: 1, background: 'rgba(0, 0, 0, 0.5)', borderRadius: '12px', border: `2px solid ${color}`, boxShadow: `0 0 20px ${color}60, inset 0 0 20px ${color}20`, minWidth: '80px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <Box sx={{ mx: 1, px: 2, py: 1, background: 'rgba(0, 0, 0, 0.45)', borderRadius: '12px', border: `2px solid ${color}`, boxShadow: `0 0 20px ${color}60, inset 0 0 20px ${color}20`, minWidth: '80px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(180deg, ${color}30 0%, transparent 100%)`, opacity: flickerValue, transition: 'opacity 0.15s' }} />
         <Typography sx={{ fontFamily: '"Creepster", cursive', fontSize: { xs: '2rem', md: '3rem' }, fontWeight: 700, color: '#ffffff', textShadow: `0 0 10px ${color}, 0 0 20px ${color}80, 0 0 40px ${color}40, 2px 2px 4px rgba(0,0,0,0.95)`, position: 'relative', zIndex: 2, letterSpacing: '4px' }}>{value}</Typography>
         <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: '0.6rem', color: color, textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, mt: -0.5, textShadow: `0 0 8px ${color}` }}>{label}</Typography>
@@ -135,7 +136,8 @@ function GothicHeader({ isConnected }) {
   return (
     <Box sx={{
       position: 'relative',
-      background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.65) 0%, rgba(26, 15, 26, 0.55) 30%, rgba(45, 27, 78, 0.50) 70%, rgba(10, 5, 10, 0.65) 100%)',
+      // ✅ TRANSPARENCE ACCRUE (0.65→0.40 / 0.55→0.30 / 0.50→0.25)
+      background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.40) 0%, rgba(26, 15, 26, 0.30) 30%, rgba(45, 27, 78, 0.25) 70%, rgba(10, 5, 10, 0.40) 100%)',
       backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
       padding: { xs: '1.5rem 1rem', md: '2rem 2rem' }, borderRadius: '24px',
       border: '1px solid rgba(255, 107, 53, 0.4)', borderTop: '3px solid #ffaa00', borderBottom: '3px solid #9d4edd',
@@ -175,9 +177,9 @@ function GothicHeader({ isConnected }) {
             </Box>
           </Box>
 
-          <Box sx={{ px: 3, py: 1.5, background: 'rgba(0, 0, 0, 0.4)', borderRadius: '16px', border: '1px solid rgba(157, 78, 221, 0.5)', boxShadow: '0 0 20px rgba(157, 78, 221, 0.2)' }}>
+          <Box sx={{ px: 3, py: 1.5, background: 'rgba(0, 0, 0, 0.30)', borderRadius: '16px', border: '1px solid rgba(157, 78, 221, 0.5)', boxShadow: '0 0 20px rgba(157, 78, 221, 0.2)' }}>
             <Typography sx={{ fontFamily: '"Montserrat", sans-serif', fontSize: { xs: '1rem', md: '1.3rem' }, color: '#d484f0', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '1.5px', textShadow: '0 0 12px rgba(157, 78, 221, 0.8)' }}>
-               {dateStr}
+               📅 {dateStr}
             </Typography>
           </Box>
         </Box>
@@ -549,23 +551,37 @@ const App = () => {
         })}
       </Box>
 
-      <Box sx={{ minHeight: '100vh', py: { xs: 2, md: 3 }, position: 'relative', zIndex: 10, color: '#ffffff', fontFamily: '"Inter", sans-serif', px: { xs: 1, sm: 1.5, md: 2 } }}>
+      {/* ✅ CONTENEUR SCROLLABLE AVEC SCROLLBAR MASQUÉE */}
+      <Box 
+        className="dashboard-scroll"
+        sx={{ 
+          minHeight: '100vh', 
+          maxHeight: '100vh',
+          overflowY: 'auto',
+          py: { xs: 2, md: 3 }, 
+          position: 'relative', 
+          zIndex: 10, 
+          color: '#ffffff', 
+          fontFamily: '"Inter", sans-serif', 
+          px: { xs: 1, sm: 1.5, md: 2 } 
+        }}
+      >
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
           
           <GothicHeader isConnected={isConnected} />
           
           {!isConnected && (
-            <Box sx={{ mb: 3, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, borderRadius: '16px', border: '2px solid rgba(255, 0, 64, 0.8)', background: 'rgba(255, 0, 64, 0.2)', backdropFilter: 'blur(12px)', animation: 'alert-pulse 2s infinite' }}>
+            <Box sx={{ mb: 3, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, borderRadius: '16px', border: '2px solid rgba(255, 0, 64, 0.8)', background: 'rgba(255, 0, 64, 0.15)', backdropFilter: 'blur(12px)', animation: 'alert-pulse 2s infinite' }}>
               <Typography sx={{ color: '#ffffff', fontWeight: 700, fontFamily: '"Montserrat", sans-serif', letterSpacing: '1px', textShadow: '0 0 10px rgba(255, 0, 64, 0.8)' }}>⚠️ CONNEXION WEBSOCKET PERDUE</Typography>
               <Button size="small" variant="outlined" onClick={reconnect} sx={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(157, 78, 221, 0.7))', color: '#ffffff', border: '2px solid rgba(255, 200, 100, 0.8)', '&:hover': { background: 'linear-gradient(135deg, rgba(255, 123, 77, 0.9), rgba(173, 98, 255, 0.7))' } }}>🔄 Reconnecter</Button>
             </Box>
           )}
 
-          {/* ✅ KPI DU HAUT : Texte parfaitement centré */}
+          {/* ✅ KPI DU HAUT : TRANSPARENCE ACCRUE (0.60→0.35 / 0.50→0.25) */}
           <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box sx={{ 
-                background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.60), rgba(26, 15, 26, 0.50))', 
+                background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.35), rgba(26, 15, 26, 0.25))', 
                 backdropFilter: 'blur(20px)', 
                 borderRadius: '20px', 
                 p: 2, 
@@ -575,8 +591,8 @@ const App = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                alignItems: 'center', // ✅ Centrage horizontal
-                textAlign: 'center'   // ✅ Centrage du texte
+                alignItems: 'center',
+                textAlign: 'center'
               }}>
                 <Typography sx={{ fontSize: '0.75rem', color: '#d484f0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>👥 Total Techs</Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', textShadow: '0 0 15px rgba(157, 78, 221, 0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>{kpi.totalAgents}</Typography>
@@ -584,7 +600,7 @@ const App = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box sx={{ 
-                background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.60), rgba(26, 15, 26, 0.50))', 
+                background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.35), rgba(26, 15, 26, 0.25))', 
                 backdropFilter: 'blur(20px)', 
                 borderRadius: '20px', 
                 p: 2, 
@@ -594,8 +610,8 @@ const App = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                alignItems: 'center', // ✅ Centrage horizontal
-                textAlign: 'center'   // ✅ Centrage du texte
+                alignItems: 'center',
+                textAlign: 'center'
               }}>
                 <Typography sx={{ fontSize: '0.75rem', color: '#ffaa00', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>📞 Number of Calls</Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', textShadow: '0 0 15px rgba(255, 170, 0, 0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>{kpi.totalCallsThisWeek}</Typography>
@@ -603,7 +619,7 @@ const App = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box sx={{ 
-                background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.60), rgba(26, 15, 26, 0.50))', 
+                background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.35), rgba(26, 15, 26, 0.25))', 
                 backdropFilter: 'blur(20px)', 
                 borderRadius: '20px', 
                 p: 2, 
@@ -613,8 +629,8 @@ const App = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                alignItems: 'center', // ✅ Centrage horizontal
-                textAlign: 'center'   // ✅ Centrage du texte
+                alignItems: 'center',
+                textAlign: 'center'
               }}>
                 <Typography sx={{ fontSize: '0.75rem', color: isInboundAHTCritical ? '#ff4500' : '#39ff14', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>⏱️ Avg Inbound AHT</Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', textShadow: `0 0 15px ${isInboundAHTCritical ? 'rgba(255, 69, 0, 0.6)' : 'rgba(57, 255, 20, 0.6)'}, 0 2px 4px rgba(0,0,0,0.9)` }}>{kpi.avgInboundAHT}</Typography>
@@ -622,7 +638,7 @@ const App = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box sx={{ 
-                background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.60), rgba(26, 15, 26, 0.50))', 
+                background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.35), rgba(26, 15, 26, 0.25))', 
                 backdropFilter: 'blur(20px)', 
                 borderRadius: '20px', 
                 p: 2, 
@@ -632,8 +648,8 @@ const App = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                alignItems: 'center', // ✅ Centrage horizontal
-                textAlign: 'center'   // ✅ Centrage du texte
+                alignItems: 'center',
+                textAlign: 'center'
               }}>
                 <Typography sx={{ fontSize: '0.75rem', color: isOutboundAHTCritical ? '#ff4500' : '#39ff14', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>📤 Avg Outbound AHT</Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', textShadow: `0 0 15px ${isOutboundAHTCritical ? 'rgba(255, 69, 0, 0.6)' : 'rgba(57, 255, 20, 0.6)'}, 0 2px 4px rgba(0,0,0,0.9)` }}>{kpi.avgOutboundAHT}</Typography>
@@ -641,7 +657,7 @@ const App = () => {
             </Grid>
           </Grid>
 
-          {/* ✅ KPI DU BAS : Tailles de police harmonisées avec le haut */}
+          {/* ✅ KPI DU BAS : TRANSPARENCE ACCRUE */}
           <Grid container spacing={2.5} sx={{ mt: 2 }}>
             {[
               { title: "Answered Calls", value: kpi.totalAnsweredCalls, icon: "✅", color: "#39ff14" },
@@ -652,7 +668,7 @@ const App = () => {
             ].map((item, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
                 <Box sx={{ 
-                  background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.60), rgba(26, 15, 26, 0.50))', 
+                  background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.35), rgba(26, 15, 26, 0.25))', 
                   backdropFilter: 'blur(20px)', 
                   borderRadius: '20px', 
                   p: 2, 
@@ -663,24 +679,24 @@ const App = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
-                  alignItems: 'center' // ✅ Centrage horizontal
+                  alignItems: 'center'
                 }}>
                   <Typography sx={{ fontSize: '1.5rem', mb: 0.5 }}>{item.icon}</Typography>
                   <Typography sx={{ 
-                    fontSize: '0.75rem', // ✅ Harmonisé avec le haut (était 0.7rem)
+                    fontSize: '0.75rem',
                     color: item.color, 
                     fontWeight: 700, 
                     textTransform: 'uppercase', 
-                    letterSpacing: '1px' // ✅ Harmonisé avec le haut (était 0.5px)
+                    letterSpacing: '1px'
                   }}>
                     {item.title}
                   </Typography>
                   <Typography sx={{ 
-                    fontSize: '2rem', // ✅ Harmonisé avec le haut (était 1.5rem)
+                    fontSize: '2rem',
                     fontWeight: 800, 
                     color: '#ffffff', 
                     mt: 0.5, 
-                    textShadow: '0 0 15px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0,0,0,0.9)' // ✅ Ombre harmonisée
+                    textShadow: '0 0 15px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0,0,0,0.9)'
                   }}>
                     {item.value}
                   </Typography>
@@ -715,21 +731,32 @@ const App = () => {
       </Box>
       
       <style>{`
+        /* ✅ BLOQUER LE SCROLL DU BODY (fond fixe) */
+        html, body {
+          overflow: hidden;
+          height: 100%;
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* ✅ MASQUER LA SCROLLBAR DU CONTENEUR (scroll fonctionnel) */
+        .dashboard-scroll {
+          scrollbar-width: none;        /* Firefox */
+          -ms-overflow-style: none;     /* IE / Edge */
+        }
+        .dashboard-scroll::-webkit-scrollbar {
+          display: none;                /* Chrome / Safari / Opera */
+        }
+
         @keyframes fog-drift { 0%, 100% { transform: translateY(0); opacity: 0.3; } 50% { transform: translateY(-30px); opacity: 0.6; } }
         .halloween-particle { pointer-events: none; z-index: 3; }
         @keyframes alert-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 64, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(255, 0, 64, 0); } }
         .particle-orange { background: radial-gradient(circle at 30% 30%, #ffaa00, #ff6b35); box-shadow: 0 0 15px #ff6b35, 0 0 30px #ffaa00; }
         .particle-purple { background: radial-gradient(circle at 30% 30%, #d484f0, #9d4edd); box-shadow: 0 0 15px #9d4edd, 0 0 30px #7b2cbf; }
         .particle-green { background: radial-gradient(circle at 30% 30%, #7fff00, #39ff14); box-shadow: 0 0 15px #39ff14, 0 0 30px #00ff00; }
-        
-        /* ✅ Masquer la barre de défilement tout en gardant le scroll fonctionnel */
-        html, body {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;     /* Firefox */
-        }
-        html::-webkit-scrollbar, body::-webkit-scrollbar {
-          display: none;             /* Chrome, Safari, Opera */
-        }
       `}</style>
     </>
   );

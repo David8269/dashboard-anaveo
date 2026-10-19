@@ -51,12 +51,12 @@ const mmssToSeconds = (mmss) => {
   return m * 60 + s;
 };
 
-// === 🎃 Style de base "Citrouille de Verre" (PLUS TRANSPARENT) ===
+// === 🎃 Style de base "Citrouille de Verre" (TRANSPARENCE MAXIMALE) ===
 const frostedGlassSx = {
   position: 'relative',
   overflow: 'hidden',
-  background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.65), rgba(26, 15, 26, 0.55))', // Transparence accrue
-  backdropFilter: 'blur(24px)', // Flou renforcé pour la lisibilité
+  background: 'linear-gradient(135deg, rgba(10, 5, 10, 0.35), rgba(26, 15, 26, 0.25))', // ✅ Transparence accrue
+  backdropFilter: 'blur(24px)',
   WebkitBackdropFilter: 'blur(24px)',
   borderRadius: '20px',
   border: '1px solid rgba(255, 107, 53, 0.4)',
@@ -83,7 +83,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
           <Typography variant="overline" sx={{ fontFamily: '"Creepster", "Dancing Script", cursive', color: '#ffaa00', textShadow: '0 0 10px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)', fontSize: '1.8rem', fontWeight: 700, mb: 2, letterSpacing: '0.05em' }}>🎃 Équipe</Typography>
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Chip label="Chargement en cours..." size="small" sx={{ mb: 2, background: 'rgba(255, 107, 53, 0.2)', backdropFilter: 'blur(6px)', color: '#ffffff', fontFamily: '"Montserrat", sans-serif', fontWeight: 700, animation: 'pulse-halloween 2s infinite alternate', border: '1px solid rgba(255, 170, 0, 0.5)' }} />
-            <Skeleton variant="rectangular" width="100%" height={400} sx={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', borderRadius: '12px' }} />
+            <Skeleton variant="rectangular" width="100%" height={400} sx={{ backgroundColor: 'rgba(0, 0, 0, 0.25)', borderRadius: '12px' }} />
           </Box>
         </CardContent>
       </Card>
@@ -131,7 +131,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
             <TableHead>
               <TableRow>
                 {['#', 'Agent', 'Statut', 'Appels entrants', 'AHT Entrant', 'Appels sortants', 'AHT Sortant'].map((label, i) => (
-                  <TableCell key={i} scope="col" sx={{ fontWeight: 800, color: '#ffaa00', fontFamily: '"Montserrat", sans-serif', fontSize: '0.8rem', borderBottom: '2px solid rgba(255, 170, 0, 0.5)', backgroundColor: 'rgba(0, 0, 0, 0.4)', textShadow: '0 0 8px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)', letterSpacing: '0.5px', textTransform: 'uppercase', py: 1.5 }} align={i >= 3 ? 'right' : 'left'}>{label}</TableCell>
+                  <TableCell key={i} scope="col" sx={{ fontWeight: 800, color: '#ffaa00', fontFamily: '"Montserrat", sans-serif', fontSize: '0.8rem', borderBottom: '2px solid rgba(255, 170, 0, 0.5)', backgroundColor: 'rgba(0, 0, 0, 0.25)', textShadow: '0 0 8px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)', letterSpacing: '0.5px', textTransform: 'uppercase', py: 1.5 }} align={i >= 3 ? 'right' : 'left'}>{label}</TableCell>
                 ))}
               </TableRow>
             </TableHead>
@@ -146,7 +146,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                 const avatarSrc = getAvatarSrc(emp.name);
 
                 return (
-                  <TableRow key={emp.id || `emp-${index}`} hover sx={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', '&:hover': { backgroundColor: 'rgba(255, 107, 53, 0.15)', boxShadow: 'inset 0 0 20px rgba(255, 107, 53, 0.1)' }, transition: 'all 0.3s ease', '&:not(:last-child)': { borderBottom: '1px solid rgba(255, 107, 53, 0.15)' } }}>
+                  <TableRow key={emp.id || `emp-${index}`} hover sx={{ backgroundColor: 'rgba(0, 0, 0, 0.20)', '&:hover': { backgroundColor: 'rgba(255, 107, 53, 0.15)', boxShadow: 'inset 0 0 20px rgba(255, 107, 53, 0.1)' }, transition: 'all 0.3s ease', '&:not(:last-child)': { borderBottom: '1px solid rgba(255, 107, 53, 0.15)' } }}>
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         {medal && <span style={{ fontSize: '22px', filter: 'drop-shadow(0 0 8px rgba(255, 170, 0, 0.8))', animation: 'medal-glow-halloween 2.5s infinite alternate' }}>{medal}</span>}
@@ -162,14 +162,14 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                       </Box>
                     </TableCell>
                     <TableCell sx={{ py: 1.5 }}>
-                      <Chip label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.8rem' }}>{statusConfig.icon}{emp.status || 'Online'}</Box>} size="small" sx={{ fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s ease', backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.3)', '&:hover': { transform: 'scale(1.05)', boxShadow: '0 0 15px rgba(255, 107, 53, 0.5)', backgroundColor: 'rgba(255, 107, 53, 0.3)', borderColor: 'rgba(255, 107, 53, 0.8)' } }} />
+                      <Chip label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.8rem' }}>{statusConfig.icon}{emp.status || 'Online'}</Box>} size="small" sx={{ fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s ease', backgroundColor: 'rgba(0, 0, 0, 0.35)', backdropFilter: 'blur(4px)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.3)', '&:hover': { transform: 'scale(1.05)', boxShadow: '0 0 15px rgba(255, 107, 53, 0.5)', backgroundColor: 'rgba(255, 107, 53, 0.3)', borderColor: 'rgba(255, 107, 53, 0.8)' } }} />
                     </TableCell>
                     <TableCell align="right" sx={{ py: 1.5 }}>
                       <Typography sx={{ color: '#ffffff', fontWeight: 700, textShadow: '0 0 10px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)', fontFamily: '"Inter", sans-serif', fontSize: '0.95rem' }}>{emp.inbound != null ? emp.inbound : '-'}</Typography>
                     </TableCell>
                     <TableCell align="right" sx={{ py: 1.5 }}>
                       {emp.avgInboundAHT ? (
-                        <Chip label={emp.avgInboundAHT} size="small" sx={{ fontWeight: 700, minWidth: 65, border: '1px solid', backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)', fontSize: '0.85rem', ...(inboundCritical ? { backgroundColor: 'rgba(255, 69, 0, 0.8)', color: '#ffffff', borderColor: '#ff4500', fontFamily: '"Montserrat", sans-serif', animation: 'pulse-critical-halloween 1.5s infinite alternate', boxShadow: '0 0 10px rgba(255, 69, 0, 0.6)' } : getDurationColor(inboundSec) === 'warning' ? { backgroundColor: 'rgba(255, 170, 0, 0.8)', color: '#000000', borderColor: '#ffaa00', boxShadow: '0 0 8px rgba(255, 170, 0, 0.4)' } : { backgroundColor: 'rgba(57, 255, 20, 0.8)', color: '#000000', borderColor: '#39ff14', boxShadow: '0 0 8px rgba(57, 255, 20, 0.4)' }) }} />
+                        <Chip label={emp.avgInboundAHT} size="small" sx={{ fontWeight: 700, minWidth: 65, border: '1px solid', backgroundColor: 'rgba(0, 0, 0, 0.35)', backdropFilter: 'blur(4px)', fontSize: '0.85rem', ...(inboundCritical ? { backgroundColor: 'rgba(255, 69, 0, 0.8)', color: '#ffffff', borderColor: '#ff4500', fontFamily: '"Montserrat", sans-serif', animation: 'pulse-critical-halloween 1.5s infinite alternate', boxShadow: '0 0 10px rgba(255, 69, 0, 0.6)' } : getDurationColor(inboundSec) === 'warning' ? { backgroundColor: 'rgba(255, 170, 0, 0.8)', color: '#000000', borderColor: '#ffaa00', boxShadow: '0 0 8px rgba(255, 170, 0, 0.4)' } : { backgroundColor: 'rgba(57, 255, 20, 0.8)', color: '#000000', borderColor: '#39ff14', boxShadow: '0 0 8px rgba(57, 255, 20, 0.4)' }) }} />
                       ) : <Typography sx={{ color: '#8b7355', textShadow: '0 0 8px rgba(0,0,0,0.95)' }}>-</Typography>}
                     </TableCell>
                     <TableCell align="right" sx={{ py: 1.5 }}>
@@ -177,7 +177,7 @@ export default function AgentTable({ employees = [], isLoading = false, isConnec
                     </TableCell>
                     <TableCell align="right" sx={{ py: 1.5 }}>
                       {emp.avgOutboundAHT ? (
-                        <Chip label={emp.avgOutboundAHT} size="small" sx={{ fontWeight: 700, minWidth: 65, border: '1px solid', backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)', fontSize: '0.85rem', ...(outboundCritical ? { backgroundColor: 'rgba(255, 69, 0, 0.8)', color: '#ffffff', borderColor: '#ff4500', fontFamily: '"Montserrat", sans-serif', animation: 'pulse-critical-halloween 1.5s infinite alternate', boxShadow: '0 0 10px rgba(255, 69, 0, 0.6)' } : getDurationColor(outboundSec) === 'warning' ? { backgroundColor: 'rgba(255, 170, 0, 0.8)', color: '#000000', borderColor: '#ffaa00', boxShadow: '0 0 8px rgba(255, 170, 0, 0.4)' } : { backgroundColor: 'rgba(57, 255, 20, 0.8)', color: '#000000', borderColor: '#39ff14', boxShadow: '0 0 8px rgba(57, 255, 20, 0.4)' }) }} />
+                        <Chip label={emp.avgOutboundAHT} size="small" sx={{ fontWeight: 700, minWidth: 65, border: '1px solid', backgroundColor: 'rgba(0, 0, 0, 0.35)', backdropFilter: 'blur(4px)', fontSize: '0.85rem', ...(outboundCritical ? { backgroundColor: 'rgba(255, 69, 0, 0.8)', color: '#ffffff', borderColor: '#ff4500', fontFamily: '"Montserrat", sans-serif', animation: 'pulse-critical-halloween 1.5s infinite alternate', boxShadow: '0 0 10px rgba(255, 69, 0, 0.6)' } : getDurationColor(outboundSec) === 'warning' ? { backgroundColor: 'rgba(255, 170, 0, 0.8)', color: '#000000', borderColor: '#ffaa00', boxShadow: '0 0 8px rgba(255, 170, 0, 0.4)' } : { backgroundColor: 'rgba(57, 255, 20, 0.8)', color: '#000000', borderColor: '#39ff14', boxShadow: '0 0 8px rgba(57, 255, 20, 0.4)' }) }} />
                       ) : <Typography sx={{ color: '#8b7355', textShadow: '0 0 8px rgba(0,0,0,0.95)' }}>-</Typography>}
                     </TableCell>
                   </TableRow>

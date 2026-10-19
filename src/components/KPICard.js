@@ -58,11 +58,11 @@ export default function KPICard({
         /* 🎃 Animation mise à jour KPI (Lueur orange ultra-transparente) */
         @keyframes kpi-highlight-halloween {
           0% { 
-            background-color: rgba(255, 107, 53, 0.30); 
+            background-color: rgba(255, 107, 53, 0.15); 
             box-shadow: 0 0 25px rgba(255, 107, 53, 0.4); 
           }
           100% { 
-            background-color: rgba(10, 5, 10, 0.60); 
+            background-color: rgba(10, 5, 10, 0.35); 
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255, 107, 53, 0.05); 
           }
         }
@@ -125,8 +125,8 @@ export default function KPICard({
       <Card
         className="kpi-potion-ripple"
         sx={{
-          // === Glassmorphism "Citrouille de Verre" (Transparence accrue) ===
-          backgroundColor: 'rgba(10, 5, 10, 0.60)',
+          // === Glassmorphism "Citrouille de Verre" (TRANSPARENCE MAXIMALE) ===
+          backgroundColor: 'rgba(10, 5, 10, 0.35)', // ✅ Transparence accrue (était 0.60)
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           height: `${height}px`,
@@ -148,7 +148,7 @@ export default function KPICard({
           }),
           '&:hover': {
             transform: 'translateY(-4px)',
-            backgroundColor: 'rgba(26, 15, 26, 0.70)',
+            backgroundColor: 'rgba(26, 15, 26, 0.45)', // ✅ Transparence accrue au hover (était 0.70)
             borderColor: isValueCritical
               ? 'rgba(255, 69, 0, 0.8)'
               : 'rgba(255, 140, 100, 0.7)',
@@ -206,7 +206,7 @@ export default function KPICard({
             sx={{
               fontWeight: 700,
               color: '#ffffff',
-              textShadow: '0 0 10px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)', // Ombre forte pour lisibilité
+              textShadow: '0 0 10px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)',
               fontFamily: '"Creepster", "Dancing Script", cursive',
               fontSize: '1.2rem',
               display: 'flex',
@@ -229,7 +229,7 @@ export default function KPICard({
             <Typography 
               variant="caption" 
               sx={{ 
-                color: '#d484f0', // Violet clair
+                color: '#d484f0',
                 display: 'block', 
                 mb: 1,
                 fontSize: '0.85rem',
@@ -259,7 +259,7 @@ export default function KPICard({
               display: 'flex',
               alignItems: 'flex-end',
               gap: 0.5,
-              textShadow: '0 0 15px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)', // Ombre forte garantie
+              textShadow: '0 0 15px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)',
               ...(animate && {
                 transform: 'scale(1.12)',
                 transition: 'transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1)',

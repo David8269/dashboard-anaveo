@@ -125,13 +125,13 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
     prevSlaDataRef.current = slaData;
   }, [slaData]);
 
-  // === 🎃 État vide – Ambiance Halloween ===
+  // === 🎃 État vide – Ambiance Halloween (TRANSPARENCE MAXIMALE) ===
   if (data.length === 0) {
     return (
       <Card
         sx={{
-          backgroundColor: 'rgba(10, 5, 10, 0.65)', // Plus transparent
-          backdropFilter: 'blur(24px)', // Flou renforcé
+          backgroundColor: 'rgba(10, 5, 10, 0.35)', // ✅ Transparence accrue (était 0.65)
+          backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           width: '100%',
           borderRadius: 4,
@@ -142,7 +142,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
           overflow: 'hidden',
           transition: 'all 0.4s ease',
           '&:hover': {
-            backgroundColor: 'rgba(26, 15, 26, 0.75)',
+            backgroundColor: 'rgba(26, 15, 26, 0.45)', // ✅ Transparence accrue au hover (était 0.75)
             borderColor: 'rgba(255, 140, 100, 0.6)',
             boxShadow: '0 12px 40px rgba(255, 107, 53, 0.3), 0 0 30px rgba(255, 107, 53, 0.2)',
             transform: 'translateY(-4px)',
@@ -264,7 +264,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
       <Card
         className="ribbon-hover-chart"
         sx={{
-          backgroundColor: 'rgba(10, 5, 10, 0.65)', // Transparence accrue
+          backgroundColor: 'rgba(10, 5, 10, 0.35)', // ✅ Transparence accrue (était 0.65)
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           width: '100%',
@@ -279,7 +279,7 @@ function SLABarchart({ slaData = [], wsConnected = false }) {
             animation: 'pulse-halloween 0.6s ease-in-out',
           }),
           '&:hover': {
-            backgroundColor: 'rgba(26, 15, 26, 0.75)',
+            backgroundColor: 'rgba(26, 15, 26, 0.45)', // ✅ Transparence accrue au hover (était 0.75)
             borderColor: 'rgba(255, 140, 100, 0.6)',
             boxShadow: '0 12px 40px rgba(255, 107, 53, 0.3), 0 0 30px rgba(255, 107, 53, 0.2)',
             transform: 'translateY(-4px)',
