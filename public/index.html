@@ -2,38 +2,42 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="/images/favicon-halloween.ico" />
+  <link rel="icon" href="/images/favicon-innoveo.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="description" content="Tableau de bord du Service Center ANAVEO – Interface Halloween Edition. Une nuit pleine de données..." />
-  <meta name="theme-color" content="#ff6b35" />
-  <title>🎃 HALLOWEEN | Service Center ANAVEO</title>
+  <meta name="description" content="Tableau de bord du Service Center INNOVEO – Interface Tech & Innovation. L'intelligence au service de vos données..." />
+  <meta name="theme-color" content="#F5C518" />
+  <title>🦉 INNOVEO | Service Center Analytics</title>
 
-  <!-- 🦉🎃 Polices : Creepster (Horreur) + Dancing Script (Élégance gothique) + Inter/Montserrat (Data Pro) -->
+  <!-- 🦉 Polices : Orbitron (Tech Futuristic) + Rajdhani (Modern Tech) + Inter (Data Pro) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* =========================================
-       VARIABLES THÈME HALLOWEEN PREMIUM
+       VARIABLES THÈME INNOVEO PREMIUM
        ========================================= */
     :root {
-      /* Accents : Orange Citrouille, Violet Mystique, Vert Néon Toxique */
-      --accent-orange: #ff6b35;
-      --accent-purple: #9d4edd;
-      --accent-green: #39ff14;
-      --accent-gold: #ffaa00;
+      /* Accents : Jaune Doré, Bleu Néon Cyan, Bleu Électrique */
+      --accent-yellow: #F5C518;
+      --accent-gold: #FFD700;
+      --accent-cyan: #00D4FF;
+      --accent-blue: #00BFFF;
+      --accent-electric: #0099FF;
       
-      /* Texte (Blanc pur pour un contraste maximal sur l'image) */
+      /* Texte (Blanc pur pour contraste maximal sur fond jaune) */
       --text-primary: #ffffff;
-      --text-secondary: #ffe4cc;
-      --text-muted: #d4a373;
+      --text-secondary: #FFF9E6;
+      --text-muted: #FFE599;
       
-      /* Glassmorphism "Citrouille de Verre" Premium */
-      --glass-bg: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(157, 78, 221, 0.05));
-      --glass-border: rgba(255, 107, 53, 0.4);
-      --glass-border-hover: rgba(255, 140, 100, 0.7);
-      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(255, 107, 53, 0.05);
+      /* Glassmorphism "Tech Glass" Premium */
+      --glass-bg: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(245, 197, 24, 0.05));
+      --glass-border: rgba(0, 212, 255, 0.4);
+      --glass-border-hover: rgba(0, 212, 255, 0.7);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(0, 212, 255, 0.1);
+      
+      /* Circuits & Tech */
+      --circuit-color: rgba(0, 212, 255, 0.3);
     }
 
     /* =========================================
@@ -47,7 +51,7 @@
 
     html, body {
       height: 100%;
-      background-color: #1a0f1a; /* Fallback */
+      background-color: #1a1500; /* Fallback */
       color: var(--text-primary);
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
@@ -56,84 +60,83 @@
     }
 
     /* =========================================
-       ARRIÈRE-PLAN HALLOWEEN (CLAIR & VISIBLE)
+       ARRIÈRE-PLAN INNOVEO (CLAIR & VISIBLE)
        ========================================= */
     body {
       position: relative;
-      /* Image pure sans calque sombre pour une visibilité maximale */
-      background-image: url('/images/halloween-bg.png');
+      /* Image INNOVEO pure sans calque sombre */
+      background-image: url('/images/innoveo-bg.png');
       background-size: cover;
       background-position: center center;
       background-attachment: fixed;
     }
 
-    /* Couche de brume animée (très subtile pour ne pas assombrir) */
-    .fog-layer {
+    /* Couche de lueur tech animée (subtile) */
+    .tech-glow-layer {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(180deg, transparent 0%, rgba(157, 78, 221, 0.05) 50%, transparent 100%);
+      background: linear-gradient(180deg, transparent 0%, rgba(0, 212, 255, 0.05) 50%, transparent 100%);
       pointer-events: none;
       z-index: 1;
-      animation: fog-move 20s ease-in-out infinite;
+      animation: tech-pulse 15s ease-in-out infinite;
     }
 
-    @keyframes fog-move {
-      0%, 100% { transform: translateY(0); opacity: 0.3; }
-      50% { transform: translateY(-30px); opacity: 0.6; }
+    @keyframes tech-pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
     }
 
-    /* Vignette subtile (focus sur le centre, bords très légèrement assombris) */
+    /* Vignette subtile (focus sur le centre) */
     .vignette {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.3) 100%);
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.2) 100%);
       pointer-events: none;
       z-index: 2;
     }
 
     /* =========================================
-       PARTICULES HALLOWEEN (Feux follets)
+       PARTICULES INNOVEO (Data Nodes)
        ========================================= */
-    .halloween-particle {
+    .innoveo-particle {
       position: fixed;
-      bottom: -20px;
       border-radius: 50%;
       opacity: 0;
       pointer-events: none;
       z-index: 3;
-      animation: float-ghost linear infinite;
+      animation: float-tech linear infinite;
     }
 
-    .particle-orange {
-      background: radial-gradient(circle at 30% 30%, #ffaa00, #ff6b35);
-      box-shadow: 0 0 15px #ff6b35, 0 0 30px #ffaa00;
+    .particle-cyan {
+      background: radial-gradient(circle at 30% 30%, #00ffff, #00D4FF);
+      box-shadow: 0 0 15px #00D4FF, 0 0 30px #00BFFF;
     }
 
-    .particle-purple {
-      background: radial-gradient(circle at 30% 30%, #d484f0, #9d4edd);
-      box-shadow: 0 0 15px #9d4edd, 0 0 30px #7b2cbf;
+    .particle-yellow {
+      background: radial-gradient(circle at 30% 30%, #FFD700, #F5C518);
+      box-shadow: 0 0 15px #F5C518, 0 0 30px #FFD700;
     }
 
-    .particle-green {
-      background: radial-gradient(circle at 30% 30%, #7fff00, #39ff14);
-      box-shadow: 0 0 15px #39ff14, 0 0 30px #00ff00;
+    .particle-blue {
+      background: radial-gradient(circle at 30% 30%, #0099FF, #0066CC);
+      box-shadow: 0 0 15px #0099FF, 0 0 30px #0066CC;
     }
 
-    @keyframes float-ghost {
-      0% { transform: translateY(0) scale(0.5); opacity: 0; }
-      10% { opacity: 0.7; }
-      50% { transform: translateY(-50vh) scale(1.2) translateX(15px); opacity: 0.4; }
-      100% { transform: translateY(-110vh) scale(0.8) translateX(-15px); opacity: 0; }
+    @keyframes float-tech {
+      0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+      10% { opacity: 0.6; }
+      50% { transform: translateY(50vh) scale(1.2) translateX(10px); opacity: 0.4; }
+      100% { transform: translateY(-10vh) scale(0.8) translateX(-10px); opacity: 0; }
     }
 
     /* =========================================
-       ÉCRAN DE CHARGEMENT "NUIT D'HALLOWEEN"
+       ÉCRAN DE CHARGEMENT "INNOVEO TECH"
        ========================================= */
     #loading-screen {
       position: fixed;
@@ -145,7 +148,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: rgba(10, 10, 10, 0.8); /* Légèrement sombre uniquement pour le loader */
+      background: rgba(10, 10, 10, 0.85);
       backdrop-filter: blur(10px);
       z-index: 9999;
       transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
@@ -154,12 +157,12 @@
     .loader-container {
       text-align: center;
       padding: 3rem;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
-      border: 2px solid rgba(255, 107, 53, 0.6);
+      border: 2px solid rgba(0, 212, 255, 0.6);
       border-radius: 24px;
-      box-shadow: 0 0 60px rgba(255, 107, 53, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 60px rgba(0, 212, 255, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.1);
       position: relative;
       overflow: hidden;
       min-width: 380px;
@@ -173,7 +176,7 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(255,107,53,0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%);
       animation: pulse-glow 3s ease-in-out infinite;
     }
 
@@ -186,7 +189,7 @@
       font-size: 5rem;
       margin-bottom: 1rem;
       display: inline-block;
-      filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.8));
+      filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.8));
       animation: owl-float 3s ease-in-out infinite;
       position: relative;
       z-index: 1;
@@ -197,42 +200,46 @@
       50% { transform: translateY(-10px) rotate(2deg); }
     }
 
-    .pumpkin-glow {
+    .tech-badge {
       position: absolute;
       top: 20px;
       right: 20px;
-      font-size: 2rem;
-      animation: flicker 2s ease-in-out infinite;
-      filter: drop-shadow(0 0 10px #ff6b35);
+      font-size: 1.5rem;
+      animation: pulse-tech 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 10px #00D4FF);
       z-index: 1;
     }
 
-    @keyframes flicker {
+    @keyframes pulse-tech {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.7; transform: scale(0.95); }
-      52% { opacity: 1; transform: scale(1); }
-      54% { opacity: 0.8; transform: scale(0.98); }
     }
 
     .loader-title {
-      font-family: 'Creepster', cursive;
+      font-family: 'Orbitron', sans-serif;
       font-size: 3rem;
-      color: var(--accent-orange);
-      letter-spacing: 3px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #00D4FF, #F5C518);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 4px;
       margin-bottom: 0.5rem;
-      text-shadow: 0 0 10px rgba(255, 107, 53, 0.8), 0 0 20px rgba(255, 107, 53, 0.5), 3px 3px 0px rgba(0,0,0,0.5);
+      text-transform: uppercase;
       position: relative;
       z-index: 1;
+      filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.5));
     }
 
     .loader-slogan {
-      font-family: 'Dancing Script', cursive;
+      font-family: 'Rajdhani', sans-serif;
       font-size: 1.3rem;
-      color: var(--accent-purple);
-      letter-spacing: 2px;
+      color: var(--accent-cyan);
+      letter-spacing: 3px;
       margin-bottom: 1.5rem;
       font-weight: 600;
-      text-shadow: 0 0 10px rgba(157, 78, 221, 0.5);
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
       position: relative;
       z-index: 1;
     }
@@ -254,17 +261,17 @@
       border-radius: 6px;
       overflow: hidden;
       position: relative;
-      border: 1px solid rgba(255, 107, 53, 0.4);
+      border: 1px solid rgba(0, 212, 255, 0.4);
       z-index: 1;
     }
 
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #ff4500, #ff6b35, #ffaa00);
+      background: linear-gradient(90deg, #00D4FF, #00BFFF, #F5C518);
       border-radius: 6px;
-      box-shadow: 0 0 20px var(--accent-orange);
-      animation: fill-pumpkin 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      box-shadow: 0 0 20px var(--accent-cyan);
+      animation: fill-tech 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       position: relative;
     }
 
@@ -275,17 +282,17 @@
       right: 0;
       width: 30px;
       height: 16px;
-      background: radial-gradient(ellipse at center, #fff5e6 0%, transparent 70%);
+      background: radial-gradient(ellipse at center, #ffffff 0%, transparent 70%);
       filter: blur(2px);
-      animation: flame-flicker 0.5s ease-in-out infinite alternate;
+      animation: energy-pulse 0.5s ease-in-out infinite alternate;
     }
 
-    @keyframes flame-flicker {
+    @keyframes energy-pulse {
       0% { opacity: 0.8; transform: scaleY(1); }
       100% { opacity: 1; transform: scaleY(1.2); }
     }
 
-    @keyframes fill-pumpkin {
+    @keyframes fill-tech {
       0% { width: 0%; }
       60% { width: 85%; }
       80% { width: 92%; }
@@ -300,7 +307,7 @@
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 2px solid var(--glass-border);
-      border-top: 3px solid var(--accent-orange);
+      border-top: 3px solid var(--accent-cyan);
       border-radius: 20px;
       box-shadow: var(--glass-shadow);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -315,14 +322,14 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.15), transparent);
       transition: left 0.6s ease;
     }
 
     .glass-panel:hover {
-      background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(157, 78, 221, 0.1));
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(245, 197, 24, 0.1));
       border-color: var(--glass-border-hover);
-      box-shadow: 0 12px 40px rgba(255, 107, 53, 0.3), 0 0 30px rgba(255, 107, 53, 0.2);
+      box-shadow: 0 12px 40px rgba(0, 212, 255, 0.3), 0 0 30px rgba(0, 212, 255, 0.2);
       transform: translateY(-4px);
     }
 
@@ -334,34 +341,34 @@
        TYPOGRAPHIE & UTILITAIRES
        ========================================= */
     h1, h2, h3, h4 {
-      font-family: 'Montserrat', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       color: var(--text-primary);
       font-weight: 700;
     }
 
-    .font-horror { font-family: 'Creepster', cursive; }
-    .font-calligraphy { font-family: 'Dancing Script', cursive; }
-    .font-tech { font-family: 'Inter', sans-serif; }
+    .font-tech { font-family: 'Orbitron', sans-serif; }
+    .font-modern { font-family: 'Rajdhani', sans-serif; }
+    .font-data { font-family: 'Inter', sans-serif; }
     
-    .text-orange { color: var(--accent-orange); }
-    .text-purple { color: var(--accent-purple); }
-    .text-green { color: var(--accent-green); }
+    .text-cyan { color: var(--accent-cyan); }
+    .text-yellow { color: var(--accent-yellow); }
     .text-gold { color: var(--accent-gold); }
+    .text-blue { color: var(--accent-blue); }
     
     .text-glow {
-      text-shadow: 0 0 15px rgba(255, 107, 53, 0.7);
+      text-shadow: 0 0 15px rgba(0, 212, 255, 0.7);
     }
 
     /* =========================================
-       BOUTON "POTION MAGIQUE"
+       BOUTON "TECH POWER"
        ========================================= */
-    .btn-halloween {
-      background: linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(157, 78, 221, 0.7));
+    .btn-innoveo {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.9), rgba(245, 197, 24, 0.7));
       color: #ffffff;
-      border: 2px solid rgba(255, 200, 100, 0.8);
+      border: 2px solid rgba(0, 212, 255, 0.8);
       padding: 0.75rem 1.5rem;
       border-radius: 12px;
-      font-family: 'Montserrat', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       font-weight: 700;
       font-size: 0.9rem;
       cursor: pointer;
@@ -370,10 +377,10 @@
       overflow: hidden;
       letter-spacing: 1px;
       text-transform: uppercase;
-      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.5), 0 0 30px rgba(255, 107, 53, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.5), 0 0 30px rgba(0, 212, 255, 0.3);
     }
 
-    .btn-halloween::before {
+    .btn-innoveo::before {
       content: '';
       position: absolute;
       top: 50%;
@@ -386,47 +393,48 @@
       transition: width 0.6s, height 0.6s;
     }
 
-    .btn-halloween:hover::before {
+    .btn-innoveo:hover::before {
       width: 300px;
       height: 300px;
     }
 
-    .btn-halloween:hover {
+    .btn-innoveo:hover {
       transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 8px 30px rgba(255, 107, 53, 0.7), 0 0 50px rgba(255, 107, 53, 0.4);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.7), 0 0 50px rgba(0, 212, 255, 0.4);
     }
 
     /* =========================================
-       DÉCORATIONS & ANIMATIONS
+       DÉCORATIONS & ANIMATIONS TECH
        ========================================= */
-    .spider-web {
+    .circuit-pattern {
       position: absolute;
-      top: -10px;
-      right: -10px;
-      width: 80px;
-      height: 80px;
-      opacity: 0.4;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M0,0 L100,100 M100,0 L0,100 M50,0 L50,100 M0,50 L100,50' stroke='%23ffffff' stroke-width='0.5' fill='none'/%3E%3Ccircle cx='50' cy='50' r='20' stroke='%23ffffff' stroke-width='0.5' fill='none'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%23ffffff' stroke-width='0.5' fill='none'/%3E%3Ccircle cx='50' cy='50' r='50' stroke='%23ffffff' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
+      top: 0;
+      right: 0;
+      width: 100px;
+      height: 100px;
+      opacity: 0.2;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10,10 L30,10 L30,30 M30,10 L50,10 M30,30 L30,50 L50,50 M50,10 L50,30 L70,30 M50,50 L70,50 L70,70 M70,30 L90,30 M70,70 L90,70 L90,90' stroke='%2300D4FF' stroke-width='1.5' fill='none'/%3E%3Ccircle cx='10' cy='10' r='3' fill='%2300D4FF'/%3E%3Ccircle cx='50' cy='10' r='3' fill='%2300D4FF'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%2300D4FF'/%3E%3Ccircle cx='70' cy='30' r='3' fill='%2300D4FF'/%3E%3Ccircle cx='50' cy='50' r='3' fill='%2300D4FF'/%3E%3Ccircle cx='90' cy='30' r='3' fill='%2300D4FF'/%3E%3Ccircle cx='70' cy='70' r='3' fill='%2300D4FF'/%3E%3Ccircle cx='90' cy='70' r='3' fill='%2300D4FF'/%3E%3C/svg%3E");
       pointer-events: none;
       z-index: 1;
     }
 
-    @keyframes bat-fly {
-      0% { transform: translateX(-100px) translateY(0) rotate(0deg); }
-      25% { transform: translateX(25vw) translateY(-30px) rotate(5deg); }
-      50% { transform: translateX(50vw) translateY(0) rotate(0deg); }
-      75% { transform: translateX(75vw) translateY(-20px) rotate(-5deg); }
-      100% { transform: translateX(calc(100vw + 100px)) translateY(0) rotate(0deg); }
+    @keyframes data-stream {
+      0% { transform: translateX(-100px) translateY(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateX(calc(100vw + 100px)) translateY(-20px); opacity: 0; }
     }
 
-    .bat-decoration {
+    .data-decoration {
       position: fixed;
-      font-size: 2rem;
-      opacity: 0.6;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      opacity: 0.3;
       pointer-events: none;
       z-index: 5;
-      animation: bat-fly 15s linear infinite;
-      filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+      animation: data-stream 20s linear infinite;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
     }
 
     @keyframes fadeInUp {
@@ -454,41 +462,41 @@
     }
     ::-webkit-scrollbar-track {
       background: rgba(0, 0, 0, 0.3);
-      border-left: 1px solid rgba(255, 107, 53, 0.2);
+      border-left: 1px solid rgba(0, 212, 255, 0.2);
     }
     ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, var(--accent-orange), var(--accent-purple));
+      background: linear-gradient(180deg, var(--accent-cyan), var(--accent-yellow));
       border-radius: 6px;
       border: 2px solid rgba(0, 0, 0, 0.3);
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(180deg, #ffaa00, #d484f0);
+      background: linear-gradient(180deg, #00ffff, #FFD700);
     }
   </style>
 </head>
 <body>
-  <!-- 🌫️ Couche de brume subtile -->
-  <div class="fog-layer"></div>
+  <!-- 💡 Couche de lueur tech subtile -->
+  <div class="tech-glow-layer"></div>
 
   <!-- 🌑 Vignette (focus sur le centre) -->
   <div class="vignette"></div>
 
-  <!-- 🦇 Chauves-souris décoratives -->
-  <div class="bat-decoration" style="top: 15%; animation-delay: 0s;">🦇</div>
-  <div class="bat-decoration" style="top: 35%; animation-delay: 5s;">🦇</div>
-  <div class="bat-decoration" style="top: 55%; animation-delay: 10s;">🦇</div>
+  <!-- 📊 Flux de données décoratifs -->
+  <div class="data-decoration" style="top: 15%; animation-delay: 0s;">01001000 1101001</div>
+  <div class="data-decoration" style="top: 35%; animation-delay: 7s;">1011010 0011001</div>
+  <div class="data-decoration" style="top: 55%; animation-delay: 14s;">1100110 1010101</div>
 
-  <!-- 🎃 Conteneur des particules Halloween -->
+  <!--  Conteneur des particules INNOVEO -->
   <div id="particles-container"></div>
 
-  <!-- ⚡ Écran de chargement "Nuit d'Halloween" -->
+  <!-- 🦉 Écran de chargement "INNOVEO Tech" -->
   <div id="loading-screen">
     <div class="loader-container">
-      <div class="pumpkin-glow">🎃</div>
+      <div class="tech-badge"></div>
       <div class="owl-icon">🦉</div>
-      <div class="loader-title">HALLOWEEN</div>
-      <div class="loader-slogan">Une nuit pleine de données...</div>
-      <div class="loader-subtitle">Chargement de l'interface analytique ANAVEO...</div>
+      <div class="loader-title">INNOVEO</div>
+      <div class="loader-slogan">L'intelligence au service de vos données</div>
+      <div class="loader-subtitle">Chargement de l'interface analytique INNOVEO...</div>
       <div class="progress-bar">
         <div class="progress-fill"></div>
       </div>
@@ -498,7 +506,7 @@
   <!-- ✅ Point de montage React -->
   <div id="root" class="animate-in"></div>
 
-  <!-- 🧠 Scripts -->
+  <!--  Scripts -->
   <script>
     // 1. Gestion du chargement avec effet de fondu fluide
     window.addEventListener('load', () => {
@@ -512,15 +520,15 @@
       }, 2500);
     });
 
-    // 2. Génération des particules Halloween (Feux follets multicolores)
+    // 2. Génération des particules INNOVEO (Data Nodes multicolores)
     document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('particles-container');
       const particleCount = 60;
-      const colors = ['particle-orange', 'particle-purple', 'particle-green'];
+      const colors = ['particle-cyan', 'particle-yellow', 'particle-blue'];
 
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
-        particle.className = `halloween-particle ${colors[Math.floor(Math.random() * colors.length)]}`;
+        particle.className = `innoveo-particle ${colors[Math.floor(Math.random() * colors.length)]}`;
         
         particle.style.left = `${Math.random() * 100}%`;
         particle.style.animationDelay = `${Math.random() * 10}s`;
